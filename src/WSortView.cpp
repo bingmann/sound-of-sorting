@@ -58,11 +58,13 @@ wxString g_algo_name;
 
 WSortView::WSortView(wxWindow *parent, int id, class WMain_wxg* wmain)
     : wxPanel(parent, id),
-      wmain(reinterpret_cast<WMain*>(wmain))
+      wmain(reinterpret_cast<WMain*>(wmain)),
+      m_step_condition(m_step_mutex)
 {
     SetBackgroundStyle(wxBG_STYLE_CUSTOM);
 
     m_stepwise = false;
+    m_step_mutex.Lock();
 }
 
 WSortView::~WSortView()
@@ -180,8 +182,16 @@ void WSortView::DoDelay(double delay)
     if (wmain->m_thread_terminate)
         wmain->m_thread->Exit();
 
-    // idle until main thread sets false
-    while (m_stepwise) wmain->m_thread->Yield();
+    // idle until main thread signals a condition
+    while (m_stepwise)
+    {
+        wxCondError ce = m_step_condition.WaitTimeout(100);
+        if (ce == wxCOND_NO_ERROR)
+            break;
+        // else timeout, recheck m_stepwise and loop
+        wmain->m_thread->TestDestroy();
+        wmain->m_thread->Yield();
+    }
 
     wmain->m_thread->TestDestroy();
 

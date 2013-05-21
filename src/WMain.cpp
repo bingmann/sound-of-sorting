@@ -131,6 +131,8 @@ bool WMain::RunAlgorithm()
         if (sortview->IsSorted())
             sortview->FillData( inputTypeChoice->GetSelection(), m_array_size );
 
+        sortview->SetStepwise(false);
+
         g_algo_name = algoList->GetStringSelection();
 
         m_thread = new SortAlgoThread(this, *sortview, algoList->GetSelection());
@@ -152,6 +154,7 @@ void WMain::AbortAlgorithm()
 
     m_thread_terminate = true;
     if (m_thread->IsPaused()) m_thread->Resume();
+    sortview->SetStepwise(false);
 
     m_thread->Wait();
     g_algo_running = false;
@@ -181,7 +184,8 @@ void WMain::OnRunButton(wxCommandEvent &event)
         else
         {
             g_algo_running = true;
-            m_thread->Resume();
+            sortview->SetStepwise(false);
+            if (m_thread->IsPaused()) m_thread->Resume();
         }
     }
     else
@@ -222,32 +226,21 @@ void WMain::OnResetButton(wxCommandEvent&)
 void WMain::OnStepButton(wxCommandEvent&)
 {
     // lock thread to one step
-    sortview->SetStepwise(true);
-
-    size_t laststep = g_access_count;
-
     if (!m_thread)
     {
         if (!RunAlgorithm()) return;
-        laststep = 0;
+        sortview->SetStepwise(true);
     }
     else
     {
         if (m_thread->IsPaused()) m_thread->Resume();
+        sortview->SetStepwise(true);    // in case not already set
+        runButton->SetValue(false);
         g_algo_running = true;
     }
 
-    // wait for step to perform
-    wxStopWatch sw;
-    while (g_access_count == laststep && sw.Time() < 1000)
-        wxYield();
-
-    // pause thread
-    m_thread->Pause();
-    sortview->SetStepwise(false);
-
-    g_algo_running = false;
-    runButton->SetValue(false);
+    // signal to perform one step
+    sortview->DoStepwise();
 }
 
 void WMain::OnSoundButton(wxCommandEvent&)
