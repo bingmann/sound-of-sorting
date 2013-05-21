@@ -83,9 +83,12 @@ const size_t g_algolist_size = sizeof(g_algolist) / sizeof(g_algolist[0]) - 1;
 
 void SelectionSort(WSortView& a)
 {
+    volatile ssize_t jMin = 0;
+    a.watch(&jMin,2);
+
     for (size_t i = 0; i < a.size()-1; ++i)
     {
-        size_t jMin = i;
+        jMin = i;
 
         for (size_t j = i+1; j < a.size(); ++j)
         {
@@ -101,6 +104,7 @@ void SelectionSort(WSortView& a)
         if (i > 0) a.unmark(i-1);
         a.mark(i);
     }
+    a.unwatch_all();
 }
 
 // ****************************************************************************
