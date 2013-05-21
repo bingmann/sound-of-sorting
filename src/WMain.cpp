@@ -35,6 +35,12 @@ WMain::WMain(wxWindow* parent)
     infoTextctrl->Hide();
     recordButton->Hide();
 
+    // program icon
+    {    
+        #include "sos.xpm"
+	SetIcon( wxIcon(sos) );
+    }
+
     // resize right split window
     splitter_0->SetSashPosition(GetSize().x - 280);
 
