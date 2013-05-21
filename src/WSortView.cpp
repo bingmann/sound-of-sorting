@@ -107,6 +107,7 @@ void WSortView::FillInputlist(wxControlWithItems* list)
     list->Append(_("Descending"));
     list->Append(_("Shuffled Cubic"));
     list->Append(_("Shuffled Quintic"));
+    list->Append(_("Shuffled n-2 Equal"));
 }
 
 void WSortView::FillData(unsigned int schema, size_t arraysize)
@@ -163,6 +164,17 @@ void WSortView::FillData(unsigned int schema, size_t arraysize)
             w /= 3.0;
             m_array[i] = ArrayItem(w + 1);
         }
+
+        std::random_shuffle(m_array.begin(), m_array.end());
+    }
+    else if (schema == 5) // shuffled n-2 equal values in [1,n]
+    {
+        m_array[0] = ArrayItem(1);
+        for (size_t i = 1; i < m_array.size()-1; ++i)
+        {
+            m_array[i] = ArrayItem( arraysize / 2 + 1 );
+        }
+        m_array[m_array.size()-1] = ArrayItem(arraysize);
 
         std::random_shuffle(m_array.begin(), m_array.end());
     }
