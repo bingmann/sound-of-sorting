@@ -69,6 +69,7 @@ WSortView::WSortView(wxWindow *parent, int id, class WMain_wxg* wmain)
 
 WSortView::~WSortView()
 {
+    m_step_mutex.Unlock();
 }
 
 void WSortView::ResetArray(size_t size)
