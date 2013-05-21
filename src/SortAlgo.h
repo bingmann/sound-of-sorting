@@ -53,7 +53,8 @@ void MergeSort(class WSortView& a);
 
 void QuickSortLR(class WSortView& a);
 void QuickSortLL(class WSortView& a);
-void QuickSortTernary(class WSortView& a);
+void QuickSortTernaryLR(class WSortView& a);
+void QuickSortTernaryLL(class WSortView& a);
 
 void BubbleSort(class WSortView& a);
 void CocktailShakerSort(class WSortView& a);

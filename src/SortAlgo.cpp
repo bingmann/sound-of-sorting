@@ -51,8 +51,10 @@ const struct AlgoEntry g_algolist[] =
       _("Quick sort variant with left and right pointers, the middle element is taken as pivot.") },
     { _("Quick Sort (LL ptrs)"), &QuickSortLL,
       _("Quick sort variant from 3rd edition of CLRS: two pointers on left, always picks first element as pivot.") },
-    { _("Quick Sort (ternary)"), &QuickSortTernary,
-      _("Ternary-split quick sort variant, adapted from multikey quicksort by Bentley & Sedgewick: partitions \"=<>=\" using two pairs of pointers at left and right, then copied to middle.") },
+    { _("Quick Sort (ternary, LR ptrs)"), &QuickSortTernaryLR,
+      _("Ternary-split quick sort variant, adapted from multikey quicksort by Bentley & Sedgewick: partitions \"=<?>=\" using two pairs of pointers at left and right, then copied to middle.") },
+    { _("Quick Sort (ternary, LL ptrs)"), &QuickSortTernaryLL,
+      _("Ternary-split quick sort variant: partitions \"<>?=\" using two pointers at left and one at right. Afterwards copies the \"=\" to middle.") },
     { _("Bubble Sort"), &BubbleSort, NULL },
     { _("Cocktail Shaker Sort"), &CocktailShakerSort, NULL },
     { _("Gnome Sort"), &GnomeSort, NULL },
@@ -306,7 +308,7 @@ void QuickSortLL(WSortView& a)
 
 // by myself (Timo Bingmann), loosely based on multikey quicksort by B&S
 
-void QuickSortTernary(WSortView& a, ssize_t lo, ssize_t hi)
+void QuickSortTernaryLR(WSortView& a, ssize_t lo, ssize_t hi)
 {
     if (hi <= lo) return;
 
@@ -377,13 +379,73 @@ void QuickSortTernary(WSortView& a, ssize_t lo, ssize_t hi)
     a.unwatch_all();
     a.unmark_all();
 
-    QuickSortTernary(a, lo, lo + num_less - 1);
-    QuickSortTernary(a, hi - num_greater + 1, hi);
+    QuickSortTernaryLR(a, lo, lo + num_less - 1);
+    QuickSortTernaryLR(a, hi - num_greater + 1, hi);
 }
 
-void QuickSortTernary(WSortView& a)
+void QuickSortTernaryLR(WSortView& a)
 {
-    return QuickSortTernary(a, 0, a.size()-1);
+    return QuickSortTernaryLR(a, 0, a.size()-1);
+}
+
+// ****************************************************************************
+// *** Quick Sort LL (in-place, two pointers at left, pivot is first element and moved to right)
+
+// by myself (Timo Bingmann)
+
+std::pair<ssize_t,ssize_t> PartitionTernaryLL(WSortView& a, ssize_t lo, ssize_t hi)
+{
+    // pick first element as pivot
+    ssize_t p = lo;
+
+    value_type pivot = a[p];
+    a.swap(p, hi-1);
+    a.mark(hi-1);
+
+    volatile ssize_t i = lo, k = hi-1;
+    a.watch(&i,2);
+
+    for (ssize_t j = lo; j < k; ++j)
+    {
+        if (a[j] == pivot) {
+            a.swap(--k, j);
+            --j; // reclassify a[j]
+            a.mark(k,3);
+        }
+        else if (a[j] <= pivot) {
+            a.swap(i++, j);
+        }
+    }
+
+    // unwatch i, because the pivot is swapped there
+    // in the first step of the following swap loop.
+    a.unwatch_all();
+
+    ssize_t j = i + (hi-k);
+
+    for (ssize_t s = 0; s < hi-k; ++s) {
+        a.swap(i+s, hi-1-s);
+        a.mark_swap(i+s, hi-1-s);
+    }
+    a.unmark_all();
+
+    return std::make_pair(i,j);
+}
+
+void QuickSortTernaryLL(WSortView& a, size_t lo, size_t hi)
+{
+    if (lo + 1 < hi)
+    {
+        std::pair<ssize_t,ssize_t> mid = PartitionTernaryLL(a, lo, hi);
+
+        QuickSortTernaryLL(a, lo, mid.first);
+        QuickSortTernaryLL(a, mid.second, hi);
+    }
+}
+
+void QuickSortTernaryLL(WSortView& a)
+{
+    return QuickSortTernaryLL(a, 0, a.size());
 }
 
 // ****************************************************************************
