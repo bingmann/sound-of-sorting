@@ -1,0 +1,37 @@
+
+#include <windows.h>
+
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+
+1   ICON                    "sos.ico"
+
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
+1   VERSIONINFO
+    FILEVERSION 0,0,0,0
+    PRODUCTVERSION 0,0,0,0
+    FILEFLAGSMASK 0x17L
+    FILEFLAGS 0x0L
+    FILEOS 0x4L
+    FILETYPE 0x1L
+    FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "ProductName", "Sound of Sorting"
+            VALUE "ProductVersion", "0,0,0,0"
+            VALUE "CompanyName", "Timo Bingmann"
+            VALUE "FileDescription", "The Sound of Sorting - A Visualization and ""Audibilization"" of Sorting Algorithms"
+            VALUE "FileVersion", "0,0,0,0"
+            VALUE "Comments", "http://panthema.net/2013/sound-of-sorting/"
+            VALUE "LegalCopyright", "Copyright (C) 2013 Timo Bingmann"
+            VALUE "OriginalFilename", "sound-of-sorting.exe"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0, 1252
+    END
+END
