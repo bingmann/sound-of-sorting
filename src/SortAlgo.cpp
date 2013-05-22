@@ -209,14 +209,61 @@ void MergeSort(WSortView& a)
 }
 
 // ****************************************************************************
+// *** Quick Sort Pivot Selection
+
+QuickSortPivotType g_quicksort_pivot = PIVOT_FIRST;
+
+// some quicksort variants use hi inclusive and some exclusive, we require it
+// to be _exclusive_. hi == array.end()!
+ssize_t QuickSortSelectPivot(WSortView& a, ssize_t lo, ssize_t hi)
+{
+    if (g_quicksort_pivot == PIVOT_FIRST)
+        return lo;
+
+    if (g_quicksort_pivot == PIVOT_LAST)
+        return hi-1;
+
+    if (g_quicksort_pivot == PIVOT_MID)
+        return (lo + hi) / 2;
+
+    if (g_quicksort_pivot == PIVOT_RANDOM)
+        return lo + (rand() % (hi - lo));
+
+    if (g_quicksort_pivot == PIVOT_MEDIAN3)
+    {
+        ssize_t mid = (lo + hi) / 2;
+
+        // cases if two are equal
+        if (a[lo] == a[mid]) return lo;
+        if (a[lo] == a[hi-1] || a[mid] == a[hi-1]) return hi-1;
+
+        // cases if three are different
+        return a[lo] < a[mid]
+            ? (a[mid] < a[hi-1] ? mid : (a[lo] < a[hi-1] ? hi-1 : lo))
+            : (a[mid] > a[hi-1] ? mid : (a[lo] < a[hi-1] ? lo : hi-1));
+    }
+
+    return lo;
+}
+
+const wxChar* g_quicksort_pivot_text[] = {
+    _("First Item"),
+    _("Last Item"),
+    _("Middle Item"),
+    _("Random Item"),
+    _("Median of Three"),
+    NULL
+};
+
+// ****************************************************************************
 // *** Quick Sort LR (in-place, pointers at left and right, pivot is middle element)
 
 // by myself (Timo Bingmann), based on Hoare's original code
 
 void QuickSortLR(WSortView& a, ssize_t lo, ssize_t hi)
 {
-    // pick middle element as pivot
-    volatile ssize_t p = (lo + hi) / 2;
+    // pick pivot and watch
+    volatile ssize_t p = QuickSortSelectPivot(a, lo, hi+1);
 
     value_type pivot = a[p];
     a.watch(&p,1);
@@ -266,8 +313,8 @@ void QuickSortLR(WSortView& a)
 
 size_t PartitionLL(WSortView& a, size_t lo, size_t hi)
 {
-    // pick first element as pivot
-    size_t p = lo;
+    // pick pivot and move to back
+    size_t p = QuickSortSelectPivot(a, lo, hi);
 
     value_type pivot = a[p];
     a.swap(p, hi-1);
@@ -316,8 +363,8 @@ void QuickSortTernaryLR(WSortView& a, ssize_t lo, ssize_t hi)
 {
     if (hi <= lo) return;
 
-    // pick middle element as pivot, swap to back
-    ssize_t piv = (lo + hi) / 2;
+    // pick pivot and swap to back
+    ssize_t piv = QuickSortSelectPivot(a, lo, hi+1);
     a.swap(piv, hi);
     a.mark(hi);
 
@@ -399,8 +446,8 @@ void QuickSortTernaryLR(WSortView& a)
 
 std::pair<ssize_t,ssize_t> PartitionTernaryLL(WSortView& a, ssize_t lo, ssize_t hi)
 {
-    // pick first element as pivot
-    ssize_t p = lo;
+    // pick pivot and swap to back
+    ssize_t p = QuickSortSelectPivot(a, lo, hi);
 
     value_type pivot = a[p];
     a.swap(p, hi-1);

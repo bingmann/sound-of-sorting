@@ -51,6 +51,10 @@ void InsertionSort(class WSortView& a);
 
 void MergeSort(class WSortView& a);
 
+extern const wxChar* g_quicksort_pivot_text[];
+enum QuickSortPivotType { PIVOT_FIRST, PIVOT_LAST, PIVOT_MID, PIVOT_RANDOM, PIVOT_MEDIAN3 };
+extern QuickSortPivotType g_quicksort_pivot;
+
 void QuickSortLR(class WSortView& a);
 void QuickSortLL(class WSortView& a);
 void QuickSortTernaryLR(class WSortView& a);

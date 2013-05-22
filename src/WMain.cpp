@@ -46,9 +46,7 @@ WMain::WMain(wxWindow* parent)
 
     // insert list of algorithms into wxListBox
     for (const AlgoEntry* ae = g_algolist; ae->name; ++ae)
-    {
         algoList->Append(ae->name);
-    }
     algoList->SetSelection(0);
 
     // insert list of data templates into wxChoice
@@ -57,6 +55,14 @@ WMain::WMain(wxWindow* parent)
     inputTypeChoice->SetSelection(0);
     arraySizeSlider->SetValue(100);
     SetArraySize(100);
+
+    // insert quicksort pivot rules into wxChoice
+    for (const wxChar** pt = g_quicksort_pivot_text; *pt; ++pt)
+        pivotRuleChoice->Append(*pt);
+    pivotRuleChoice->SetSelection(0);
+
+    pivotRuleLabel->Hide();
+    pivotRuleChoice->Hide();
 
     // set default speed
     speedSlider->SetValue(1000);
@@ -134,6 +140,7 @@ bool WMain::RunAlgorithm()
         sortview->SetStepwise(false);
 
         g_algo_name = algoList->GetStringSelection();
+        g_quicksort_pivot = (QuickSortPivotType)pivotRuleChoice->GetSelection();
 
         m_thread = new SortAlgoThread(this, *sortview, algoList->GetSelection());
 
@@ -329,6 +336,10 @@ void WMain::OnAlgoList(wxCommandEvent&)
 {
     int sel = algoList->GetSelection();
     wxString text;
+
+    bool isQuickSort = (algoList->GetStringSelection().Contains(_("Quick Sort")));
+    pivotRuleLabel->Show(isQuickSort);
+    pivotRuleChoice->Show(isQuickSort);
 
     if (sel >= 0 && sel < (int)g_algolist_size && g_algolist[sel].text)
     {
