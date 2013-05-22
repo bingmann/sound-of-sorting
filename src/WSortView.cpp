@@ -58,18 +58,15 @@ wxString g_algo_name;
 
 WSortView::WSortView(wxWindow *parent, int id, class WMain_wxg* wmain)
     : wxPanel(parent, id),
-      wmain(reinterpret_cast<WMain*>(wmain)),
-      m_step_condition(m_step_mutex)
+      wmain(reinterpret_cast<WMain*>(wmain))
 {
     SetBackgroundStyle(wxBG_STYLE_CUSTOM);
 
     m_stepwise = false;
-    m_step_mutex.Lock();
 }
 
 WSortView::~WSortView()
 {
-    m_step_mutex.Unlock();
 }
 
 void WSortView::ResetArray(size_t size)
@@ -198,8 +195,8 @@ void WSortView::DoDelay(double delay)
     // idle until main thread signals a condition
     while (m_stepwise)
     {
-        wxCondError ce = m_step_condition.WaitTimeout(100);
-        if (ce == wxCOND_NO_ERROR)
+        wxSemaError se = m_step_semaphore.WaitTimeout(200);
+        if (se == wxSEMA_NO_ERROR)
             break;
         // else timeout, recheck m_stepwise and loop
         wmain->m_thread->TestDestroy();
@@ -214,6 +211,13 @@ void WSortView::DoDelay(double delay)
     // wxMSW does not have a high resolution timer, maybe others do?
     wxMilliSleep(delay);
 #endif
+}
+
+void WSortView::DoStepwise()
+{
+    wxSemaError se = m_step_semaphore.Post();
+    if (se != wxSEMA_NO_ERROR)
+        wxLogError(_T("Error posting to semaphore: %d"), se);
 }
 
 void WSortView::OnAccess()

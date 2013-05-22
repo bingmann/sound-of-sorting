@@ -32,8 +32,9 @@ WMain::WMain(wxWindow* parent)
     m_thread = NULL;
     g_sound_on = false;
 
-    infoTextctrl->Hide();
     recordButton->Hide();
+    panelQuickSortPivot->Hide();
+    infoTextctrl->Hide();
 
     // program icon
     {    
@@ -60,9 +61,6 @@ WMain::WMain(wxWindow* parent)
     for (const wxChar** pt = g_quicksort_pivot_text; *pt; ++pt)
         pivotRuleChoice->Append(*pt);
     pivotRuleChoice->SetSelection(0);
-
-    pivotRuleLabel->Hide();
-    pivotRuleChoice->Hide();
 
     // set default speed
     speedSlider->SetValue(1000);
@@ -338,8 +336,7 @@ void WMain::OnAlgoList(wxCommandEvent&)
     wxString text;
 
     bool isQuickSort = (algoList->GetStringSelection().Contains(_("Quick Sort")));
-    pivotRuleLabel->Show(isQuickSort);
-    pivotRuleChoice->Show(isQuickSort);
+    panelQuickSortPivot->Show(isQuickSort);
 
     if (sel >= 0 && sel < (int)g_algolist_size && g_algolist[sel].text)
     {

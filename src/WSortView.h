@@ -185,9 +185,8 @@ protected:
     /// flag for step-wise processing (idle while true)
     bool        m_stepwise;
 
-    /// mutex and condition for signaling steps from main thread
-    wxMutex     m_step_mutex;
-    wxCondition m_step_condition;
+    /// semaphore for signaling steps from main thread
+    wxSemaphore m_step_semaphore;
 
     // *** Array Functions
 
@@ -208,7 +207,7 @@ public:
     void SetStepwise(bool v) { m_stepwise = v; }
 
     /// stepwise processing for Step button
-    void DoStepwise() { m_step_condition.Signal(); }
+    void DoStepwise();
 
 protected:
     /// reset the array to the given size
