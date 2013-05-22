@@ -114,8 +114,12 @@ public:
     bool operator>= (const ArrayItem& v) const
     { OnComparison(*this,v); return (value >= v.value); }
 
-    int compareTo(const ArrayItem& v) const
+    // ternary comparison which counts just one
+    int cmp(const ArrayItem& v) const
     { OnComparison(*this,v); return (value == v.value ? 0 : value < v.value ? -1 : +1); }
+
+    int compareTo(const ArrayItem& v) const
+    { return cmp(v); }
 
     static void OnComparison(const ArrayItem& a, const ArrayItem& b);
 };

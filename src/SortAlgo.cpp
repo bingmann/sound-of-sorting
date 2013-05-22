@@ -363,6 +363,8 @@ void QuickSortTernaryLR(WSortView& a, ssize_t lo, ssize_t hi)
 {
     if (hi <= lo) return;
 
+    int cmp;
+
     // pick pivot and swap to back
     ssize_t piv = QuickSortSelectPivot(a, lo, hi+1);
     a.swap(piv, hi);
@@ -380,9 +382,9 @@ void QuickSortTernaryLR(WSortView& a, ssize_t lo, ssize_t hi)
     for (;;)
     {
         // partition on left
-        while (i <= j && a[i] <= pivot)
+        while (i <= j && (cmp = a[i].cmp(pivot)) <= 0)
         {
-            if (a[i] == pivot) {
+            if (cmp == 0) {
                 a.mark(p,3);
                 a.swap(i, p++);
             }
@@ -390,9 +392,9 @@ void QuickSortTernaryLR(WSortView& a, ssize_t lo, ssize_t hi)
         }
 
         // partition on right
-        while (i <= j && a[j] >= pivot)
+        while (i <= j && (cmp = a[j].cmp(pivot)) >= 0)
         {
-            if (a[j] == pivot) {
+            if (cmp == 0) {
                 a.mark(q,3);
                 a.swap(j, q--);
             }
@@ -458,12 +460,13 @@ std::pair<ssize_t,ssize_t> PartitionTernaryLL(WSortView& a, ssize_t lo, ssize_t 
 
     for (ssize_t j = lo; j < k; ++j)
     {
-        if (a[j] == pivot) {
+        int cmp = a[j].cmp(pivot); // ternary comparison
+        if (cmp == 0) {
             a.swap(--k, j);
             --j; // reclassify a[j]
             a.mark(k,3);
         }
-        else if (a[j] <= pivot) {
+        else if (cmp < 0) {
             a.swap(i++, j);
         }
     }
