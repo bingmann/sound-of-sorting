@@ -42,6 +42,9 @@ WMain::WMain(wxWindow* parent)
 	SetIcon( wxIcon(sos) );
     }
 
+    // program version
+    SetTitle(_("The Sound of Sorting " VERSION " - http://panthema.net/2013/sound-of-sorting"));
+
     // resize right split window
     splitter_0->SetSashPosition(GetSize().x - 280);
 
@@ -263,9 +266,20 @@ void WMain::OnSoundButton(wxCommandEvent&)
     }
 }
 
+class WAbout : public WAbout_wxg
+{
+public:
+    WAbout(wxWindow* parent)
+        : WAbout_wxg(parent, wxID_ANY, wxEmptyString)
+    {
+        labelTitle->SetLabel(_("The Sound of Sorting " VERSION));
+        labelBuildDate->SetLabel(_("Build Date: " __DATE__));
+    }
+};
+
 void WMain::OnAboutButton(wxCommandEvent&)
 {
-    WAbout_wxg dlg(this, wxID_ANY, wxEmptyString);
+    WAbout dlg(this);
     dlg.ShowModal();
 }
 
