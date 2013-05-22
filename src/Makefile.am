@@ -19,3 +19,7 @@ resources.o: resources.rc
 
 LDADD += resources.o
 endif
+
+EXTRA_DIST = \
+	resources.rc sos.ico sos.xpm \
+	wxg/sos.wxg

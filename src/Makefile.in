@@ -222,6 +222,10 @@ sound_of_sorting_SOURCES = \
 
 AM_CXXFLAGS = -W -Wall @WX_CXXFLAGS@ @SDL_CFLAGS@
 LDADD = @WX_LIBS@ @SDL_LIBS@ $(am__append_1)
+EXTRA_DIST = \
+	resources.rc sos.ico sos.xpm \
+	wxg/sos.wxg
+
 all: all-am
 
 .SUFFIXES:
