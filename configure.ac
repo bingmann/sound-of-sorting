@@ -70,7 +70,7 @@ AM_PATH_SDL($SDL_VERSION,
 
 AM_OPTIONS_WXCONFIG
 
-AM_PATH_WXCONFIG(2.8.9, [wxWin=1], [wxWin=0], [core,base,adv])
+AM_PATH_WXCONFIG(2.8.9, [wxWin=1], [wxWin=0], [adv,core,base])
 
 if test "$wxWin" != 1; then
     AC_MSG_ERROR([
