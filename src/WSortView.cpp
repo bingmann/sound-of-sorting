@@ -444,7 +444,7 @@ void* SortAlgoThread::Entry()
     m_array.CheckSorted();
 
     wxCommandEvent evt(wxEVT_COMMAND_BUTTON_CLICKED, WMain::ID_RUN_FINISHED);
-    m_wmain->AddPendingEvent(evt);
+    m_wmain->GetEventHandler()->AddPendingEvent(evt);
 
     return NULL;
 }

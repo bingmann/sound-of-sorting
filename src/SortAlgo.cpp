@@ -862,14 +862,14 @@ protected:
     size_t      m_pos;
 
 public:
-    typedef typename std::iterator<std::random_access_iterator_tag, value_type> base_type;
+    typedef std::iterator<std::random_access_iterator_tag, value_type> base_type;
 
     typedef std::random_access_iterator_tag iterator_category;
 
-    typedef typename base_type::value_type value_type;
-    typedef typename base_type::difference_type difference_type;
-    typedef typename base_type::reference reference;
-    typedef typename base_type::pointer pointer;
+    typedef base_type::value_type value_type;
+    typedef base_type::difference_type difference_type;
+    typedef base_type::reference reference;
+    typedef base_type::pointer pointer;
 
     MyIterator() : m_array(NULL), m_pos(0) {}
 
