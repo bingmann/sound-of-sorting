@@ -218,7 +218,24 @@ void SoundAccess(size_t i)
 /// function mapping array index (normalized to [0,1]) to frequency
 static double arrayindex_to_frequency(double aindex)
 {
-    return 120 + 1200 * (aindex*aindex);
+    double low_c = 65.406;
+    double low_d = 73.416;
+    double low_e = 82.407;
+    double low_g = 97.999;
+    double low_a = 110;
+
+    int index = aindex * 40;
+    float tone;
+    switch (index % 5) {
+        case 0: tone = low_c; break;
+        case 1: tone = low_d; break;
+        case 2: tone = low_e; break;
+        case 3: tone = low_g; break;
+        case 4: tone = low_a; break;
+    }
+    return tone * ((index / 5) + 1);
+
+    // return 120 + 1200 * (aindex*aindex);
 }
 
 /// reset internal sound data (called from main thread)
