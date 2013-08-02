@@ -74,6 +74,7 @@ const struct AlgoEntry g_algolist[] =
     { _("Bogo Sort"), &BogoSort, NULL },
     { _("Bozo Sort"), &BozoSort, NULL },
     { _("Stooge Sort"), &StoogeSort, NULL },
+    { _("Permute Sort"), &PermuteSort, NULL },
     { NULL, NULL, NULL },
 };
 
@@ -1088,6 +1089,18 @@ void BozoSort(WSortView& a)
         a.swap(rand() % a.size(), rand() % a.size());
     }
 }
+
+
+void PermuteSort(WSortView& a)
+{
+	while(1)
+	{
+		if(BogoCheckSorted(a))
+			break;
+		std::next_permutation(MyIterator(&a,0), MyIterator(&a,a.size()), std::greater<ArrayItem>());
+	}
+}
+
 
 // ****************************************************************************
 // *** Bitonic Sort
