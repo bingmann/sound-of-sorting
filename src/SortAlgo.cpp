@@ -80,46 +80,6 @@ const struct AlgoEntry g_algolist[] =
 const size_t g_algolist_size = sizeof(g_algolist) / sizeof(g_algolist[0]) - 1;
 
 // ****************************************************************************
-// *** Stooge Sort
-void StoogeSort(WSortView& a, int i, int j)
-{
-	if(a[i] > a[j])
-	{
-		a.swap(i, j);
-	}	
-
-	if(j - i + 1 >= 3)
-	{
-		int t = (j-i+1)/3;
-
-		a.mark(i);
-		a.mark(j-t);
-		StoogeSort(a, i, j-t);
-		a.unmark(i);
-		a.unmark(j-t);
-
-		a.mark(i+t);
-		a.mark(j);
-		StoogeSort(a, i+t, j);
-		a.unmark(i+t);
-		a.unmark(j);
-
-
-		a.mark(i);
-		a.mark(j-t);
-		StoogeSort(a, i, j-t);
-		a.unmark(i);
-		a.unmark(j-t);
-
-	}
-}
-
-void StoogeSort(WSortView& a)
-{
-	StoogeSort(a, 0, a.size()-1);
-}
-
-// ****************************************************************************
 // *** Selection Sort
 
 void SelectionSort(WSortView& a)
@@ -1314,6 +1274,37 @@ void sort(WSortView& a, int lo, int hi)
 void SmoothSort(WSortView& a)
 {
     return SmoothSortNS::sort(a, 0, a.size()-1);
+}
+
+// ****************************************************************************
+// *** Stooge Sort
+
+void StoogeSort(WSortView& a, int i, int j)
+{
+    if (a[i] > a[j])
+    {
+        a.swap(i, j);
+    }
+
+    if (j - i + 1 >= 3)
+    {
+        int t = (j - i + 1) / 3;
+
+        a.mark(i, 2);
+        a.mark(j, 2);
+
+        StoogeSort(a, i, j-t);
+        StoogeSort(a, i+t, j);
+        StoogeSort(a, i, j-t);
+
+        a.unmark(i);
+        a.unmark(j);
+    }
+}
+
+void StoogeSort(WSortView& a)
+{
+    StoogeSort(a, 0, a.size()-1);
 }
 
 // ****************************************************************************
