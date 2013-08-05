@@ -79,6 +79,8 @@ void StlSort(class WSortView& a);
 void StlStableSort(class WSortView& a);
 void StlHeapSort(class WSortView& a);
 
+void TimSort(class WSortView& a);
+
 void BogoSort(class WSortView& a);
 void BozoSort(class WSortView& a);
 void StoogeSort(class WSortView& a);
