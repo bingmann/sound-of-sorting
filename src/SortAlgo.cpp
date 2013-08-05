@@ -82,71 +82,71 @@ const size_t g_algolist_size = sizeof(g_algolist) / sizeof(g_algolist[0]) - 1;
 // ****************************************************************************
 // *** Selection Sort
 
-void SelectionSort(WSortView& a)
+void SelectionSort(WSortView& A)
 {
     volatile ssize_t jMin = 0;
-    a.watch(&jMin,2);
+    A.watch(&jMin,2);
 
-    for (size_t i = 0; i < a.size()-1; ++i)
+    for (size_t i = 0; i < A.size()-1; ++i)
     {
         jMin = i;
 
-        for (size_t j = i+1; j < a.size(); ++j)
+        for (size_t j = i+1; j < A.size(); ++j)
         {
-            if (a[j] < a[jMin]) {
-                a.mark_swap(j, jMin);
+            if (A[j] < A[jMin]) {
+                A.mark_swap(j, jMin);
                 jMin = j;
             }
         }
 
-        a.swap(i, jMin);
+        A.swap(i, jMin);
 
         // mark the last good element
-        if (i > 0) a.unmark(i-1);
-        a.mark(i);
+        if (i > 0) A.unmark(i-1);
+        A.mark(i);
     }
-    a.unwatch_all();
+    A.unwatch_all();
 }
 
 // ****************************************************************************
 // *** Insertion Sort
 
 // swaps every time (keeps all values visible)
-void InsertionSort(WSortView& a)
+void InsertionSort(WSortView& A)
 {
-    for (size_t i = 1; i < a.size(); ++i)
+    for (size_t i = 1; i < A.size(); ++i)
     {
-        value_type key = a[i];
-        a.mark(i);
+        value_type key = A[i];
+        A.mark(i);
 
         ssize_t j = i - 1;
-        while (j >= 0 && a[j] > key)
+        while (j >= 0 && A[j] > key)
         {
-            a.swap(j, j+1);
+            A.swap(j, j+1);
             j--;
         }
 
-        a.unmark(i);
+        A.unmark(i);
     }
 }
 
 // with extra item on stack
-void InsertionSort2(WSortView& a)
+void InsertionSort2(WSortView& A)
 {
-    for (size_t i = 1; i < a.size(); ++i)
+    for (size_t i = 1; i < A.size(); ++i)
     {
-        value_type tmp, key = a[i];
-        a.mark(i);
+        value_type tmp, key = A[i];
+        A.mark(i);
 
         ssize_t j = i - 1;
-        while (j >= 0 && (tmp = a[j]) > key)
+        while (j >= 0 && (tmp = A[j]) > key)
         {
-            a.set(j + 1, tmp);
+            A.set(j + 1, tmp);
             j--;
         }
-        a.set(j + 1, key);
+        A.set(j + 1, key);
 
-        a.unmark(i);
+        A.unmark(i);
     }
 }
 
@@ -155,12 +155,12 @@ void InsertionSort2(WSortView& a)
 
 // by myself (Timo Bingmann)
 
-void Merge(WSortView& a, size_t lo, size_t mid, size_t hi)
+void Merge(WSortView& A, size_t lo, size_t mid, size_t hi)
 {
     // mark merge boundaries
-    a.mark(lo);
-    a.mark(mid,2);
-    a.mark(hi-1);
+    A.mark(lo);
+    A.mark(mid,2);
+    A.mark(hi-1);
 
     // allocate output
     std::vector<value_type> out(hi-lo);
@@ -170,43 +170,43 @@ void Merge(WSortView& a, size_t lo, size_t mid, size_t hi)
     while (i < mid && j < hi)
     {
         // copy out for fewer time steps
-        value_type ai = a[i], aj = a[j];
+        value_type ai = A[i], aj = A[j];
 
         out[o++] = (ai < aj ? (++i, ai) : (++j, aj));
     }
 
     // copy rest
-    while (i < mid) out[o++] = a[i++];
-    while (j < hi) out[o++] = a[j++];
+    while (i < mid) out[o++] = A[i++];
+    while (j < hi) out[o++] = A[j++];
 
     ASSERT(o == hi-lo);
 
-    a.unmark(mid);
+    A.unmark(mid);
 
     // copy back
     for (i = 0; i < hi-lo; ++i)
-        a.set(lo + i, out[i]);
+        A.set(lo + i, out[i]);
 
-    a.unmark(lo);
-    a.unmark(hi-1);
+    A.unmark(lo);
+    A.unmark(hi-1);
 }
 
-void MergeSort(WSortView& a, size_t lo, size_t hi)
+void MergeSort(WSortView& A, size_t lo, size_t hi)
 {
     if (lo + 1 < hi)
     {
         size_t mid = (lo + hi) / 2;
 
-        MergeSort(a, lo, mid);
-        MergeSort(a, mid, hi);
+        MergeSort(A, lo, mid);
+        MergeSort(A, mid, hi);
 
-        Merge(a, lo, mid, hi);
+        Merge(A, lo, mid, hi);
     }
 }
 
-void MergeSort(WSortView& a)
+void MergeSort(WSortView& A)
 {
-    return MergeSort(a, 0, a.size());
+    return MergeSort(A, 0, A.size());
 }
 
 // ****************************************************************************
@@ -216,7 +216,7 @@ QuickSortPivotType g_quicksort_pivot = PIVOT_FIRST;
 
 // some quicksort variants use hi inclusive and some exclusive, we require it
 // to be _exclusive_. hi == array.end()!
-ssize_t QuickSortSelectPivot(WSortView& a, ssize_t lo, ssize_t hi)
+ssize_t QuickSortSelectPivot(WSortView& A, ssize_t lo, ssize_t hi)
 {
     if (g_quicksort_pivot == PIVOT_FIRST)
         return lo;
@@ -235,13 +235,13 @@ ssize_t QuickSortSelectPivot(WSortView& a, ssize_t lo, ssize_t hi)
         ssize_t mid = (lo + hi) / 2;
 
         // cases if two are equal
-        if (a[lo] == a[mid]) return lo;
-        if (a[lo] == a[hi-1] || a[mid] == a[hi-1]) return hi-1;
+        if (A[lo] == A[mid]) return lo;
+        if (A[lo] == A[hi-1] || A[mid] == A[hi-1]) return hi-1;
 
         // cases if three are different
-        return a[lo] < a[mid]
-            ? (a[mid] < a[hi-1] ? mid : (a[lo] < a[hi-1] ? hi-1 : lo))
-            : (a[mid] > a[hi-1] ? mid : (a[lo] < a[hi-1] ? lo : hi-1));
+        return A[lo] < A[mid]
+            ? (A[mid] < A[hi-1] ? mid : (A[lo] < A[hi-1] ? hi-1 : lo))
+            : (A[mid] > A[hi-1] ? mid : (A[lo] < A[hi-1] ? lo : hi-1));
     }
 
     return lo;
@@ -261,29 +261,29 @@ const wxChar* g_quicksort_pivot_text[] = {
 
 // by myself (Timo Bingmann), based on Hoare's original code
 
-void QuickSortLR(WSortView& a, ssize_t lo, ssize_t hi)
+void QuickSortLR(WSortView& A, ssize_t lo, ssize_t hi)
 {
     // pick pivot and watch
-    volatile ssize_t p = QuickSortSelectPivot(a, lo, hi+1);
+    volatile ssize_t p = QuickSortSelectPivot(A, lo, hi+1);
 
-    value_type pivot = a[p];
-    a.watch(&p,1);
+    value_type pivot = A[p];
+    A.watch(&p,1);
 
     volatile ssize_t i = lo, j = hi;
-    a.watch(&i,2);
-    a.watch(&j,2);
+    A.watch(&i,2);
+    A.watch(&j,2);
 
     while (i <= j)
     {
-        while (a[i] < pivot)
+        while (A[i] < pivot)
             i++;
 
-        while (a[j] > pivot)
+        while (A[j] > pivot)
             j--;
 
         if (i <= j)
         {
-            a.swap(i,j);
+            A.swap(i,j);
 
             // follow pivot if it is swapped
             if (p == i) p = j;
@@ -293,18 +293,18 @@ void QuickSortLR(WSortView& a, ssize_t lo, ssize_t hi)
         }
     }
 
-    a.unwatch_all();
+    A.unwatch_all();
 
     if (lo < j)
-        QuickSortLR(a, lo, j);
+        QuickSortLR(A, lo, j);
 
     if (i < hi)
-        QuickSortLR(a, i, hi);
+        QuickSortLR(A, i, hi);
 }
 
-void QuickSortLR(WSortView& a)
+void QuickSortLR(WSortView& A)
 {
-    return QuickSortLR(a, 0, a.size()-1);
+    return QuickSortLR(A, 0, A.size()-1);
 }
 
 // ****************************************************************************
@@ -312,47 +312,47 @@ void QuickSortLR(WSortView& a)
 
 // by myself (Timo Bingmann), based on CLRS' 3rd edition
 
-size_t PartitionLL(WSortView& a, size_t lo, size_t hi)
+size_t PartitionLL(WSortView& A, size_t lo, size_t hi)
 {
     // pick pivot and move to back
-    size_t p = QuickSortSelectPivot(a, lo, hi);
+    size_t p = QuickSortSelectPivot(A, lo, hi);
 
-    value_type pivot = a[p];
-    a.swap(p, hi-1);
-    a.mark(hi-1);
+    value_type pivot = A[p];
+    A.swap(p, hi-1);
+    A.mark(hi-1);
 
     volatile ssize_t i = lo;
-    a.watch(&i,2);
+    A.watch(&i,2);
 
     for (size_t j = lo; j < hi-1; ++j)
     {
-        if (a[j] <= pivot) {
-            a.swap(i, j);
+        if (A[j] <= pivot) {
+            A.swap(i, j);
             ++i;
         }
     }
 
-    a.swap(i, hi-1);
-    a.unmark(hi-1);
-    a.unwatch_all();
+    A.swap(i, hi-1);
+    A.unmark(hi-1);
+    A.unwatch_all();
 
     return i;
 }
 
-void QuickSortLL(WSortView& a, size_t lo, size_t hi)
+void QuickSortLL(WSortView& A, size_t lo, size_t hi)
 {
     if (lo + 1 < hi)
     {
-        size_t mid = PartitionLL(a, lo, hi);
+        size_t mid = PartitionLL(A, lo, hi);
 
-        QuickSortLL(a, lo, mid);
-        QuickSortLL(a, mid+1, hi);
+        QuickSortLL(A, lo, mid);
+        QuickSortLL(A, mid+1, hi);
     }
 }
 
-void QuickSortLL(WSortView& a)
+void QuickSortLL(WSortView& A)
 {
-    return QuickSortLL(a, 0, a.size());
+    return QuickSortLL(A, 0, A.size());
 }
 
 // ****************************************************************************
@@ -360,44 +360,44 @@ void QuickSortLL(WSortView& a)
 
 // by myself (Timo Bingmann), loosely based on multikey quicksort by B&S
 
-void QuickSortTernaryLR(WSortView& a, ssize_t lo, ssize_t hi)
+void QuickSortTernaryLR(WSortView& A, ssize_t lo, ssize_t hi)
 {
     if (hi <= lo) return;
 
     int cmp;
 
     // pick pivot and swap to back
-    ssize_t piv = QuickSortSelectPivot(a, lo, hi+1);
-    a.swap(piv, hi);
-    a.mark(hi);
+    ssize_t piv = QuickSortSelectPivot(A, lo, hi+1);
+    A.swap(piv, hi);
+    A.mark(hi);
 
-    const value_type& pivot = a[hi];
+    const value_type& pivot = A[hi];
 
     // schema: |p ===  |i <<< | ??? |j >>> |q === |piv
     volatile ssize_t i = lo, j = hi-1;
     volatile ssize_t p = lo, q = hi-1;
 
-    a.watch(&i,2);
-    a.watch(&j,2);
+    A.watch(&i,2);
+    A.watch(&j,2);
 
     for (;;)
     {
         // partition on left
-        while (i <= j && (cmp = a[i].cmp(pivot)) <= 0)
+        while (i <= j && (cmp = A[i].cmp(pivot)) <= 0)
         {
             if (cmp == 0) {
-                a.mark(p,3);
-                a.swap(i, p++);
+                A.mark(p,3);
+                A.swap(i, p++);
             }
             ++i;
         }
 
         // partition on right
-        while (i <= j && (cmp = a[j].cmp(pivot)) >= 0)
+        while (i <= j && (cmp = A[j].cmp(pivot)) >= 0)
         {
             if (cmp == 0) {
-                a.mark(q,3);
-                a.swap(j, q--);
+                A.mark(q,3);
+                A.swap(j, q--);
             }
             --j;
         }
@@ -405,12 +405,12 @@ void QuickSortTernaryLR(WSortView& a, ssize_t lo, ssize_t hi)
         if (i > j) break;
 
         // swap item between < > regions
-        a.swap(i++, j--);
+        A.swap(i++, j--);
     }
 
     // swap pivot to right place
-    a.swap(i,hi);
-    a.mark_swap(i,hi);
+    A.swap(i,hi);
+    A.mark_swap(i,hi);
 
     ssize_t num_less = i - p;
     ssize_t num_greater = q - j;
@@ -420,26 +420,26 @@ void QuickSortTernaryLR(WSortView& a, ssize_t lo, ssize_t hi)
 
     ssize_t pe = lo + std::min(p-lo, num_less);
     for (ssize_t k = lo; k < pe; k++, j--) {
-        a.swap(k,j);
-        a.mark_swap(k,j);
+        A.swap(k,j);
+        A.mark_swap(k,j);
     }
 
     ssize_t qe = hi-1 - std::min(hi-1-q, num_greater-1); // one already greater at end
     for (ssize_t k = hi-1; k > qe; k--, i++) {
-        a.swap(i,k);
-        a.mark_swap(i,k);
+        A.swap(i,k);
+        A.mark_swap(i,k);
     }
 
-    a.unwatch_all();
-    a.unmark_all();
+    A.unwatch_all();
+    A.unmark_all();
 
-    QuickSortTernaryLR(a, lo, lo + num_less - 1);
-    QuickSortTernaryLR(a, hi - num_greater + 1, hi);
+    QuickSortTernaryLR(A, lo, lo + num_less - 1);
+    QuickSortTernaryLR(A, hi - num_greater + 1, hi);
 }
 
-void QuickSortTernaryLR(WSortView& a)
+void QuickSortTernaryLR(WSortView& A)
 {
-    return QuickSortTernaryLR(a, 0, a.size()-1);
+    return QuickSortTernaryLR(A, 0, A.size()-1);
 }
 
 // ****************************************************************************
@@ -447,74 +447,74 @@ void QuickSortTernaryLR(WSortView& a)
 
 // by myself (Timo Bingmann)
 
-std::pair<ssize_t,ssize_t> PartitionTernaryLL(WSortView& a, ssize_t lo, ssize_t hi)
+std::pair<ssize_t,ssize_t> PartitionTernaryLL(WSortView& A, ssize_t lo, ssize_t hi)
 {
     // pick pivot and swap to back
-    ssize_t p = QuickSortSelectPivot(a, lo, hi);
+    ssize_t p = QuickSortSelectPivot(A, lo, hi);
 
-    value_type pivot = a[p];
-    a.swap(p, hi-1);
-    a.mark(hi-1);
+    value_type pivot = A[p];
+    A.swap(p, hi-1);
+    A.mark(hi-1);
 
     volatile ssize_t i = lo, k = hi-1;
-    a.watch(&i,2);
+    A.watch(&i,2);
 
     for (ssize_t j = lo; j < k; ++j)
     {
-        int cmp = a[j].cmp(pivot); // ternary comparison
+        int cmp = A[j].cmp(pivot); // ternary comparison
         if (cmp == 0) {
-            a.swap(--k, j);
-            --j; // reclassify a[j]
-            a.mark(k,3);
+            A.swap(--k, j);
+            --j; // reclassify A[j]
+            A.mark(k,3);
         }
         else if (cmp < 0) {
-            a.swap(i++, j);
+            A.swap(i++, j);
         }
     }
 
     // unwatch i, because the pivot is swapped there
     // in the first step of the following swap loop.
-    a.unwatch_all();
+    A.unwatch_all();
 
     ssize_t j = i + (hi-k);
 
     for (ssize_t s = 0; s < hi-k; ++s) {
-        a.swap(i+s, hi-1-s);
-        a.mark_swap(i+s, hi-1-s);
+        A.swap(i+s, hi-1-s);
+        A.mark_swap(i+s, hi-1-s);
     }
-    a.unmark_all();
+    A.unmark_all();
 
     return std::make_pair(i,j);
 }
 
-void QuickSortTernaryLL(WSortView& a, size_t lo, size_t hi)
+void QuickSortTernaryLL(WSortView& A, size_t lo, size_t hi)
 {
     if (lo + 1 < hi)
     {
-        std::pair<ssize_t,ssize_t> mid = PartitionTernaryLL(a, lo, hi);
+        std::pair<ssize_t,ssize_t> mid = PartitionTernaryLL(A, lo, hi);
 
-        QuickSortTernaryLL(a, lo, mid.first);
-        QuickSortTernaryLL(a, mid.second, hi);
+        QuickSortTernaryLL(A, lo, mid.first);
+        QuickSortTernaryLL(A, mid.second, hi);
     }
 }
 
-void QuickSortTernaryLL(WSortView& a)
+void QuickSortTernaryLL(WSortView& A)
 {
-    return QuickSortTernaryLL(a, 0, a.size());
+    return QuickSortTernaryLL(A, 0, A.size());
 }
 
 // ****************************************************************************
 // *** Bubble Sort
 
-void BubbleSort(WSortView& a)
+void BubbleSort(WSortView& A)
 {
-    for (size_t i = 0; i < a.size()-1; ++i)
+    for (size_t i = 0; i < A.size()-1; ++i)
     {
-        for (size_t j = 0; j < a.size()-1 - i; ++j)
+        for (size_t j = 0; j < A.size()-1 - i; ++j)
         {
-            if (a[j] > a[j + 1])
+            if (A[j] > A[j + 1])
             {
-                a.swap(j, j+1);
+                A.swap(j, j+1);
             }
         }
     }
@@ -525,17 +525,17 @@ void BubbleSort(WSortView& a)
 
 // from http://de.wikibooks.org/wiki/Algorithmen_und_Datenstrukturen_in_C/_Shakersort
 
-void CocktailShakerSort(WSortView& a)
+void CocktailShakerSort(WSortView& A)
 {
-    size_t lo = 0, hi = a.size()-1, mov = lo;
+    size_t lo = 0, hi = A.size()-1, mov = lo;
 
     while (lo < hi)
     {
         for (size_t i = hi; i > lo; --i)
         {
-            if (a[i-1] > a[i])
+            if (A[i-1] > A[i])
             {
-                a.swap(i-1, i);
+                A.swap(i-1, i);
                 mov = i;
             }
         }
@@ -544,9 +544,9 @@ void CocktailShakerSort(WSortView& a)
 
         for (size_t i = lo; i < hi; ++i)
         {
-            if (a[i] > a[i+1])
+            if (A[i] > A[i+1])
             {
-                a.swap(i, i+1);
+                A.swap(i, i+1);
                 mov = i;
             }
         }
@@ -558,19 +558,19 @@ void CocktailShakerSort(WSortView& a)
 // ****************************************************************************
 // *** Gnome Sort
 
-// from http://en.wikipedia.org/wiki/Gnome_sort
+// from http://en.wikipediA.org/wiki/Gnome_sort
 
-void GnomeSort(WSortView& a)
+void GnomeSort(WSortView& A)
 {
-    for (size_t i = 1; i < a.size(); )
+    for (size_t i = 1; i < A.size(); )
     {
-        if (a[i] >= a[i-1])
+        if (A[i] >= A[i-1])
         {
             ++i;
         }
         else
         {
-            a.swap(i, i-1);
+            A.swap(i, i-1);
             if (i > 1) --i;
         }
     }
@@ -579,14 +579,14 @@ void GnomeSort(WSortView& a)
 // ****************************************************************************
 // *** Comb Sort
 
-// from http://en.wikipedia.org/wiki/Comb_sort
+// from http://en.wikipediA.org/wiki/Comb_sort
 
-void CombSort(WSortView& a)
+void CombSort(WSortView& A)
 {
     const double shrink = 1.3;
 
     bool swapped = false;
-    size_t gap = a.size();
+    size_t gap = A.size();
 
     while ((gap > 1) || swapped)
     {
@@ -596,11 +596,11 @@ void CombSort(WSortView& a)
 
         swapped = false;
 
-        for (size_t i = 0; gap + i < a.size(); ++i)
+        for (size_t i = 0; gap + i < A.size(); ++i)
         {
-            if (a[i] > a[i + gap])
+            if (A[i] > A[i + gap])
             {
-                a.swap(i, i+gap);
+                A.swap(i, i+gap);
                 swapped = true;
             }
         }
@@ -610,9 +610,9 @@ void CombSort(WSortView& a)
 // ****************************************************************************
 // *** Odd-Even Sort
 
-// from http://en.wikipedia.org/wiki/Odd%E2%80%93even_sort
+// from http://en.wikipediA.org/wiki/Odd%E2%80%93even_sort
 
-void OddEvenSort(WSortView& a)
+void OddEvenSort(WSortView& A)
 {
     bool sorted = false;
 
@@ -620,20 +620,20 @@ void OddEvenSort(WSortView& a)
     {
         sorted = true;
 
-        for (size_t i = 1; i < a.size()-1; i += 2)
+        for (size_t i = 1; i < A.size()-1; i += 2)
         {
-            if(a[i] > a[i+1])
+            if(A[i] > A[i+1])
             {
-                a.swap(i, i+1);
+                A.swap(i, i+1);
                 sorted = false;
             }
         }
 
-        for (size_t i = 0; i < a.size()-1; i += 2)
+        for (size_t i = 0; i < A.size()-1; i += 2)
         {
-            if(a[i] > a[i+1])
+            if(A[i] > A[i+1])
             {
-                a.swap(i, i+1);
+                A.swap(i, i+1);
                 sorted = false;
             }
         }
@@ -645,7 +645,7 @@ void OddEvenSort(WSortView& a)
 
 // with gaps by Robert Sedgewick from http://www.cs.princeton.edu/~rs/shell/shell.c
 
-void ShellSort(WSortView& a)
+void ShellSort(WSortView& A)
 {
     size_t incs[16] = { 1391376, 463792, 198768, 86961, 33936,
                         13776, 4592, 1968, 861, 336,
@@ -653,18 +653,18 @@ void ShellSort(WSortView& a)
 
     for (size_t k = 0; k < 16; k++)
     {
-        for (size_t h = incs[k], i = h; i < a.size(); i++)
+        for (size_t h = incs[k], i = h; i < A.size(); i++)
         {
-            value_type v = a[i];
+            value_type v = A[i];
             size_t j = i;
 
-            while (j >= h && a[j-h] > v)
+            while (j >= h && A[j-h] > v)
             {
-                a.set(j, a[j-h]);
+                A.set(j, A[j-h]);
                 j -= h;
             }
 
-            a[j] = v;
+            A[j] = v;
         }
     }
 }
@@ -686,42 +686,42 @@ uint32_t prevPowerOfTwo(uint32_t x)
     return x - (x >> 1);
 }
 
-void HeapSort(WSortView& a)
+void HeapSort(WSortView& A)
 {
-    size_t n = a.size(), i = n / 2;
+    size_t n = A.size(), i = n / 2;
 
     // mark heap levels with different colors
     for (size_t j = i; j < n; ++j)
-        a.mark(j, log(prevPowerOfTwo(j+1)) / log(2) + 3);
+        A.mark(j, log(prevPowerOfTwo(j+1)) / log(2) + 3);
 
     while (1)
     {
         if (i > 0) {
-            // build heap, sift a[i] down the heap
+            // build heap, sift A[i] down the heap
             i--;
         }
         else {
             // pop largest element from heap: swap front to back, and sift
-            // front a[0] down the heap
+            // front A[0] down the heap
             n--;
             if (n == 0) return;
-            a.swap(0,n);
+            A.swap(0,n);
 
-            a.mark(n);
-            if (n+1 < a.size()) a.unmark(n+1);
+            A.mark(n);
+            if (n+1 < A.size()) A.unmark(n+1);
         }
 
         size_t parent = i;
         size_t child = i*2 + 1;
 
-        // sift operation - push the value of a[i] down the heap
+        // sift operation - push the value of A[i] down the heap
         while (child < n)
         {
-            if (child + 1 < n && a[child + 1] > a[child]) {
+            if (child + 1 < n && A[child + 1] > A[child]) {
                 child++;
             }
-            if (a[child] > a[parent]) {
-                a.swap(parent, child);
+            if (A[child] > A[parent]) {
+                A.swap(parent, child);
                 parent = child;
                 child = parent*2+1;
             }
@@ -731,7 +731,7 @@ void HeapSort(WSortView& a)
         }
 
         // mark heap levels with different colors
-        a.mark(i, log(prevPowerOfTwo(i+1)) / log(2) + 3);
+        A.mark(i, log(prevPowerOfTwo(i+1)) / log(2) + 3);
     }
 
 }
@@ -741,14 +741,14 @@ void HeapSort(WSortView& a)
 
 // by myself (Timo Bingmann)
 
-void RadixSortMSD(WSortView& a, size_t lo, size_t hi, size_t depth)
+void RadixSortMSD(WSortView& A, size_t lo, size_t hi, size_t depth)
 {
-    a.mark(lo); a.mark(hi-1);
+    A.mark(lo); A.mark(hi-1);
 
     // radix and base calculations
     const unsigned int RADIX = 4;
 
-    unsigned int pmax = floor( log(a.array_max()) / log(RADIX) );
+    unsigned int pmax = floor( log(A.array_max()) / log(RADIX) );
     ASSERT(depth <= pmax);
 
     size_t base = pow(RADIX, pmax - depth);
@@ -758,7 +758,7 @@ void RadixSortMSD(WSortView& a, size_t lo, size_t hi, size_t depth)
 
     for (size_t i = lo; i < hi; ++i)
     {
-        size_t r = a[i].get() / base % RADIX;
+        size_t r = A[i].get() / base % RADIX;
         ASSERT(r < RADIX);
         count[r]++;
     }
@@ -770,20 +770,20 @@ void RadixSortMSD(WSortView& a, size_t lo, size_t hi, size_t depth)
     // mark bucket boundaries
     for (size_t i = 0; i < bkt.size(); ++i) {
         if (bkt[i] == 0) continue;
-        a.mark(lo + bkt[i]-1, 2);
+        A.mark(lo + bkt[i]-1, 2);
     }
 
     // reorder items in-place by walking cycles
     for (size_t i=0, j; i < (hi-lo); )
     {
-        while ( (j = --bkt[ (a[lo+i].get() / base % RADIX) ]) > i )
+        while ( (j = --bkt[ (A[lo+i].get() / base % RADIX) ]) > i )
         {
-            a.swap(lo + i, lo + j);
+            A.swap(lo + i, lo + j);
         }
-        i += count[ (a[lo+i].get() / base % RADIX) ];
+        i += count[ (A[lo+i].get() / base % RADIX) ];
     }
 
-    a.unmark_all();
+    A.unmark_all();
 
     // no more depth to sort?
     if (depth+1 > pmax) return;
@@ -793,14 +793,14 @@ void RadixSortMSD(WSortView& a, size_t lo, size_t hi, size_t depth)
     for (size_t i = 0; i < RADIX; ++i)
     {
         if (count[i] <= 1) continue;
-        RadixSortMSD(a, sum, sum+count[i], depth+1);
+        RadixSortMSD(A, sum, sum+count[i], depth+1);
         sum += count[i];
     }
 }
 
-void RadixSortMSD(WSortView& a)
+void RadixSortMSD(WSortView& A)
 {
-    return RadixSortMSD(a, 0, a.size(), 0);
+    return RadixSortMSD(A, 0, A.size(), 0);
 }
 
 // ****************************************************************************
@@ -808,12 +808,12 @@ void RadixSortMSD(WSortView& a)
 
 // by myself (Timo Bingmann)
 
-void RadixSortLSD(WSortView& a)
+void RadixSortLSD(WSortView& A)
 {
     // radix and base calculations
     const unsigned int RADIX = 4;
 
-    unsigned int pmax = floor( log(a.array_max()) / log(RADIX) );
+    unsigned int pmax = floor( log(A.array_max()) / log(RADIX) );
 
     for (unsigned int p = 0; p <= pmax; ++p)
     {
@@ -821,11 +821,11 @@ void RadixSortLSD(WSortView& a)
 
         // count digits and copy data
         std::vector<size_t> count(RADIX, 0);
-        std::vector<value_type> copy(a.size());
+        std::vector<value_type> copy(A.size());
 
-        for (size_t i = 0; i < a.size(); ++i)
+        for (size_t i = 0; i < A.size(); ++i)
         {
-            size_t r = (copy[i] = a[i]).get() / base % RADIX;
+            size_t r = (copy[i] = A[i]).get() / base % RADIX;
             ASSERT(r < RADIX);
             count[r]++;
         }
@@ -836,18 +836,18 @@ void RadixSortLSD(WSortView& a)
 
         // mark bucket boundaries
         for (size_t i = 0; i < bkt.size()-1; ++i) {
-            if (bkt[i] >= a.size()) continue;
-            a.mark(bkt[i], 2);
+            if (bkt[i] >= A.size()) continue;
+            A.mark(bkt[i], 2);
         }
 
         // redistribute items back into array (stable)
-        for (size_t i=0; i < a.size(); ++i)
+        for (size_t i=0; i < A.size(); ++i)
         {
             size_t r = copy[i].get() / base % RADIX;
-            a[ bkt[r]++ ] = copy[i];
+            A[ bkt[r]++ ] = copy[i];
         }
 
-        a.unmark_all();
+        A.unmark_all();
     }
 }
 
@@ -874,7 +874,7 @@ public:
 
     MyIterator() : m_array(NULL), m_pos(0) {}
 
-    MyIterator(WSortView* a, size_t p) : m_array(a), m_pos(p) {}
+    MyIterator(WSortView* A, size_t p) : m_array(A), m_pos(p) {}
 
     MyIterator(const MyIterator& r) : m_array(r.m_array), m_pos(r.m_pos) {}
 
@@ -939,20 +939,20 @@ public:
     { ASSERT(m_array == r2.m_array); return (m_pos - r2.m_pos); }
 };
 
-void StlSort(WSortView& a)
+void StlSort(WSortView& A)
 {
-    std::sort(MyIterator(&a,0), MyIterator(&a,a.size()));
+    std::sort(MyIterator(&A,0), MyIterator(&A,A.size()));
 }
 
-void StlStableSort(WSortView& a)
+void StlStableSort(WSortView& A)
 {
-    std::stable_sort(MyIterator(&a,0), MyIterator(&a,a.size()));
+    std::stable_sort(MyIterator(&A,0), MyIterator(&A,A.size()));
 }
 
-void StlHeapSort(WSortView& a)
+void StlHeapSort(WSortView& A)
 {
-    std::make_heap(MyIterator(&a,0), MyIterator(&a,a.size()));
-    std::sort_heap(MyIterator(&a,0), MyIterator(&a,a.size()));
+    std::make_heap(MyIterator(&A,0), MyIterator(&A,A.size()));
+    std::sort_heap(MyIterator(&A,0), MyIterator(&A,A.size()));
 }
 
 // ****************************************************************************
@@ -960,51 +960,51 @@ void StlHeapSort(WSortView& a)
 
 // by myself (Timo Bingmann)
 
-bool BogoCheckSorted(WSortView& a)
+bool BogoCheckSorted(WSortView& A)
 {
     size_t i;
-    value_type prev = a[0];
-    a.mark(0);
-    for (i = 1; i < a.size(); ++i)
+    value_type prev = A[0];
+    A.mark(0);
+    for (i = 1; i < A.size(); ++i)
     {
-        value_type val = a[i];
+        value_type val = A[i];
         if (prev > val) break;
         prev = val;
-        a.mark(i);
+        A.mark(i);
     }
 
-    if (i == a.size()) {
+    if (i == A.size()) {
         // this is amazing.
         return true;
     }
 
     // unmark
-    while (i > 0) a.unmark(i--);
-    a.unmark(0);
+    while (i > 0) A.unmark(i--);
+    A.unmark(0);
 
     return false;
 }
 
-void BogoSort(WSortView& a)
+void BogoSort(WSortView& A)
 {
     // keep a permutation of [0,size)
-    std::vector<size_t> perm(a.size());
+    std::vector<size_t> perm(A.size());
 
-    for (size_t i = 0; i < a.size(); ++i)
+    for (size_t i = 0; i < A.size(); ++i)
         perm[i] = i;
 
     while (1)
     {
         // check if array is sorted
-        if (BogoCheckSorted(a)) break;
+        if (BogoCheckSorted(A)) break;
 
         // pick a random permutation of indexes
         std::random_shuffle(perm.begin(), perm.end());
 
         // permute array in-place
-        std::vector<char> pmark(a.size(), 0);
+        std::vector<char> pmark(A.size(), 0);
 
-        for (size_t i = 0; i < a.size(); ++i)
+        for (size_t i = 0; i < A.size(); ++i)
         {
             if (pmark[i]) continue;
 
@@ -1016,7 +1016,7 @@ void BogoSort(WSortView& a)
             while ( perm[j] != i )
             {
                 ASSERT(!pmark[j]);
-                a.swap(j, perm[j]);
+                A.swap(j, perm[j]);
                 pmark[j] = 1;
 
                 j = perm[j];
@@ -1030,22 +1030,22 @@ void BogoSort(WSortView& a)
 
         //std::cout << "permute end\n";
 
-        for (size_t i = 0; i < a.size(); ++i)
+        for (size_t i = 0; i < A.size(); ++i)
             ASSERT(pmark[i]);
     }
 }
 
-void BozoSort(WSortView& a)
+void BozoSort(WSortView& A)
 {
     srand(time(NULL));
 
     while (1)
     {
         // check if array is sorted
-        if (BogoCheckSorted(a)) break;
+        if (BogoCheckSorted(A)) break;
 
         // swap two random items
-        a.swap(rand() % a.size(), rand() % a.size());
+        A.swap(rand() % A.size(), rand() % A.size());
     }
 }
 
@@ -1058,10 +1058,10 @@ namespace BitonicSortNS {
 
 static const bool ASCENDING = true;    // sorting direction
 
-static void compare(WSortView& a, int i, int j, bool dir)
+static void compare(WSortView& A, int i, int j, bool dir)
 {
-    if (dir == (a[i] > a[j]))
-        a.swap(i, j);
+    if (dir == (A[i] > A[j]))
+        A.swap(i, j);
 }
 
 static int greatestPowerOfTwoLessThan(int n)
@@ -1071,42 +1071,42 @@ static int greatestPowerOfTwoLessThan(int n)
     return k >> 1;
 }
 
-static void bitonicMerge(WSortView& a, int lo, int n, bool dir)
+static void bitonicMerge(WSortView& A, int lo, int n, bool dir)
 {
     if (n > 1)
     {
         int m = greatestPowerOfTwoLessThan(n);
 
         for (int i = lo; i < lo + n - m; i++)
-            compare(a, i, i+m, dir);
+            compare(A, i, i+m, dir);
 
-        bitonicMerge(a, lo, m, dir);
-        bitonicMerge(a, lo + m, n - m, dir);
+        bitonicMerge(A, lo, m, dir);
+        bitonicMerge(A, lo + m, n - m, dir);
     }
 }
 
-static void bitonicSort(WSortView& a, int lo, int n, bool dir)
+static void bitonicSort(WSortView& A, int lo, int n, bool dir)
 {
     if (n > 1)
     {
         int m = n / 2;
-        bitonicSort(a, lo, m, !dir);
-        bitonicSort(a, lo + m, n - m, dir);
-        bitonicMerge(a, lo, n, dir);
+        bitonicSort(A, lo, m, !dir);
+        bitonicSort(A, lo + m, n - m, dir);
+        bitonicMerge(A, lo, n, dir);
     }
 }
 
 } // namespace BitonicSortNS
 
-void BitonicSort(WSortView& a)
+void BitonicSort(WSortView& A)
 {
-    BitonicSortNS::bitonicSort(a, 0, a.size(), BitonicSortNS::ASCENDING);
+    BitonicSortNS::bitonicSort(A, 0, A.size(), BitonicSortNS::ASCENDING);
 }
 
 // ****************************************************************************
 // *** Smooth Sort
 
-// from http://en.wikipedia.org/wiki/Smoothsort
+// from http://en.wikipediA.org/wiki/Smoothsort
 
 namespace SmoothSortNS {
 
@@ -1119,46 +1119,46 @@ static const int LP[] = {
     866988873 // the next number is > 31 bits.
 };
 
-static void sift(WSortView& a, int pshift, int head)
+static void sift(WSortView& A, int pshift, int head)
 {
     // we do not use Floyd's improvements to the heapsort sift, because we
     // are not doing what heapsort does - always moving nodes from near
     // the bottom of the tree to the root.
 
-    value_type val = a[head];
+    value_type val = A[head];
 
     while (pshift > 1)
     {
         int rt = head - 1;
         int lf = head - 1 - LP[pshift - 2];
 
-        if (val.compareTo(a[lf]) >= 0 && val.compareTo(a[rt]) >= 0)
+        if (val.compareTo(A[lf]) >= 0 && val.compareTo(A[rt]) >= 0)
             break;
 
-        if (a[lf].compareTo(a[rt]) >= 0) {
-            a[head] = a[lf];
+        if (A[lf].compareTo(A[rt]) >= 0) {
+            A[head] = A[lf];
             head = lf;
             pshift -= 1;
         }
         else {
-            a[head] = a[rt];
+            A[head] = A[rt];
             head = rt;
             pshift -= 2;
         }
     }
 
-    a[head] = val;
+    A[head] = val;
 }
 
-static void trinkle(WSortView& a, int p, int pshift, int head, bool isTrusty)
+static void trinkle(WSortView& A, int p, int pshift, int head, bool isTrusty)
 {
-    value_type val = a[head];
+    value_type val = A[head];
 
     while (p != 1)
     {
         int stepson = head - LP[pshift];
 
-        if (a[stepson].compareTo(val) <= 0)
+        if (A[stepson].compareTo(val) <= 0)
             break; // current node is greater than head. sift.
 
         // no need to check this if we know the current node is trusty,
@@ -1167,12 +1167,12 @@ static void trinkle(WSortView& a, int p, int pshift, int head, bool isTrusty)
         if (!isTrusty && pshift > 1) {
             int rt = head - 1;
             int lf = head - 1 - LP[pshift - 2];
-            if (a[rt].compareTo(a[stepson]) >= 0
-                || a[lf].compareTo(a[stepson]) >= 0)
+            if (A[rt].compareTo(A[stepson]) >= 0
+                || A[lf].compareTo(A[stepson]) >= 0)
                 break;
         }
 
-        a[head] = a[stepson];
+        A[head] = A[stepson];
 
         head = stepson;
         //int trail = Integer.numberOfTrailingZeros(p & ~1);
@@ -1183,12 +1183,12 @@ static void trinkle(WSortView& a, int p, int pshift, int head, bool isTrusty)
     }
 
     if (!isTrusty) {
-        a[head] = val;
-        sift(a, pshift, head);
+        A[head] = val;
+        sift(A, pshift, head);
     }
 }
 
-void sort(WSortView& a, int lo, int hi)
+void sort(WSortView& A, int lo, int hi)
 {
     int head = lo; // the offset of the first element of the prefix into m
 
@@ -1211,7 +1211,7 @@ void sort(WSortView& a, int lo, int hi)
         if ((p & 3) == 3) {
             // Add 1 by merging the first two blocks into a larger one.
             // The next Leonardo number is one bigger.
-            sift(a, pshift, head);
+            sift(A, pshift, head);
             p >>= 2;
             pshift += 2;
         }
@@ -1219,10 +1219,10 @@ void sort(WSortView& a, int lo, int hi)
             // adding a new block of length 1
             if (LP[pshift - 1] >= hi - head) {
                 // this block is its final size.
-                trinkle(a, p, pshift, head, false);
+                trinkle(A, p, pshift, head, false);
             } else {
                 // this block will get merged. Just make it trusty.
-                sift(a, pshift, head);
+                sift(A, pshift, head);
             }
 
             if (pshift == 1) {
@@ -1239,7 +1239,7 @@ void sort(WSortView& a, int lo, int hi)
         head++;
     }
 
-    trinkle(a, p, pshift, head, false);
+    trinkle(A, p, pshift, head, false);
 
     while (pshift != 1 || p != 1)
     {
@@ -1261,8 +1261,8 @@ void sort(WSortView& a, int lo, int hi)
             // are appropriately heapified, but the root nodes are not
             // necessarily in order. We therefore semitrinkle both of them
 
-            trinkle(a, p >> 1, pshift + 1, head - LP[pshift] - 1, true);
-            trinkle(a, p, pshift, head - 1, true);
+            trinkle(A, p >> 1, pshift + 1, head - LP[pshift] - 1, true);
+            trinkle(A, p, pshift, head - 1, true);
         }
 
         head--;
@@ -1271,40 +1271,40 @@ void sort(WSortView& a, int lo, int hi)
 
 } // namespace SmoothSortNS
 
-void SmoothSort(WSortView& a)
+void SmoothSort(WSortView& A)
 {
-    return SmoothSortNS::sort(a, 0, a.size()-1);
+    return SmoothSortNS::sort(A, 0, A.size()-1);
 }
 
 // ****************************************************************************
 // *** Stooge Sort
 
-void StoogeSort(WSortView& a, int i, int j)
+void StoogeSort(WSortView& A, int i, int j)
 {
-    if (a[i] > a[j])
+    if (A[i] > A[j])
     {
-        a.swap(i, j);
+        A.swap(i, j);
     }
 
     if (j - i + 1 >= 3)
     {
         int t = (j - i + 1) / 3;
 
-        a.mark(i, 2);
-        a.mark(j, 2);
+        A.mark(i, 2);
+        A.mark(j, 2);
 
-        StoogeSort(a, i, j-t);
-        StoogeSort(a, i+t, j);
-        StoogeSort(a, i, j-t);
+        StoogeSort(A, i, j-t);
+        StoogeSort(A, i+t, j);
+        StoogeSort(A, i, j-t);
 
-        a.unmark(i);
-        a.unmark(j);
+        A.unmark(i);
+        A.unmark(j);
     }
 }
 
-void StoogeSort(WSortView& a)
+void StoogeSort(WSortView& A)
 {
-    StoogeSort(a, 0, a.size()-1);
+    StoogeSort(A, 0, A.size()-1);
 }
 
 // ****************************************************************************
