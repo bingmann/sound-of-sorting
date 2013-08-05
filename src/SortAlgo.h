@@ -81,7 +81,7 @@ void StlHeapSort(class WSortView& a);
 
 void BogoSort(class WSortView& a);
 void BozoSort(class WSortView& a);
-
 void StoogeSort(class WSortView& a);
+void SlowSort(class WSortView& a);
 
 #endif // SORTALGO_H

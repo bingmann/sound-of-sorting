@@ -74,6 +74,7 @@ const struct AlgoEntry g_algolist[] =
     { _("Bogo Sort"), &BogoSort, NULL },
     { _("Bozo Sort"), &BozoSort, NULL },
     { _("Stooge Sort"), &StoogeSort, NULL },
+    { _("Slow Sort"), &SlowSort, NULL },
     { NULL, NULL, NULL },
 };
 
@@ -1305,6 +1306,33 @@ void StoogeSort(WSortView& A, int i, int j)
 void StoogeSort(WSortView& A)
 {
     StoogeSort(A, 0, A.size()-1);
+}
+
+// ****************************************************************************
+// *** Slow Sort
+
+void SlowSort(WSortView& A, int i, int j)
+{
+    if (i >= j) return;
+
+    int m = (i + j) / 2;
+
+    SlowSort(A, i, m);
+    SlowSort(A, m+1, j);
+
+    if (A[m] > A[j])
+        A.swap(m, j);
+
+    A.mark(j, 1);
+
+    SlowSort(A, i, j-1);
+
+    A.unmark(j);
+}
+
+void SlowSort(WSortView& A)
+{
+    SlowSort(A, 0, A.size()-1);
 }
 
 // ****************************************************************************
