@@ -111,6 +111,7 @@ BEGIN_EVENT_TABLE(WMain, WMain_wxg)
     EVT_BUTTON(ID_RESET_BUTTON, WMain::OnResetButton)
     EVT_BUTTON(ID_STEP_BUTTON, WMain::OnStepButton)
     EVT_TOGGLEBUTTON(ID_SOUND_BUTTON, WMain::OnSoundButton)
+    EVT_BUTTON(ID_RANDOM_BUTTON, WMain::OnRandomButton)
     EVT_BUTTON(wxID_ABOUT, WMain::OnAboutButton)
 
     EVT_COMMAND_SCROLL(ID_SPEED_SLIDER, WMain::OnSpeedSliderChange)
@@ -266,6 +267,18 @@ void WMain::OnSoundButton(wxCommandEvent&)
     }
 }
 
+void WMain::OnRandomButton(wxCommandEvent&)
+{
+    AbortAlgorithm();
+
+    algoList->SetSelection( rand() % algoList->GetCount() );
+    sortview->FillData( inputTypeChoice->GetSelection(), m_array_size );
+
+    RunAlgorithm();
+
+    algoList->SetSelection(wxNOT_FOUND);
+}
+
 class WAbout : public WAbout_wxg
 {
 public:
@@ -414,6 +427,8 @@ public:
             wxLog::FlushActive();
             return false;
         }
+
+        srand((int)wxGetLocalTime());
 
         WMain* wmain = new WMain(NULL);
         SetTopWindow(wmain);

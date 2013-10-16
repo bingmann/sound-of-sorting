@@ -76,6 +76,7 @@ public:
     virtual void OnResetButton(wxCommandEvent &event);
     virtual void OnStepButton(wxCommandEvent &event);
     virtual void OnSoundButton(wxCommandEvent &event);
+    virtual void OnRandomButton(wxCommandEvent &event);
     virtual void OnAboutButton(wxCommandEvent &event);
     virtual void OnSpeedSliderChange(wxScrollEvent &event);
     virtual void OnSoundSustainSliderChange(wxScrollEvent &event);
