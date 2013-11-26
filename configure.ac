@@ -2,7 +2,7 @@
 
 AC_PREREQ(2.59)
 
-AC_INIT(sound-of-sorting, 0.6)
+AC_INIT(sound-of-sorting, 0.6.3)
 AC_CONFIG_SRCDIR(src/WMain.cpp)
 AC_CONFIG_AUX_DIR(acscripts)
 
