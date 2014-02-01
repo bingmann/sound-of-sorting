@@ -750,7 +750,7 @@ void RadixSortMSD(WSortView& A, size_t lo, size_t hi, size_t depth)
     // radix and base calculations
     const unsigned int RADIX = 4;
 
-    unsigned int pmax = floor( log(A.array_max()) / log(RADIX) );
+    unsigned int pmax = floor( log(A.array_max()+1) / log(RADIX) );
     ASSERT(depth <= pmax);
 
     size_t base = pow(RADIX, pmax - depth);
@@ -815,9 +815,9 @@ void RadixSortLSD(WSortView& A)
     // radix and base calculations
     const unsigned int RADIX = 4;
 
-    unsigned int pmax = floor( log(A.array_max()) / log(RADIX) );
+    unsigned int pmax = ceil( log(A.array_max()+1) / log(RADIX) );
 
-    for (unsigned int p = 0; p <= pmax; ++p)
+    for (unsigned int p = 0; p < pmax; ++p)
     {
         size_t base = pow(RADIX, p);
 
