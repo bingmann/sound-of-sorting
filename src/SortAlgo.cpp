@@ -55,6 +55,8 @@ const struct AlgoEntry g_algolist[] =
       _("Ternary-split quick sort variant, adapted from multikey quicksort by Bentley & Sedgewick: partitions \"=<?>=\" using two pairs of pointers at left and right, then copied to middle.") },
     { _("Quick Sort (ternary, LL ptrs)"), &QuickSortTernaryLL,
       _("Ternary-split quick sort variant: partitions \"<>?=\" using two pointers at left and one at right. Afterwards copies the \"=\" to middle.") },
+    { _("Quick Sort (dual pivot)"), &QuickSortDualPivot,
+      _("Dual pivot quick sort variant: partitions \"<1<2?>\" using three pointers, two at left and one at right.") },
     { _("Bubble Sort"), &BubbleSort, NULL },
     { _("Cocktail Shaker Sort"), &CocktailShakerSort, NULL },
     { _("Gnome Sort"), &GnomeSort, NULL },
@@ -503,6 +505,70 @@ void QuickSortTernaryLL(WSortView& A, size_t lo, size_t hi)
 void QuickSortTernaryLL(WSortView& A)
 {
     return QuickSortTernaryLL(A, 0, A.size());
+}
+
+// ****************************************************************************
+// *** Dual-Pivot Quick Sort
+
+// by Sebastian Wild
+
+void dualPivotYaroslavskiy(class WSortView& a, int left, int right)
+{
+    if (right > left)
+    {
+        if (a[left] > a[right]) {
+            a.swap(left, right);
+        }
+
+        const value_type p = a[left];
+        const value_type q = a[right];
+
+        a.mark(left);
+        a.mark(right);
+
+        volatile ssize_t l = left + 1;
+        volatile ssize_t g = right - 1;
+        volatile ssize_t k = l;
+
+        a.watch(&l, 2);
+        a.watch(&g, 2);
+        a.watch(&k, 2);
+
+        while (k <= g)
+        {
+            if (a[k] < p) {
+                a.swap(k, l);
+                ++l;
+            }
+            else if (a[k] >= q) {
+                while (a[g] > q && k < g)  --g;
+                a.swap(k, g);
+                --g;
+
+                if (a[k] < p) {
+                    a.swap(k, l);
+                    ++l;
+                }
+            }
+            ++k;
+        }
+        --l;
+        ++g;
+        a.swap(left, l);
+        a.swap(right, g);
+
+        a.unmark_all();
+        a.unwatch_all();
+
+        dualPivotYaroslavskiy(a, left, l - 1);
+        dualPivotYaroslavskiy(a, l + 1, g - 1);
+        dualPivotYaroslavskiy(a, g + 1, right);
+    }
+}
+
+void QuickSortDualPivot(class WSortView& a)
+{
+    return dualPivotYaroslavskiy(a, 0, a.size()-1);
 }
 
 // ****************************************************************************
