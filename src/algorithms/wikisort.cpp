@@ -201,7 +201,7 @@ void Sort(Iterator first, Iterator last, const Comparison compare)
 
     // also, if you change this to dynamically allocate a full-size buffer,
     // the algorithm seamlessly degenerates into a standard merge sort!
-    const size_t cache_size = 16;
+    const size_t cache_size = 8;
     value_type cache[cache_size];
 
     // calculate how to scale the index value to the range within the array
@@ -568,10 +568,39 @@ void Sort(Iterator first, Iterator last, const Comparison compare)
 
 } // namespace WikiSortNS
 
+struct ColoringComparator
+{
+    WSortView& m_array;
+    const ArrayItem *m_begin, *m_end;
+
+    ColoringComparator(WSortView& A)
+        : m_array(A),
+          m_begin( &(A.direct(0)) ),
+          m_end( &(A.direct(A.size()-1)) )
+    { }
+
+    void touch(const ArrayItem* x) const
+    {
+        if (x < m_begin || x > m_end) return;
+
+        unsigned int index = x - m_begin;
+        m_array.touch(index, 16, 1, 10);
+    }
+
+    bool operator()(const ArrayItem& a, const ArrayItem& b) const
+    {
+        touch(&a);
+        touch(&b);
+
+        return a < b;
+    }
+};
+
 void WikiSort(WSortView& A)
 {
-    WikiSortNS::Sort(MyIterator(&A,0), MyIterator(&A,A.size()),
-                     std::less<ArrayItem>());
+    ColoringComparator cmp(A);
+
+    WikiSortNS::Sort(MyIterator(&A,0), MyIterator(&A,A.size()), cmp);
 }
 
 // ****************************************************************************

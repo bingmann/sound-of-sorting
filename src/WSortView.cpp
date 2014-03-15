@@ -295,7 +295,15 @@ short WSortView::InAccessList(ssize_t idx)
         }
 
         if (it->sustain == 0) {
-            it = m_access_list.erase(it);
+            if (it->index == m_access1.index ||
+                it->index == m_access2.index)
+            {
+                ++it;
+            }
+            else
+            {
+                it = m_access_list.erase(it);
+            }
         }
         else {
             it->sustain--;
@@ -359,18 +367,19 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
         *wxRED_PEN,
         *wxGREEN_PEN,
         *wxCYAN_PEN,
-        wxPen(wxColour(255,255,0)), // yellow
-        wxPen(wxColour(255,0,255)), // magenta
-        wxPen(wxColour(255,192,128)), // orange
-        wxPen(wxColour(255,128,192)), // pink
-        wxPen(wxColour(128,192,255)), // darker cyan
-        wxPen(wxColour(192,255,128)), // darker green
-        wxPen(wxColour(192,128,255)), // purple
-        wxPen(wxColour(128,255,192)), // light green
-        wxPen(wxColour(128,128,255)), // blue
-        wxPen(wxColour(192,128,192)), // dark purple
-        wxPen(wxColour(128,192,192)), // dark cyan
-        wxPen(wxColour(192,192,128)), // dark yellow
+        wxPen(wxColour(255,255,0)),   //  4 yellow
+        wxPen(wxColour(255,0,255)),   //  5 magenta
+        wxPen(wxColour(255,192,128)), //  6 orange
+        wxPen(wxColour(255,128,192)), //  7 pink
+        wxPen(wxColour(128,192,255)), //  8 darker cyan
+        wxPen(wxColour(192,255,128)), //  9 darker green
+        wxPen(wxColour(192,128,255)), // 10 purple
+        wxPen(wxColour(128,255,192)), // 11 light green
+        wxPen(wxColour(128,128,255)), // 12 blue
+        wxPen(wxColour(192,128,192)), // 13 dark purple
+        wxPen(wxColour(128,192,192)), // 14 dark cyan
+        wxPen(wxColour(192,192,128)), // 15 dark yellow
+        wxPen(wxColour(0,128,255)),   // 16 blue/cyan mix
     };
 
     static const wxBrush brushes[] = {
@@ -378,18 +387,19 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
         *wxRED_BRUSH,
         *wxGREEN_BRUSH,
         *wxCYAN_BRUSH,
-        wxBrush(wxColour(255,255,0)), // yellow
-        wxBrush(wxColour(255,0,255)), // magenta
-        wxBrush(wxColour(255,192,128)), // orange
-        wxBrush(wxColour(255,128,192)), // pink
-        wxBrush(wxColour(128,192,255)), // darker cyan
-        wxBrush(wxColour(192,255,128)), // darker green
-        wxBrush(wxColour(192,128,255)), // purple
-        wxBrush(wxColour(128,255,192)), // light green
-        wxBrush(wxColour(128,128,255)), // blue
-        wxBrush(wxColour(192,128,192)), // dark purple
-        wxBrush(wxColour(128,192,192)), // dark cyan
-        wxBrush(wxColour(192,192,128)), // dark yellow
+        wxBrush(wxColour(255,255,0)),   //  4 yellow
+        wxBrush(wxColour(255,0,255)),   //  5 magenta
+        wxBrush(wxColour(255,192,128)), //  6 orange
+        wxBrush(wxColour(255,128,192)), //  7 pink
+        wxBrush(wxColour(128,192,255)), //  8 darker cyan
+        wxBrush(wxColour(192,255,128)), //  9 darker green
+        wxBrush(wxColour(192,128,255)), // 10 purple
+        wxBrush(wxColour(128,255,192)), // 11 light green
+        wxBrush(wxColour(128,128,255)), // 12 blue
+        wxBrush(wxColour(192,128,192)), // 13 dark purple
+        wxBrush(wxColour(128,192,192)), // 14 dark cyan
+        wxBrush(wxColour(192,192,128)), // 15 dark yellow
+        wxBrush(wxColour(0,128,255)),   // 16 blue/cyan mix
     };
 
     wxMutexLocker lock(m_mutex);
