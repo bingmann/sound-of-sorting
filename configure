@@ -2636,10 +2636,10 @@ fi
 # set debug info flag if no optimization flags are set.
 
 if test "$CFLAGS" == ""; then
-    CFLAGS="-g"
+    CFLAGS="-g -Wno-unused-local-typedefs"
 fi
 if test "$CXXFLAGS" == ""; then
-    CXXFLAGS="-g"
+    CXXFLAGS="-g -Wno-unused-local-typedefs"
 fi
 
 # enable full optimization by configure switch
