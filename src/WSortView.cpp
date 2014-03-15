@@ -275,18 +275,38 @@ void WSortView::OnSize(wxSizeEvent&)
     Refresh(false);
 }
 
-template <typename Vector>
-static inline bool InList(const Vector& vec, const typename Vector::value_type& v)
+short WSortView::InAccessList(ssize_t idx)
 {
-    for (typename Vector::const_iterator it = vec.begin();
-         it != vec.end(); ++it)
+    signed color = -1;
+    signed priority = -1;
+
+    for (std::vector<Access>::iterator it = m_access_list.begin();
+         it != m_access_list.end(); )
     {
-        if (*it == v) return true;
+        if (it->index != idx) {
+            ++it;
+            continue;
+        }
+
+        if (it->priority >= priority)
+        {
+            priority = it->priority;
+            color = it->color;
+        }
+
+        if (it->sustain == 0) {
+            it = m_access_list.erase(it);
+        }
+        else {
+            it->sustain--;
+            ++it;
+        }
     }
-    return false;
+
+    return color;
 }
 
-unsigned char WSortView::InWatchList(ssize_t idx) const
+unsigned short WSortView::InWatchList(ssize_t idx) const
 {
     for (size_t i = 0; i < m_watch.size(); ++i)
     {
@@ -336,6 +356,7 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
 
     static const wxPen pens[] = {
         *wxWHITE_PEN,
+        *wxRED_PEN,
         *wxGREEN_PEN,
         *wxCYAN_PEN,
         wxPen(wxColour(255,255,0)), // yellow
@@ -354,6 +375,7 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
 
     static const wxBrush brushes[] = {
         *wxWHITE_BRUSH,
+        *wxRED_BRUSH,
         *wxGREEN_BRUSH,
         *wxCYAN_BRUSH,
         wxBrush(wxColour(255,255,0)), // yellow
@@ -373,37 +395,38 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
     wxMutexLocker lock(m_mutex);
     ASSERT(lock.IsOk());
 
-    unsigned char clr;
-
     for (size_t i = 0; i < size(); ++i)
     {
-        if (i == m_access1 || i == m_access2)
+        int clr;
+
+        // select color
+        if (i == m_access1.index)
         {
-            dc.SetPen( *wxRED_PEN );
-            dc.SetBrush( *wxRED_BRUSH );
+            clr = m_access1.color;
+        }
+        else if (i == m_access2.index)
+        {
+            clr = m_access2.color;
         }
         else if ( (clr = InWatchList(i)) != 0 )
         {
-            ASSERT(clr < sizeof(brushes) / sizeof(brushes[0]));
-            dc.SetPen( pens[clr] );
-            dc.SetBrush( brushes[clr] );
+            // clr already set
         }
         else if (m_mark[i] != 0)
         {
-            ASSERT(m_mark[i] < sizeof(brushes) / sizeof(brushes[0]));
-            dc.SetPen( pens[m_mark[i]] );
-            dc.SetBrush( brushes[m_mark[i]] );
+            clr = m_mark[i];
         }
-        else if (InList(m_access_list, i))
+        else if ( (clr = InAccessList(i)) >= 0 )
         {
-            dc.SetPen( *wxRED_PEN );
-            dc.SetBrush( *wxRED_BRUSH );
         }
         else
         {
-            dc.SetPen( *wxWHITE_PEN );
-            dc.SetBrush( *wxWHITE_BRUSH );
+            clr = 0;
         }
+
+        ASSERT(clr < (int)(sizeof(brushes) / sizeof(brushes[0])));
+        dc.SetPen( pens[clr] );
+        dc.SetBrush( brushes[clr] );
 
         dc.DrawRectangle(i*bstep, height,
                          wxMax(1, // draw at least 1 pixel
@@ -412,8 +435,6 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
                              ),
                          -(double)height * m_array[i].get_direct() / m_array_max);
     }
-
-    m_access_list.clear();
 }
 
 BEGIN_EVENT_TABLE(WSortView, wxWindow)

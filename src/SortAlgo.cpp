@@ -89,7 +89,7 @@ const size_t g_algolist_size = sizeof(g_algolist) / sizeof(g_algolist[0]) - 1;
 void SelectionSort(WSortView& A)
 {
     volatile ssize_t jMin = 0;
-    A.watch(&jMin,2);
+    A.watch(&jMin, 3);
 
     for (size_t i = 0; i < A.size()-1; ++i)
     {
@@ -163,7 +163,7 @@ void Merge(WSortView& A, size_t lo, size_t mid, size_t hi)
 {
     // mark merge boundaries
     A.mark(lo);
-    A.mark(mid,2);
+    A.mark(mid,3);
     A.mark(hi-1);
 
     // allocate output
@@ -271,11 +271,11 @@ void QuickSortLR(WSortView& A, ssize_t lo, ssize_t hi)
     volatile ssize_t p = QuickSortSelectPivot(A, lo, hi+1);
 
     value_type pivot = A[p];
-    A.watch(&p,1);
+    A.watch(&p, 2);
 
     volatile ssize_t i = lo, j = hi;
-    A.watch(&i,2);
-    A.watch(&j,2);
+    A.watch(&i, 3);
+    A.watch(&j, 3);
 
     while (i <= j)
     {
@@ -326,7 +326,7 @@ size_t PartitionLL(WSortView& A, size_t lo, size_t hi)
     A.mark(hi-1);
 
     volatile ssize_t i = lo;
-    A.watch(&i,2);
+    A.watch(&i, 3);
 
     for (size_t j = lo; j < hi-1; ++j)
     {
@@ -381,8 +381,8 @@ void QuickSortTernaryLR(WSortView& A, ssize_t lo, ssize_t hi)
     volatile ssize_t i = lo, j = hi-1;
     volatile ssize_t p = lo, q = hi-1;
 
-    A.watch(&i,2);
-    A.watch(&j,2);
+    A.watch(&i, 3);
+    A.watch(&j, 3);
 
     for (;;)
     {
@@ -390,7 +390,7 @@ void QuickSortTernaryLR(WSortView& A, ssize_t lo, ssize_t hi)
         while (i <= j && (cmp = A[i].cmp(pivot)) <= 0)
         {
             if (cmp == 0) {
-                A.mark(p,3);
+                A.mark(p,4);
                 A.swap(i, p++);
             }
             ++i;
@@ -400,7 +400,7 @@ void QuickSortTernaryLR(WSortView& A, ssize_t lo, ssize_t hi)
         while (i <= j && (cmp = A[j].cmp(pivot)) >= 0)
         {
             if (cmp == 0) {
-                A.mark(q,3);
+                A.mark(q,4);
                 A.swap(j, q--);
             }
             --j;
@@ -461,7 +461,7 @@ std::pair<ssize_t,ssize_t> PartitionTernaryLL(WSortView& A, ssize_t lo, ssize_t 
     A.mark(hi-1);
 
     volatile ssize_t i = lo, k = hi-1;
-    A.watch(&i,2);
+    A.watch(&i, 3);
 
     for (ssize_t j = lo; j < k; ++j)
     {
@@ -469,7 +469,7 @@ std::pair<ssize_t,ssize_t> PartitionTernaryLL(WSortView& A, ssize_t lo, ssize_t 
         if (cmp == 0) {
             A.swap(--k, j);
             --j; // reclassify A[j]
-            A.mark(k,3);
+            A.mark(k,4);
         }
         else if (cmp < 0) {
             A.swap(i++, j);
@@ -530,9 +530,9 @@ void dualPivotYaroslavskiy(class WSortView& a, int left, int right)
         volatile ssize_t g = right - 1;
         volatile ssize_t k = l;
 
-        a.watch(&l, 2);
-        a.watch(&g, 2);
-        a.watch(&k, 2);
+        a.watch(&l, 3);
+        a.watch(&g, 3);
+        a.watch(&k, 3);
 
         while (k <= g)
         {
@@ -760,7 +760,7 @@ void HeapSort(WSortView& A)
 
     // mark heap levels with different colors
     for (size_t j = i; j < n; ++j)
-        A.mark(j, log(prevPowerOfTwo(j+1)) / log(2) + 3);
+        A.mark(j, log(prevPowerOfTwo(j+1)) / log(2) + 4);
 
     while (1)
     {
@@ -799,7 +799,7 @@ void HeapSort(WSortView& A)
         }
 
         // mark heap levels with different colors
-        A.mark(i, log(prevPowerOfTwo(i+1)) / log(2) + 3);
+        A.mark(i, log(prevPowerOfTwo(i+1)) / log(2) + 4);
     }
 
 }
@@ -838,7 +838,7 @@ void RadixSortMSD(WSortView& A, size_t lo, size_t hi, size_t depth)
     // mark bucket boundaries
     for (size_t i = 0; i < bkt.size(); ++i) {
         if (bkt[i] == 0) continue;
-        A.mark(lo + bkt[i]-1, 2);
+        A.mark(lo + bkt[i]-1, 3);
     }
 
     // reorder items in-place by walking cycles
@@ -905,7 +905,7 @@ void RadixSortLSD(WSortView& A)
         // mark bucket boundaries
         for (size_t i = 0; i < bkt.size()-1; ++i) {
             if (bkt[i] >= A.size()) continue;
-            A.mark(bkt[i], 2);
+            A.mark(bkt[i], 3);
         }
 
         // redistribute items back into array (stable)
@@ -1273,8 +1273,8 @@ void StoogeSort(WSortView& A, int i, int j)
     {
         int t = (j - i + 1) / 3;
 
-        A.mark(i, 2);
-        A.mark(j, 2);
+        A.mark(i, 3);
+        A.mark(j, 3);
 
         StoogeSort(A, i, j-t);
         StoogeSort(A, i+t, j);
@@ -1305,7 +1305,7 @@ void SlowSort(WSortView& A, int i, int j)
     if (A[m] > A[j])
         A.swap(m, j);
 
-    A.mark(j, 1);
+    A.mark(j, 2);
 
     SlowSort(A, i, j-1);
 

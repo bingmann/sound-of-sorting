@@ -164,11 +164,24 @@ protected:
     /// maximum value in array for scaling display
     ArrayItem::value_type      m_array_max;
 
+    /// access touch color
+    struct Access
+    {
+        unsigned int index;
+        unsigned short color;
+        unsigned short sustain;
+        unsigned short priority;
+
+        Access(size_t i=0, unsigned short c=1,
+               unsigned short s=0, unsigned short p=0)
+            : index(i), color(c), sustain(s), priority(p) { }
+    };
+
     /// position of very last get/set accesses (two for swaps)
-    size_t      m_access1, m_access2;
+    Access      m_access1, m_access2;
 
     /// array of get/set accesses since last paint event
-    std::vector<unsigned int> m_access_list;
+    std::vector<Access> m_access_list;
 
     /// mutex for accesses and watch items
     wxMutex     m_mutex;
@@ -223,7 +236,10 @@ protected:
     void SaveAccess(size_t i);
 
     /// check if index matches one of the watched pointers
-    unsigned char InWatchList(ssize_t idx) const;
+    short InAccessList(ssize_t idx);
+
+    /// check if index matches one of the watched pointers
+    unsigned short InWatchList(ssize_t idx) const;
 
 public:
     /// return array size
@@ -236,12 +252,19 @@ public:
     /// delay algorithm time by this amount
     void DoDelay(double delay);
 
+    /// Return an item of the array (bypassing sound, counting and delay)
+    ArrayItem& direct(size_t i)
+    {
+        ASSERT(i < m_array.size());
+        return m_array[i];
+    }
+
     /// Return an item of the array (yields sound, counting and delay)
     ArrayItem& operator[](size_t i)
     {
         ASSERT(i < m_array.size());
 
-        if (m_access1 != i)
+        if (m_access1.index != i)
         {
             {
                 wxMutexLocker lock(m_mutex);
@@ -263,7 +286,7 @@ public:
     {
         ASSERT(i < m_array.size());
 
-        if (m_access1 != i)
+        if (m_access1.index != i)
         {
             {
                 wxMutexLocker lock(m_mutex);
@@ -323,8 +346,23 @@ public:
         m_access2 = -1;
     }
 
+    /// Touch an item of the array: set color till next frame is outputted.
+    void touch(size_t i, int color = 2,
+               unsigned short sustain = 0, unsigned short priority = 0)
+    {
+        ASSERT(i < m_array.size());
+
+        {
+            wxMutexLocker lock(m_mutex);
+            ASSERT(lock.IsOk());
+
+            m_access1 = Access(i, color, sustain, priority);
+            m_access_list.push_back( Access(i, color, sustain, priority) );
+        }
+    }
+
     /// Mark an array index with a color.
-    void mark(size_t i, int color = 1)
+    void mark(size_t i, int color = 2)
     {
         ASSERT(i < m_array.size());
         m_mark[i] = color;
@@ -359,7 +397,7 @@ public:
 
     /// Highly experimental method to _track_ array live indexes. For this, the
     /// index must be marked volatile!.
-    void watch(volatile ssize_t* idxptr, unsigned char color=1)
+    void watch(volatile ssize_t* idxptr, unsigned char color = 2)
     {
         wxMutexLocker lock(m_mutex);
         ASSERT(lock.IsOk());
