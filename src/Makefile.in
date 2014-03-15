@@ -69,7 +69,7 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_sound_of_sorting_OBJECTS = WMain.$(OBJEXT) WMain_wxg.$(OBJEXT) \
 	WAbout_wxg.$(OBJEXT) WSortView.$(OBJEXT) SortSound.$(OBJEXT) \
-	SortAlgo.$(OBJEXT) timsort.$(OBJEXT)
+	SortAlgo.$(OBJEXT) timsort.$(OBJEXT) wikisort.$(OBJEXT)
 sound_of_sorting_OBJECTS = $(am_sound_of_sorting_OBJECTS)
 sound_of_sorting_LDADD = $(LDADD)
 sound_of_sorting_DEPENDENCIES = $(am__append_1)
@@ -219,7 +219,8 @@ sound_of_sorting_SOURCES = \
 	WSortView.cpp WSortView.h \
 	SortSound.cpp \
 	SortAlgo.cpp SortAlgo.h \
-	algorithms/timsort.cpp
+	algorithms/timsort.cpp \
+	algorithms/wikisort.cpp
 
 AM_CXXFLAGS = -W -Wall @WX_CXXFLAGS@ @SDL_CFLAGS@
 LDADD = @WX_LIBS@ @SDL_LIBS@ $(am__append_1)
@@ -318,6 +319,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WMain_wxg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WSortView.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timsort.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wikisort.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -374,6 +376,20 @@ timsort.obj: algorithms/timsort.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='algorithms/timsort.cpp' object='timsort.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o timsort.obj `if test -f 'algorithms/timsort.cpp'; then $(CYGPATH_W) 'algorithms/timsort.cpp'; else $(CYGPATH_W) '$(srcdir)/algorithms/timsort.cpp'; fi`
+
+wikisort.o: algorithms/wikisort.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wikisort.o -MD -MP -MF $(DEPDIR)/wikisort.Tpo -c -o wikisort.o `test -f 'algorithms/wikisort.cpp' || echo '$(srcdir)/'`algorithms/wikisort.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/wikisort.Tpo $(DEPDIR)/wikisort.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='algorithms/wikisort.cpp' object='wikisort.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wikisort.o `test -f 'algorithms/wikisort.cpp' || echo '$(srcdir)/'`algorithms/wikisort.cpp
+
+wikisort.obj: algorithms/wikisort.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT wikisort.obj -MD -MP -MF $(DEPDIR)/wikisort.Tpo -c -o wikisort.obj `if test -f 'algorithms/wikisort.cpp'; then $(CYGPATH_W) 'algorithms/wikisort.cpp'; else $(CYGPATH_W) '$(srcdir)/algorithms/wikisort.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/wikisort.Tpo $(DEPDIR)/wikisort.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='algorithms/wikisort.cpp' object='wikisort.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wikisort.obj `if test -f 'algorithms/wikisort.cpp'; then $(CYGPATH_W) 'algorithms/wikisort.cpp'; else $(CYGPATH_W) '$(srcdir)/algorithms/wikisort.cpp'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \

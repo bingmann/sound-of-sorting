@@ -9,7 +9,8 @@ sound_of_sorting_SOURCES = \
 	WSortView.cpp WSortView.h \
 	SortSound.cpp \
 	SortAlgo.cpp SortAlgo.h \
-	algorithms/timsort.cpp
+	algorithms/timsort.cpp \
+	algorithms/wikisort.cpp
 
 AM_CXXFLAGS = -W -Wall @WX_CXXFLAGS@ @SDL_CFLAGS@
 LDADD = @WX_LIBS@ @SDL_LIBS@
