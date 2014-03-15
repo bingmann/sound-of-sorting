@@ -8,7 +8,8 @@ sound_of_sorting_SOURCES = \
 	wxg/WAbout_wxg.cpp wxg/WAbout_wxg.h \
 	WSortView.cpp WSortView.h \
 	SortSound.cpp \
-	SortAlgo.cpp SortAlgo.h
+	SortAlgo.cpp SortAlgo.h \
+	algorithms/timsort.cpp
 
 AM_CXXFLAGS = -W -Wall @WX_CXXFLAGS@ @SDL_CFLAGS@
 LDADD = @WX_LIBS@ @SDL_LIBS@

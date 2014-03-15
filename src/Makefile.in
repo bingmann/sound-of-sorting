@@ -69,7 +69,7 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_sound_of_sorting_OBJECTS = WMain.$(OBJEXT) WMain_wxg.$(OBJEXT) \
 	WAbout_wxg.$(OBJEXT) WSortView.$(OBJEXT) SortSound.$(OBJEXT) \
-	SortAlgo.$(OBJEXT)
+	SortAlgo.$(OBJEXT) timsort.$(OBJEXT)
 sound_of_sorting_OBJECTS = $(am_sound_of_sorting_OBJECTS)
 sound_of_sorting_LDADD = $(LDADD)
 sound_of_sorting_DEPENDENCIES = $(am__append_1)
@@ -218,7 +218,8 @@ sound_of_sorting_SOURCES = \
 	wxg/WAbout_wxg.cpp wxg/WAbout_wxg.h \
 	WSortView.cpp WSortView.h \
 	SortSound.cpp \
-	SortAlgo.cpp SortAlgo.h
+	SortAlgo.cpp SortAlgo.h \
+	algorithms/timsort.cpp
 
 AM_CXXFLAGS = -W -Wall @WX_CXXFLAGS@ @SDL_CFLAGS@
 LDADD = @WX_LIBS@ @SDL_LIBS@ $(am__append_1)
@@ -316,6 +317,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WMain.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WMain_wxg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WSortView.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timsort.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -358,6 +360,20 @@ WAbout_wxg.obj: wxg/WAbout_wxg.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wxg/WAbout_wxg.cpp' object='WAbout_wxg.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o WAbout_wxg.obj `if test -f 'wxg/WAbout_wxg.cpp'; then $(CYGPATH_W) 'wxg/WAbout_wxg.cpp'; else $(CYGPATH_W) '$(srcdir)/wxg/WAbout_wxg.cpp'; fi`
+
+timsort.o: algorithms/timsort.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT timsort.o -MD -MP -MF $(DEPDIR)/timsort.Tpo -c -o timsort.o `test -f 'algorithms/timsort.cpp' || echo '$(srcdir)/'`algorithms/timsort.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/timsort.Tpo $(DEPDIR)/timsort.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='algorithms/timsort.cpp' object='timsort.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o timsort.o `test -f 'algorithms/timsort.cpp' || echo '$(srcdir)/'`algorithms/timsort.cpp
+
+timsort.obj: algorithms/timsort.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT timsort.obj -MD -MP -MF $(DEPDIR)/timsort.Tpo -c -o timsort.obj `if test -f 'algorithms/timsort.cpp'; then $(CYGPATH_W) 'algorithms/timsort.cpp'; else $(CYGPATH_W) '$(srcdir)/algorithms/timsort.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/timsort.Tpo $(DEPDIR)/timsort.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='algorithms/timsort.cpp' object='timsort.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o timsort.obj `if test -f 'algorithms/timsort.cpp'; then $(CYGPATH_W) 'algorithms/timsort.cpp'; else $(CYGPATH_W) '$(srcdir)/algorithms/timsort.cpp'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
