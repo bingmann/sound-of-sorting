@@ -73,7 +73,7 @@ const struct AlgoEntry g_algolist[] =
     { _("std::stable_sort (gcc)"), &StlStableSort, NULL },
     { _("std::sort_heap (gcc)"), &StlHeapSort, NULL },
     { _("Tim Sort"), &TimSort, NULL },
-    { _("Wiki Sort"), &WikiSort, _("An O(1) place O(n log n) time stable merge sort.") },
+    { _("Block Merge Sort (WikiSort)"), &WikiSort, _("An O(1) place O(n log n) time stable merge sort.") },
     { _("Bogo Sort"), &BogoSort, NULL },
     { _("Bozo Sort"), &BozoSort, NULL },
     { _("Stooge Sort"), &StoogeSort, NULL },
