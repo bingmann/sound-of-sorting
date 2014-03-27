@@ -89,6 +89,8 @@ void BozoSort(class WSortView& a);
 void StoogeSort(class WSortView& a);
 void SlowSort(class WSortView& a);
 
+void CycleSort(class WSortView& a);
+
 // ****************************************************************************
 // *** Iterator Adapter
 

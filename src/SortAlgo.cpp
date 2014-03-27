@@ -65,6 +65,7 @@ const struct AlgoEntry g_algolist[] =
     { _("Smooth Sort"), &SmoothSort, NULL },
     { _("Odd-Even Sort"), &OddEvenSort, NULL },
     { _("Bitonic Sort"), &BitonicSort, NULL },
+    { _("Cycle Sort"), &CycleSort, NULL },
     { _("Radix Sort (LSD)"), &RadixSortLSD,
       _("Least significant digit radix sort, which copies item into a shadow array during counting.") },
     { _("Radix Sort (MSD)"), &RadixSortMSD,
@@ -1315,6 +1316,60 @@ void SlowSort(WSortView& A, int i, int j)
 void SlowSort(WSortView& A)
 {
     SlowSort(A, 0, A.size()-1);
+}
+
+// ****************************************************************************
+// *** Cycle Sort
+
+// Adapted from http://en.wikipedia.org/wiki/Cycle_sort
+
+void CycleSort(WSortView& array, ssize_t n)
+{
+    volatile ssize_t cycleStart = 0;
+    array.watch(&cycleStart, 16);
+
+    volatile ssize_t rank = 0;
+    array.watch(&rank, 3);
+
+    // Loop through the array to find cycles to rotate.
+    for (cycleStart = 0; cycleStart < n - 1; ++cycleStart)
+    {
+        value_type& item = array[cycleStart];
+
+        do {
+            // Find where to put the item.
+            rank = cycleStart;
+            for (ssize_t i = cycleStart + 1; i < n; ++i)
+            {
+                if (array[i] < item)
+                    rank++;
+            }
+
+            // If the item is already there, this is a 1-cycle.
+            if (rank == cycleStart) {
+                array.mark(rank, 2);
+                break;
+            }
+
+            // Otherwise, put the item after any duplicates.
+            while (item == array[rank])
+                rank++;
+
+            // Put item into right place and colorize
+            std::swap(array[rank], item);
+            array.mark(rank, 2);
+
+            // Continue for rest of the cycle.
+        }
+        while (rank != cycleStart);
+    }
+
+    array.unwatch_all();
+}
+
+void CycleSort(WSortView& A)
+{
+    CycleSort(A, A.size());
 }
 
 // ****************************************************************************
