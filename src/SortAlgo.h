@@ -146,13 +146,13 @@ public:
     { m_pos -= n; return *this; }
 
     reference operator*() const
-    { return (*m_array)[m_pos]; }
+    { return m_array->get_mutable(m_pos); }
 
     pointer operator->() const
-    { return &(*m_array)[m_pos]; }
+    { return &(m_array->get_mutable(m_pos)); }
 
     reference operator[](const difference_type& n) const
-    { return (*m_array)[n]; }
+    { return m_array->get_mutable(n); }
 
     bool operator==(const MyIterator& r)
     { return (m_array == r.m_array) && (m_pos == r.m_pos); }

@@ -733,7 +733,7 @@ void ShellSort(WSortView& A)
                 j -= h;
             }
 
-            A[j] = v;
+            A.set(j, v);
         }
     }
 }
@@ -913,7 +913,7 @@ void RadixSortLSD(WSortView& A)
         for (size_t i=0; i < A.size(); ++i)
         {
             size_t r = copy[i].get() / base % RADIX;
-            A[ bkt[r]++ ] = copy[i];
+            A.set( bkt[r]++, copy[i] );
         }
 
         A.unmark_all();
@@ -1116,22 +1116,22 @@ static void sift(WSortView& A, int pshift, int head)
         int rt = head - 1;
         int lf = head - 1 - LP[pshift - 2];
 
-        if (val.compareTo(A[lf]) >= 0 && val.compareTo(A[rt]) >= 0)
+        if (val.cmp(A[lf]) >= 0 && val.cmp(A[rt]) >= 0)
             break;
 
-        if (A[lf].compareTo(A[rt]) >= 0) {
-            A[head] = A[lf];
+        if (A[lf].cmp(A[rt]) >= 0) {
+            A.set(head, A[lf]);
             head = lf;
             pshift -= 1;
         }
         else {
-            A[head] = A[rt];
+            A.set(head, A[rt]);
             head = rt;
             pshift -= 2;
         }
     }
 
-    A[head] = val;
+    A.set(head, val);
 }
 
 static void trinkle(WSortView& A, int p, int pshift, int head, bool isTrusty)
@@ -1142,7 +1142,7 @@ static void trinkle(WSortView& A, int p, int pshift, int head, bool isTrusty)
     {
         int stepson = head - LP[pshift];
 
-        if (A[stepson].compareTo(val) <= 0)
+        if (A[stepson].cmp(val) <= 0)
             break; // current node is greater than head. sift.
 
         // no need to check this if we know the current node is trusty,
@@ -1151,12 +1151,12 @@ static void trinkle(WSortView& A, int p, int pshift, int head, bool isTrusty)
         if (!isTrusty && pshift > 1) {
             int rt = head - 1;
             int lf = head - 1 - LP[pshift - 2];
-            if (A[rt].compareTo(A[stepson]) >= 0
-                || A[lf].compareTo(A[stepson]) >= 0)
+            if (A[rt].cmp(A[stepson]) >= 0 ||
+                A[lf].cmp(A[stepson]) >= 0)
                 break;
         }
 
-        A[head] = A[stepson];
+        A.set(head, A[stepson]);
 
         head = stepson;
         //int trail = Integer.numberOfTrailingZeros(p & ~1);
@@ -1167,7 +1167,7 @@ static void trinkle(WSortView& A, int p, int pshift, int head, bool isTrusty)
     }
 
     if (!isTrusty) {
-        A[head] = val;
+        A.set(head, val);
         sift(A, pshift, head);
     }
 }
@@ -1334,7 +1334,7 @@ void CycleSort(WSortView& array, ssize_t n)
     // Loop through the array to find cycles to rotate.
     for (cycleStart = 0; cycleStart < n - 1; ++cycleStart)
     {
-        value_type& item = array[cycleStart];
+        value_type& item = array.get_mutable(cycleStart);
 
         do {
             // Find where to put the item.
@@ -1356,7 +1356,7 @@ void CycleSort(WSortView& array, ssize_t n)
                 rank++;
 
             // Put item into right place and colorize
-            std::swap(array[rank], item);
+            std::swap(array.get_mutable(rank), item);
             array.mark(rank, 2);
 
             // Continue for rest of the cycle.

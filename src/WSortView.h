@@ -66,7 +66,7 @@ extern size_t       g_compare_count;
 /// globally count the number of array access
 extern size_t       g_access_count;
 
-// custom struct for array items, which allows detailed counting of comparisons. 
+// custom struct for array items, which allows detailed counting of comparisons.
 class ArrayItem
 {
 public:
@@ -101,7 +101,7 @@ public:
 
     bool operator!= (const ArrayItem& v) const
     { OnComparison(*this,v); return (value != v.value); }
- 
+
     bool operator< (const ArrayItem& v) const
     { OnComparison(*this,v); return (value < v.value); }
 
@@ -118,8 +118,16 @@ public:
     int cmp(const ArrayItem& v) const
     { OnComparison(*this,v); return (value == v.value ? 0 : value < v.value ? -1 : +1); }
 
-    int compareTo(const ArrayItem& v) const
-    { return cmp(v); }
+    // *** comparisons without sound, counting or delay
+
+    bool equal_direct(const ArrayItem& v) const
+    { return (value == v.value); }
+
+    bool less_direct(const ArrayItem& v) const
+    { return (value < v.value); }
+
+    bool greater_direct(const ArrayItem& v) const
+    { return (value > v.value); }
 
     static void OnComparison(const ArrayItem& a, const ArrayItem& b);
 };
@@ -253,14 +261,14 @@ public:
     void DoDelay(double delay);
 
     /// Return an item of the array (bypassing sound, counting and delay)
-    ArrayItem& direct(size_t i)
+    const ArrayItem& direct(size_t i) const
     {
         ASSERT(i < m_array.size());
         return m_array[i];
     }
 
-    /// Return an item of the array (yields sound, counting and delay)
-    ArrayItem& operator[](size_t i)
+    /// Return an item of the array (yields counting and delay)
+    const ArrayItem& operator[](size_t i)
     {
         ASSERT(i < m_array.size());
 
@@ -281,8 +289,30 @@ public:
         return m_array[i];
     }
 
-    /// Return an item of the array (yields sound and delay)
-    ArrayItem& get_nocount(size_t i)
+    /// Return a mutable item of the array (yields counting and delay)
+    ArrayItem& get_mutable(size_t i)
+    {
+        ASSERT(i < m_array.size());
+
+        if (m_access1.index != i)
+        {
+            {
+                wxMutexLocker lock(m_mutex);
+                ASSERT(lock.IsOk());
+
+                m_access1 = i;
+                m_access_list.push_back(i);
+            }
+
+            // skip wait for duplicate accesses
+            OnAccess();
+        }
+
+        return m_array[i];
+    }
+
+    /// Return an item of the array (yields delay, but no counting)
+    const ArrayItem& get_nocount(size_t i)
     {
         ASSERT(i < m_array.size());
 
@@ -410,7 +440,7 @@ public:
     {
         wxMutexLocker lock(m_mutex);
         ASSERT(lock.IsOk());
-        
+
         m_watch.clear();
     }
 };
