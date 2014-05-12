@@ -46,7 +46,7 @@ void WAbout_wxg::do_layout()
     sizer_1->Add(labelTitle, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 12);
     wxStaticText* labelInfo = new wxStaticText(this, wxID_ANY, _("Visualization and \"audibilization\" of many\npopular sorting algorithms for integers.\nAlso counts the number of comparisons\nand array accesses while running."));
     sizer_1->Add(labelInfo, 0, wxLEFT|wxRIGHT|wxBOTTOM|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 12);
-    wxStaticText* labelCopyright = new wxStaticText(this, wxID_ANY, _("Copyright (c) 2013\nTimo Bingmann <tb@panthema.net>"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE);
+    wxStaticText* labelCopyright = new wxStaticText(this, wxID_ANY, _("Copyright (c) 2013-2014\nTimo Bingmann <tb@panthema.net>"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE);
     sizer_1->Add(labelCopyright, 1, wxLEFT|wxRIGHT|wxBOTTOM|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 12);
     wxHyperlinkCtrl* hyperlink = new wxHyperlinkCtrl(this, wxID_ANY, _("http://panthema.net/2013/sound-of-sorting"), _("http://panthema.net/2013/sound-of-sorting"));
     sizer_1->Add(hyperlink, 0, wxLEFT|wxRIGHT|wxBOTTOM|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 12);

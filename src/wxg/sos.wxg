@@ -431,7 +431,7 @@
                 <object class="wxStaticText" name="labelCopyright" base="EditStaticText">
                     <style>wxALIGN_CENTRE</style>
                     <attribute>0</attribute>
-                    <label>Copyright (c) 2013\nTimo Bingmann &lt;tb@panthema.net&gt;</label>
+                    <label>Copyright (c) 2013-2014\nTimo Bingmann &lt;tb@panthema.net&gt;</label>
                 </object>
             </object>
             <object class="sizeritem">
