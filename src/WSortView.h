@@ -172,6 +172,9 @@ protected:
     /// maximum value in array for scaling display
     ArrayItem::value_type      m_array_max;
 
+    /// the number of inversions in the array order
+    size_t                     m_inversions;
+
     /// access touch color
     struct Access
     {
@@ -249,6 +252,12 @@ protected:
     /// check if index matches one of the watched pointers
     unsigned short InWatchList(ssize_t idx) const;
 
+    /// recalculate the number of inversions (in quadratic time)
+    void RecalcInversions();
+
+    // update inversion count by calculating delta linearly for a swap
+    void UpdateInversions(size_t i, size_t j);
+
 public:
     /// return array size
     size_t size() const { return m_array.size(); }
@@ -256,6 +265,10 @@ public:
     /// return highest element value in array
     const ArrayItem::value_type& array_max() const
     { return m_array_max; }
+
+    /// return the number of inversions in the array
+    size_t get_inversions() const
+    { return m_inversions; }
 
     /// delay algorithm time by this amount
     void DoDelay(double delay);
@@ -308,6 +321,7 @@ public:
             OnAccess();
         }
 
+        RecalcInversions();
         return m_array[i];
     }
 
@@ -349,6 +363,7 @@ public:
             m_array[i] = v;
         }
 
+        RecalcInversions();
         OnAccess();
     }
 
@@ -369,6 +384,8 @@ public:
             m_access_list.push_back(i);
             m_access_list.push_back(j);
         }
+
+        UpdateInversions(i, j); // update inversion count
 
         OnAccess();
         std::swap(m_array[i], m_array[j]);

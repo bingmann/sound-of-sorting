@@ -95,6 +95,8 @@ void WSortView::FinishFill()
     m_is_sorted = false;
     g_access_count = 0;
     g_compare_count = 0;
+
+    RecalcInversions();
 }
 
 void WSortView::FillInputlist(wxControlWithItems* list)
@@ -230,6 +232,8 @@ void WSortView::OnAccess()
 void WSortView::CheckSorted()
 {
     unmark_all();
+    // needed because iterator instrumentated algorithms may have changed the array
+    RecalcInversions();
 
     ArrayItem prev = get_nocount(0);
     mark(0);
@@ -249,6 +253,60 @@ void WSortView::CheckSorted()
     unmark_all();
 
     m_is_sorted = true;
+}
+
+void WSortView::RecalcInversions()
+{
+    unsigned int inversions = 0;
+
+    for (size_t i = 0; i < size(); ++i)
+    {
+        const ArrayItem& a = direct(i);
+
+        for (size_t j = i+1; j < size(); ++j)
+        {
+            const ArrayItem& b = direct(j);
+
+            if ( a.greater_direct(b) )
+            {
+                inversions++;
+            }
+        }
+    }
+
+    m_inversions = inversions;
+}
+
+void WSortView::UpdateInversions(size_t i, size_t j)
+{
+    if (i == j) return;
+
+    unsigned int lo = i, hi = j;
+    if (lo > hi) std::swap(lo, hi);
+
+    const ArrayItem& ilo = m_array[lo];
+    const ArrayItem& ihi = m_array[hi];
+    int invdelta = 0;
+
+    for (size_t k = lo + 1; k < hi; ++k)
+    {
+        if (m_array[k].less_direct(ilo))
+            invdelta--;
+        if (m_array[k].greater_direct(ilo))
+            invdelta++;
+
+        if (m_array[k].less_direct(ihi))
+            invdelta++;
+        if (m_array[k].greater_direct(ihi))
+            invdelta--;
+    }
+
+    if (ilo.less_direct(ihi))
+        invdelta++;
+    if (ilo.greater_direct(ihi))
+        invdelta--;
+
+    m_inversions += invdelta;
 }
 
 void WSortView::RepaintNow()

@@ -405,9 +405,14 @@ WMain::RefreshTimer::RefreshTimer(WMain* wmain)
 void WMain::RefreshTimer::Notify()
 {
     // update some labels with current values
-    wm.labelAccessCount->SetLabel(wxString::Format(_("%ld"), (long int)g_access_count));
+    long int accesses = g_access_count;
+    wm.labelAccessCount->SetLabel(wxString::Format(_("%ld"), accesses));
 
-    wm.labelComparisonsValue->SetLabel(wxString::Format(_("%ld"), (long int)g_compare_count));
+    long int compares = g_compare_count;
+    wm.labelComparisonsValue->SetLabel(wxString::Format(_("%ld"), compares));
+
+    long int inversions = wm.sortview->get_inversions();
+    wm.labelInversionCount->SetLabel(wxString::Format(_("%ld"), inversions));
 
     // repaint sortview
     wm.sortview->Refresh(false);
