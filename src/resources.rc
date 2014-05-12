@@ -26,7 +26,7 @@ BEGIN
             VALUE "FileDescription", "The Sound of Sorting - A Visualization and ""Audibilization"" of Sorting Algorithms"
             VALUE "FileVersion", "0,0,0,0"
             VALUE "Comments", "http://panthema.net/2013/sound-of-sorting/"
-            VALUE "LegalCopyright", "Copyright (C) 2013 Timo Bingmann"
+            VALUE "LegalCopyright", "Copyright (C) 2013-2014 Timo Bingmann"
             VALUE "OriginalFilename", "sound-of-sorting.exe"
         END
     END

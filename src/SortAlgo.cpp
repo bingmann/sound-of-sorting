@@ -15,7 +15,7 @@
  * code is freely available.
  *
  * The source code added by myself (Timo Bingmann) and all modifications are
- * copyright (C) 2013 Timo Bingmann <tb@panthema.net>
+ * copyright (C) 2013-2014 Timo Bingmann <tb@panthema.net>
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
