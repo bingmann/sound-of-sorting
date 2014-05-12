@@ -69,6 +69,20 @@ WSortView::~WSortView()
 {
 }
 
+void WSortView::OnAlgoLaunch(const AlgoEntry& ae)
+{
+    if (size() <= ae.inversion_count_limit)
+    {
+        m_calc_inversions = true;
+        RecalcInversions();
+    }
+    else
+    {
+        m_calc_inversions = false;
+        m_inversions = -1;
+    }
+}
+
 void WSortView::ResetArray(size_t size)
 {
     m_array.resize(size, ArrayItem(0));
@@ -255,8 +269,22 @@ void WSortView::CheckSorted()
     m_is_sorted = true;
 }
 
+void WSortView::ToggleCalcInversions()
+{
+    // toggle boolean
+    m_calc_inversions = !m_calc_inversions;
+
+    if (!m_calc_inversions)
+        m_inversions = -1;
+}
+
 void WSortView::RecalcInversions()
 {
+    if (!m_calc_inversions) {
+        m_inversions = -1;
+        return;
+    }
+
     unsigned int inversions = 0;
 
     for (size_t i = 0; i < size(); ++i)
@@ -279,6 +307,12 @@ void WSortView::RecalcInversions()
 
 void WSortView::UpdateInversions(size_t i, size_t j)
 {
+    if (!m_calc_inversions) {
+        m_inversions = -1;
+        return;
+    }
+    if (m_inversions < 0) return RecalcInversions();
+
     if (i == j) return;
 
     unsigned int lo = i, hi = j;
@@ -335,13 +369,15 @@ void WSortView::OnSize(wxSizeEvent&)
 
 short WSortView::InAccessList(ssize_t idx)
 {
+    if (idx < 0) return -1;
+
     signed color = -1;
     signed priority = -1;
 
     for (std::vector<Access>::iterator it = m_access_list.begin();
          it != m_access_list.end(); )
     {
-        if (it->index != idx) {
+        if (it->index != (size_t)idx) {
             ++it;
             continue;
         }
@@ -527,6 +563,8 @@ void* SortAlgoThread::Entry()
 {
     ASSERT(m_algo < g_algolist_size);
     const AlgoEntry& ae = g_algolist[m_algo];
+
+    m_array.OnAlgoLaunch(ae);
 
     ae.func(m_array);
 

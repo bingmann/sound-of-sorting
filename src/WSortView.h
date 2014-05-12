@@ -172,8 +172,11 @@ protected:
     /// maximum value in array for scaling display
     ArrayItem::value_type      m_array_max;
 
+    /// disable calculating of inversions
+    bool m_calc_inversions;
+
     /// the number of inversions in the array order
-    size_t                     m_inversions;
+    ssize_t m_inversions;
 
     /// access touch color
     struct Access
@@ -215,6 +218,12 @@ protected:
     // *** Array Functions
 
 public:
+    /// called by main when an algorithm starts
+    void OnAlgoLaunch(const struct AlgoEntry& ae);
+
+    /// toggle boolean to calculate inversions
+    void ToggleCalcInversions();
+
     /// fill the array with one of the predefined data templates
     void FillData(unsigned int schema, size_t arraysize);
 
@@ -267,7 +276,7 @@ public:
     { return m_array_max; }
 
     /// return the number of inversions in the array
-    size_t get_inversions() const
+    ssize_t get_inversions() const
     { return m_inversions; }
 
     /// delay algorithm time by this amount

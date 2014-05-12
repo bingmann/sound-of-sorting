@@ -39,6 +39,7 @@ struct AlgoEntry
 {
     const wxChar* name;
     void        (*func)(class WSortView&);
+    unsigned int  inversion_count_limit; // count inversions if n <= limit
     const wxChar* text;
 };
 
