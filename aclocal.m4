@@ -210,7 +210,6 @@ dnl Author:          wxWidgets development team,
 dnl                  Francesco Montorsi,
 dnl                  Bob McCown (Mac-testing)
 dnl Creation date:   24/11/2001
-dnl RCS-ID:          $Id: wxwin.m4-2.9,v 1.1 2010/02/16 01:21:29 dirtyepic Exp $
 dnl ---------------------------------------------------------------------------
 
 dnl ===========================================================================
@@ -767,7 +766,7 @@ dnl WX_STANDARD_OPTIONS([options-to-add])
 dnl
 dnl Adds to the configure script one or more of the following options:
 dnl   --enable-[debug|unicode|shared|wxshared|wxdebug]
-dnl   --with-[gtk|msw|motif|x11|mac|mgl|dfb]
+dnl   --with-[gtk|msw|motif|x11|mac|dfb]
 dnl   --with-wxversion
 dnl Then checks for their presence and eventually set the DEBUG, UNICODE, SHARED,
 dnl PORT, WX_SHARED, WX_DEBUG, variables to one of the "yes", "no", "auto" values.
@@ -812,10 +811,10 @@ AC_DEFUN([WX_STANDARD_OPTIONS],
                     dnl PORT must be one of the allowed values
                     if test "$TOOLKIT" != "gtk1" -a "$TOOLKIT" != "gtk2" -a \
                             "$TOOLKIT" != "msw" -a "$TOOLKIT" != "motif" -a \
-                            "$TOOLKIT" != "x11" -a "$TOOLKIT" != "mac" -a \
-                            "$TOOLKIT" != "mgl" -a "$TOOLKIT" != "dfb" ; then
+                            "$TOOLKIT" != "osx_carbon" -a "$TOOLKIT" != "osx_cocoa" -a \
+                            "$TOOLKIT" != "dfb" -a "$TOOLKIT" != "x11"; then
                         AC_MSG_ERROR([
-    Unrecognized option value (allowed values: auto, gtk1, gtk2, msw, motif, x11, mac, mgl, dfb)
+    Unrecognized option value (allowed values: auto, gtk1, gtk2, msw, motif, osx_carbon, osx_cocoa, dfb, x11)
                         ])
                     fi
 
@@ -1079,7 +1078,6 @@ AC_DEFUN([WX_DETECT_STANDARD_OPTION_VALUES],
             WX_OSXCOCOAPORT=$(expr "$WX_SELECTEDCONFIG" : ".*osx_cocoa.*")
             WX_OSXCARBONPORT=$(expr "$WX_SELECTEDCONFIG" : ".*osx_carbon.*")
             WX_X11PORT=$(expr "$WX_SELECTEDCONFIG" : ".*x11.*")
-            WX_MGLPORT=$(expr "$WX_SELECTEDCONFIG" : ".*mgl.*")
             WX_DFBPORT=$(expr "$WX_SELECTEDCONFIG" : ".*dfb.*")
 
             WX_PORT="unknown"
@@ -1090,7 +1088,6 @@ AC_DEFUN([WX_DETECT_STANDARD_OPTION_VALUES],
             if test "$WX_OSXCOCOAPORT" != "0"; then WX_PORT="osx_cocoa"; fi
             if test "$WX_OSXCARBONPORT" != "0"; then WX_PORT="osx_carbon"; fi
             if test "$WX_X11PORT" != "0"; then WX_PORT="x11"; fi
-            if test "$WX_MGLPORT" != "0"; then WX_PORT="mgl"; fi
             if test "$WX_DFBPORT" != "0"; then WX_PORT="dfb"; fi
 
             dnl NOTE: backward-compatible check for wx2.8; in wx2.9 the mac
@@ -1266,8 +1263,7 @@ AC_DEFUN([AM_OPTIONS_WXCONFIG], [WX_CONFIG_OPTIONS])
 AC_DEFUN([AM_PATH_WXCONFIG], [
     WX_CONFIG_CHECK([$1],[$2],[$3],[$4],[$5])
 ])
-
-
+AC_DEFUN([AM_PATH_WXRC], [WXRC_CHECK([$1],[$2])])
 
 # Copyright (C) 2002-2012 Free Software Foundation, Inc.
 #
