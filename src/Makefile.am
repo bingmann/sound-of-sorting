@@ -9,6 +9,7 @@ sound_of_sorting_SOURCES = \
 	WSortView.cpp WSortView.h \
 	SortSound.cpp \
 	SortAlgo.cpp SortAlgo.h \
+	wxClickText.cpp wxClickText.h \
 	algorithms/timsort.cpp \
 	algorithms/wikisort.cpp
 

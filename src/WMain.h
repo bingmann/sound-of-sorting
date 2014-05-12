@@ -80,6 +80,7 @@ public:
     virtual void OnAboutButton(wxCommandEvent &event);
     virtual void OnSpeedSliderChange(wxScrollEvent &event);
     virtual void OnSoundSustainSliderChange(wxScrollEvent &event);
+    virtual void OnInversionLabelClick(wxCommandEvent &event);
     virtual void OnArraySizeSliderChange(wxScrollEvent &event);
     virtual void OnAlgoList(wxCommandEvent &event);
     virtual void OnAlgoListDClick(wxCommandEvent &event);

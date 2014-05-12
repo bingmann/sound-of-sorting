@@ -69,7 +69,8 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_sound_of_sorting_OBJECTS = WMain.$(OBJEXT) WMain_wxg.$(OBJEXT) \
 	WAbout_wxg.$(OBJEXT) WSortView.$(OBJEXT) SortSound.$(OBJEXT) \
-	SortAlgo.$(OBJEXT) timsort.$(OBJEXT) wikisort.$(OBJEXT)
+	SortAlgo.$(OBJEXT) wxClickText.$(OBJEXT) timsort.$(OBJEXT) \
+	wikisort.$(OBJEXT)
 sound_of_sorting_OBJECTS = $(am_sound_of_sorting_OBJECTS)
 sound_of_sorting_LDADD = $(LDADD)
 sound_of_sorting_DEPENDENCIES = $(am__append_1)
@@ -219,6 +220,7 @@ sound_of_sorting_SOURCES = \
 	WSortView.cpp WSortView.h \
 	SortSound.cpp \
 	SortAlgo.cpp SortAlgo.h \
+	wxClickText.cpp wxClickText.h \
 	algorithms/timsort.cpp \
 	algorithms/wikisort.cpp
 
@@ -320,6 +322,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WSortView.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timsort.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wikisort.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wxClickText.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

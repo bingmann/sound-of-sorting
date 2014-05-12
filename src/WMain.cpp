@@ -122,6 +122,8 @@ BEGIN_EVENT_TABLE(WMain, WMain_wxg)
 
     EVT_COMMAND(ID_RUN_FINISHED, wxEVT_COMMAND_BUTTON_CLICKED, WMain::OnRunFinished)
 
+    EVT_COMMAND(ID_INVERSION_LABEL, wxEVT_COMMAND_BUTTON_CLICKED, WMain::OnInversionLabelClick)
+
 END_EVENT_TABLE();
 
 bool WMain::RunAlgorithm()
@@ -326,6 +328,11 @@ void WMain::SetDelay(size_t pos)
 void WMain::OnSoundSustainSliderChange(wxScrollEvent &event)
 {
     SetSoundSustain(event.GetPosition());
+}
+
+void WMain::OnInversionLabelClick(wxCommandEvent &)
+{
+    sortview->ToggleCalcInversions();
 }
 
 void WMain::SetSoundSustain(size_t pos)
