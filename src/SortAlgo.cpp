@@ -45,48 +45,75 @@ const unsigned int inversion_count_instrumented = 512;
 
 const struct AlgoEntry g_algolist[] =
 {
-    { _("Selection Sort"), &SelectionSort, UINT_MAX, NULL },
-    { _("Insertion Sort"), &InsertionSort, UINT_MAX, NULL },
+    { _("Selection Sort"), &SelectionSort, UINT_MAX,
+      wxEmptyString },
+    { _("Insertion Sort"), &InsertionSort, UINT_MAX,
+      wxEmptyString },
     { _("Merge Sort"), &MergeSort, 512,
-      _("Merge sort which merges two sorted sequences into a shadow array, and then copies it back to the shown array.") },
+      _("Merge sort which merges two sorted sequences into a shadow array,"
+        "and then copies it back to the shown array.") },
     { _("Quick Sort (LR ptrs)"), &QuickSortLR, UINT_MAX,
       _("Quick sort variant with left and right pointers.") },
     { _("Quick Sort (LL ptrs)"), &QuickSortLL, UINT_MAX,
       _("Quick sort variant from 3rd edition of CLRS: two pointers on left.") },
     { _("Quick Sort (ternary, LR ptrs)"), &QuickSortTernaryLR, UINT_MAX,
-      _("Ternary-split quick sort variant, adapted from multikey quicksort by Bentley & Sedgewick: partitions \"=<?>=\" using two pairs of pointers at left and right, then copied to middle.") },
+      _("Ternary-split quick sort variant, adapted from multikey quicksort by "
+        "Bentley & Sedgewick: partitions \"=<?>=\" using two pairs of pointers "
+        "at left and right, then copied to middle.") },
     { _("Quick Sort (ternary, LL ptrs)"), &QuickSortTernaryLL, UINT_MAX,
-      _("Ternary-split quick sort variant: partitions \"<>?=\" using two pointers at left and one at right. Afterwards copies the \"=\" to middle.") },
+      _("Ternary-split quick sort variant: partitions \"<>?=\" using two "
+        "pointers at left and one at right. Afterwards copies the \"=\" to middle.") },
     { _("Quick Sort (dual pivot)"), &QuickSortDualPivot, UINT_MAX,
-      _("Dual pivot quick sort variant: partitions \"<1<2?>\" using three pointers, two at left and one at right.") },
-    { _("Bubble Sort"), &BubbleSort, UINT_MAX, NULL },
-    { _("Cocktail Shaker Sort"), &CocktailShakerSort, UINT_MAX, NULL },
-    { _("Gnome Sort"), &GnomeSort, UINT_MAX, NULL },
-    { _("Comb Sort"), &CombSort, UINT_MAX, NULL },
-    { _("Shell Sort"), &ShellSort, 1024, NULL },
-    { _("Heap Sort"), &HeapSort, UINT_MAX, NULL },
-    { _("Smooth Sort"), &SmoothSort, 1024, NULL },
-    { _("Odd-Even Sort"), &OddEvenSort, 1024, NULL },
-    { _("Bitonic Sort"), &BitonicSort, UINT_MAX, NULL },
-    { _("Cycle Sort"), &CycleSort, UINT_MAX, NULL },
+      _("Dual pivot quick sort variant: partitions \"<1<2?>\" using three pointers, "
+        "two at left and one at right.") },
+    { _("Bubble Sort"), &BubbleSort, UINT_MAX,
+      wxEmptyString },
+    { _("Cocktail Shaker Sort"), &CocktailShakerSort, UINT_MAX,
+      wxEmptyString },
+    { _("Gnome Sort"), &GnomeSort, UINT_MAX,
+      wxEmptyString },
+    { _("Comb Sort"), &CombSort, UINT_MAX,
+      wxEmptyString },
+    { _("Shell Sort"), &ShellSort, 1024,
+      wxEmptyString },
+    { _("Heap Sort"), &HeapSort, UINT_MAX,
+      wxEmptyString },
+    { _("Smooth Sort"), &SmoothSort, 1024,
+      wxEmptyString },
+    { _("Odd-Even Sort"), &OddEvenSort, 1024,
+      wxEmptyString },
+    { _("Bitonic Sort"), &BitonicSort, UINT_MAX,
+      wxEmptyString },
+    { _("Cycle Sort"), &CycleSort, UINT_MAX,
+      wxEmptyString },
     { _("Radix Sort (LSD)"), &RadixSortLSD, 512,
-      _("Least significant digit radix sort, which copies item into a shadow array during counting.") },
+      _("Least significant digit radix sort, which copies item into a shadow "
+        "array during counting.") },
     { _("Radix Sort (MSD)"), &RadixSortMSD, UINT_MAX,
       _("Most significant digit radix sort, which permutes items in-place by walking cycles.") },
-    { _("std::sort (gcc)"), &StlSort, inversion_count_instrumented, NULL },
-    { _("std::stable_sort (gcc)"), &StlStableSort, inversion_count_instrumented, NULL },
-    { _("std::sort_heap (gcc)"), &StlHeapSort, inversion_count_instrumented, NULL },
-    { _("Tim Sort"), &TimSort, inversion_count_instrumented, NULL },
+    { _("std::sort (gcc)"), &StlSort, inversion_count_instrumented,
+      wxEmptyString },
+    { _("std::stable_sort (gcc)"), &StlStableSort, inversion_count_instrumented,
+      wxEmptyString },
+    { _("std::sort_heap (gcc)"), &StlHeapSort, inversion_count_instrumented,
+      wxEmptyString },
+    { _("Tim Sort"), &TimSort, inversion_count_instrumented,
+      wxEmptyString },
     { _("Block Merge Sort (WikiSort)"), &WikiSort, inversion_count_instrumented,
       _("An O(1) place O(n log n) time stable merge sort.") },
-    { _("Bogo Sort"), &BogoSort, UINT_MAX, NULL },
-    { _("Bozo Sort"), &BozoSort, UINT_MAX, NULL },
-    { _("Stooge Sort"), &StoogeSort, inversion_count_instrumented, NULL },
-    { _("Slow Sort"), &SlowSort, inversion_count_instrumented, NULL },
-    { NULL, NULL, UINT_MAX, NULL },
+    { _("Bogo Sort"), &BogoSort, UINT_MAX,
+      wxEmptyString },
+    { _("Bozo Sort"), &BozoSort, UINT_MAX,
+      wxEmptyString },
+    { _("Stooge Sort"), &StoogeSort, inversion_count_instrumented,
+      wxEmptyString },
+    { _("Slow Sort"), &SlowSort, inversion_count_instrumented,
+      wxEmptyString }
 };
 
-const size_t g_algolist_size = sizeof(g_algolist) / sizeof(g_algolist[0]) - 1;
+const size_t g_algolist_size = sizeof(g_algolist) / sizeof(g_algolist[0]);
+
+const struct AlgoEntry* g_algolist_end = g_algolist + g_algolist_size;
 
 // ****************************************************************************
 // *** Selection Sort
@@ -256,14 +283,18 @@ ssize_t QuickSortSelectPivot(WSortView& A, ssize_t lo, ssize_t hi)
     return lo;
 }
 
-const wxChar* g_quicksort_pivot_text[] = {
-    _("First Item"),
-    _("Last Item"),
-    _("Middle Item"),
-    _("Random Item"),
-    _("Median of Three"),
-    NULL
-};
+wxArrayString QuickSortPivotText()
+{
+    wxArrayString sl;
+
+    sl.Add( _("First Item") );
+    sl.Add( _("Last Item") );
+    sl.Add( _("Middle Item") );
+    sl.Add( _("Random Item") );
+    sl.Add( _("Median of Three") );
+
+    return sl;
+}
 
 // ****************************************************************************
 // *** Quick Sort LR (in-place, pointers at left and right, pivot is middle element)

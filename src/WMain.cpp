@@ -49,8 +49,9 @@ WMain::WMain(wxWindow* parent)
     splitter_0->SetSashPosition(GetSize().x - 280);
 
     // insert list of algorithms into wxListBox
-    for (const AlgoEntry* ae = g_algolist; ae->name; ++ae)
+    for (const AlgoEntry* ae = g_algolist; ae != g_algolist_end; ++ae)
         algoList->Append(ae->name);
+
     algoList->SetSelection(0);
 
     // insert list of data templates into wxChoice
@@ -61,8 +62,7 @@ WMain::WMain(wxWindow* parent)
     SetArraySize(100);
 
     // insert quicksort pivot rules into wxChoice
-    for (const wxChar** pt = g_quicksort_pivot_text; *pt; ++pt)
-        pivotRuleChoice->Append(*pt);
+    pivotRuleChoice->Append( QuickSortPivotText() );
     pivotRuleChoice->SetSelection(0);
 
     // set default speed
@@ -372,7 +372,7 @@ void WMain::OnAlgoList(wxCommandEvent&)
     bool isQuickSort = (algoList->GetStringSelection().Contains(_("Quick Sort")));
     panelQuickSortPivot->Show(isQuickSort);
 
-    if (sel >= 0 && sel < (int)g_algolist_size && g_algolist[sel].text)
+    if (sel >= 0 && sel < (int)g_algolist_size && !g_algolist[sel].text.IsEmpty())
     {
         text = g_algolist[sel].text;
 

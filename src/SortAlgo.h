@@ -37,14 +37,15 @@
 
 struct AlgoEntry
 {
-    const wxChar* name;
-    void        (*func)(class WSortView&);
-    unsigned int  inversion_count_limit; // count inversions if n <= limit
-    const wxChar* text;
+    wxString name;
+    void (*func)(class WSortView&);
+    unsigned int inversion_count_limit; // count inversions if n <= limit
+    wxString text;
 };
 
 extern const struct AlgoEntry g_algolist[];
 extern const size_t g_algolist_size;
+extern const struct AlgoEntry* g_algolist_end;
 
 // *** Sorting Algorithms
 
@@ -53,7 +54,8 @@ void InsertionSort(class WSortView& a);
 
 void MergeSort(class WSortView& a);
 
-extern const wxChar* g_quicksort_pivot_text[];
+wxArrayString QuickSortPivotText();
+
 enum QuickSortPivotType { PIVOT_FIRST, PIVOT_LAST, PIVOT_MID, PIVOT_RANDOM, PIVOT_MEDIAN3 };
 extern QuickSortPivotType g_quicksort_pivot;
 
