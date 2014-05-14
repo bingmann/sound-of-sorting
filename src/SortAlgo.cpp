@@ -49,6 +49,8 @@ const struct AlgoEntry g_algolist[] =
       wxEmptyString },
     { _("Insertion Sort"), &InsertionSort, UINT_MAX,
       wxEmptyString },
+    { _("Binary Insertion Sort"), &BinaryInsertionSort, UINT_MAX,
+      wxEmptyString },
     { _("Merge Sort"), &MergeSort, 512,
       _("Merge sort which merges two sorted sequences into a shadow array,"
         "and then copies it back to the shown array.") },
@@ -181,6 +183,36 @@ void InsertionSort2(WSortView& A)
             j--;
         }
         A.set(j + 1, key);
+
+        A.unmark(i);
+    }
+}
+
+// swaps every time (keeps all values visible)
+void BinaryInsertionSort(WSortView& A)
+{
+    for (size_t i = 1; i < A.size(); ++i)
+    {
+        value_type key = A[i];
+        A.mark(i);
+
+        int lo = 0, hi = i;
+        while (lo < hi) {
+            int mid = (lo + hi) / 2;
+            if (key <= A[mid])
+                hi = mid;
+            else
+                lo = mid + 1;
+        }
+
+        // item has to go into position lo
+
+        ssize_t j = i - 1;
+        while (j >= lo)
+        {
+            A.swap(j, j+1);
+            j--;
+        }
 
         A.unmark(i);
     }

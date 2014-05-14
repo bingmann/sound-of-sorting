@@ -51,6 +51,7 @@ extern const struct AlgoEntry* g_algolist_end;
 
 void SelectionSort(class WSortView& a);
 void InsertionSort(class WSortView& a);
+void BinaryInsertionSort(class WSortView& a);
 
 void MergeSort(class WSortView& a);
 
