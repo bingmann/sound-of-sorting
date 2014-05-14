@@ -242,6 +242,13 @@ public:
     /// stepwise processing for Step button
     void DoStepwise();
 
+    /// return the number of inversions in the array
+    ssize_t GetInversions() const
+    { return m_inversions; }
+
+    /// calculate the number of runs in the array
+    size_t GetRuns() const;
+
 protected:
     /// reset the array to the given size
     void ResetArray(size_t size);
@@ -274,10 +281,6 @@ public:
     /// return highest element value in array
     const ArrayItem::value_type& array_max() const
     { return m_array_max; }
-
-    /// return the number of inversions in the array
-    ssize_t get_inversions() const
-    { return m_inversions; }
 
     /// delay algorithm time by this amount
     void DoDelay(double delay);

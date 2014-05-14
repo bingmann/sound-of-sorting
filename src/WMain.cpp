@@ -418,11 +418,14 @@ void WMain::RefreshTimer::Notify()
     long int compares = g_compare_count;
     wm.labelComparisonsValue->SetLabel(wxString::Format(_("%ld"), compares));
 
-    long int inversions = wm.sortview->get_inversions();
+    long int inversions = wm.sortview->GetInversions();
     if (inversions >= 0)
         wm.labelInversionCount->SetLabel(wxString::Format(_("%ld"), inversions));
     else
         wm.labelInversionCount->SetLabel(_("skipped"));
+
+    long int runs = wm.sortview->GetRuns();
+    wm.labelRunsCount->SetLabel(wxString::Format(_("%ld"), runs));
 
     // repaint sortview
     wm.sortview->Refresh(false);

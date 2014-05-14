@@ -109,6 +109,7 @@ void WSortView::FinishFill()
     m_is_sorted = false;
     g_access_count = 0;
     g_compare_count = 0;
+    m_calc_inversions = true;
 
     RecalcInversions();
 }
@@ -341,6 +342,24 @@ void WSortView::UpdateInversions(size_t i, size_t j)
         invdelta--;
 
     m_inversions += invdelta;
+}
+
+size_t WSortView::GetRuns() const
+{
+    unsigned int runs = 1;
+
+    for (size_t i = 1; i < size(); ++i)
+    {
+        const ArrayItem& a = direct(i-1);
+        const ArrayItem& b = direct(i);
+
+        if ( a.greater_direct(b) )
+        {
+            runs++;
+        }
+    }
+
+    return runs;
 }
 
 void WSortView::RepaintNow()
