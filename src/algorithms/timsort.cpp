@@ -31,6 +31,8 @@
 
 #include "../SortAlgo.h"
 
+#include <functional>
+
 #ifdef ENABLE_TIMSORT_LOG
 #define GFX_TIMSORT_LOG(expr) (std::clog << "# " << __func__ << ": " << expr << std::endl)
 #else

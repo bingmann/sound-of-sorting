@@ -43,7 +43,7 @@ WMain::WMain(wxWindow* parent)
     }
 
     // program version
-    SetTitle(_("The Sound of Sorting " VERSION " - http://panthema.net/2013/sound-of-sorting"));
+    SetTitle(_("The Sound of Sorting " PACKAGE_VERSION " - http://panthema.net/2013/sound-of-sorting"));
 
     // resize right split window
     splitter_0->SetSashPosition(GetSize().x - 280);
@@ -287,8 +287,12 @@ public:
     WAbout(wxWindow* parent)
         : WAbout_wxg(parent, wxID_ANY, wxEmptyString)
     {
-        labelTitle->SetLabel(_("The Sound of Sorting " VERSION));
+        labelTitle->SetLabel(_("The Sound of Sorting " PACKAGE_VERSION));
         labelBuildDate->SetLabel(_("Build Date: " __DATE__));
+
+        GetSizer()->Fit(this);
+        Layout();
+        Centre();
     }
 };
 
