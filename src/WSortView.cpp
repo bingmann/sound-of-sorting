@@ -200,6 +200,30 @@ void WSortView::FillData(unsigned int schema, size_t arraysize)
     FinishFill();
 }
 
+#if MSW_PERFORMANCECOUNTER
+
+void mswMicroSleep(int microseconds)
+{
+    static LARGE_INTEGER s_liFreq = { 0, 0 };
+
+    if (s_liFreq.QuadPart == 0)
+        QueryPerformanceFrequency(&s_liFreq);
+
+    LARGE_INTEGER liStart, liGoal;
+    QueryPerformanceCounter(&liStart);
+
+    liGoal.QuadPart = liStart.QuadPart;
+    liGoal.QuadPart += (s_liFreq.QuadPart * microseconds) / 1000000;
+    LARGE_INTEGER liAct;
+    do
+    {
+        QueryPerformanceCounter(&liAct);
+        if (liStart.QuadPart > liAct.QuadPart) break;
+    } while(liAct.QuadPart < liGoal.QuadPart);
+}
+
+#endif // MSW_PERFORMANCECOUNTER
+
 void WSortView::DoDelay(double delay)
 {
     // must be called by the algorithm thread
@@ -224,6 +248,8 @@ void WSortView::DoDelay(double delay)
 
 #if __WXGTK__
     wxMicroSleep(delay * 1000.0);
+#elif MSW_PERFORMANCECOUNTER
+    mswMicroSleep(delay * 1000.0);
 #else
     // wxMSW does not have a high resolution timer, maybe others do?
     wxMilliSleep(delay);
@@ -233,8 +259,9 @@ void WSortView::DoDelay(double delay)
 void WSortView::DoStepwise()
 {
     wxSemaError se = m_step_semaphore.Post();
-    if (se != wxSEMA_NO_ERROR)
+    if (se != wxSEMA_NO_ERROR) {
         wxLogError(_T("Error posting to semaphore: %d"), se);
+    }
 }
 
 void WSortView::OnAccess()

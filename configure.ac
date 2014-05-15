@@ -84,6 +84,25 @@ if test "$wxWin" != 1; then
     ])
 fi
 
+# Test for function "QueryPerformanceCounter" on Win32
+
+if $ON_WIN32; then
+
+   AC_CHECK_DECL(QueryPerformanceCounter,
+        [HavePerformanceCounter=1],
+        [HavePerformanceCounter=0],
+        [#include <windows.h>])
+
+   if test "$HavePerformanceCounter" != 1; then
+      AC_MSG_WARN([
+        Could not find QueryPerformanceCounter() function. This
+        reduces the precision of delays at array accesses.
+      ])
+   fi
+
+   AC_DEFINE_UNQUOTED(MSW_PERFORMANCECOUNTER, $HavePerformanceCounter)
+fi
+
 # Win32 tools to add icons to the programs
 
 if $ON_WIN32; then
