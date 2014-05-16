@@ -16,7 +16,7 @@
 // end wxGlade
 
 
-WAbout_wxg::WAbout_wxg(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
+WAbout_wxg::WAbout_wxg(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long /* style */):
     wxDialog(parent, id, title, pos, size, wxDEFAULT_DIALOG_STYLE)
 {
     // begin wxGlade: WAbout_wxg::WAbout_wxg

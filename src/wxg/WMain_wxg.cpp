@@ -16,7 +16,7 @@
 // end wxGlade
 
 
-WMain_wxg::WMain_wxg(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
+WMain_wxg::WMain_wxg(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long /* style */):
     wxFrame(parent, id, title, pos, size, wxDEFAULT_FRAME_STYLE)
 {
     // begin wxGlade: WMain_wxg::WMain_wxg
