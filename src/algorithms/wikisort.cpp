@@ -72,7 +72,9 @@ size_t FloorPowerOfTwo (const size_t value) {
 // n^2 sorting algorithm used to sort tiny chunks of the full array
 template <typename Iterator, typename Comparison>
 void InsertionSort(Iterator begin, Iterator end, const Comparison compare) {
-    std::__insertion_sort(begin, end, compare);
+    for (auto it = begin; it != end; ++it) {
+        std::rotate(std::upper_bound(begin, it, *it, compare), it, it+1);
+    }
 }
 
 // swap a series of values in the array
