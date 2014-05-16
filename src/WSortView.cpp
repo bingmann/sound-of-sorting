@@ -21,6 +21,8 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************************/
 
+#include <random>
+
 #include "WSortView.h"
 #include "SortAlgo.h"
 #include "WMain.h"
@@ -122,6 +124,7 @@ void WSortView::FillInputlist(wxControlWithItems* list)
     list->Append(_("Shuffled Cubic"));
     list->Append(_("Shuffled Quintic"));
     list->Append(_("Shuffled n-2 Equal"));
+    list->Append(_("Almost Ascending"));
 }
 
 void WSortView::FillData(unsigned int schema, size_t arraysize)
@@ -191,6 +194,17 @@ void WSortView::FillData(unsigned int schema, size_t arraysize)
         m_array[m_array.size()-1] = ArrayItem(arraysize);
 
         std::random_shuffle(m_array.begin(), m_array.end());
+    }
+    else if (schema == 6) // almost sorted values in [1,n]
+    {
+        for (size_t i = 0; i < m_array.size(); ++i)
+            m_array[i] = ArrayItem(i+1);
+        auto arraysize = m_array.size();
+        std::uniform_int_distribution<std::size_t> dist{0, arraysize};
+        std::random_device gen;
+        std::size_t permutations = arraysize / 30; // magic numbers ftw!
+        for(std::size_t i=0; i < permutations; ++i)
+            std::swap(m_array[dist(gen)], m_array[dist(gen)]);
     }
     else // fallback
     {
