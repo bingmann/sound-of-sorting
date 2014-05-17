@@ -55,8 +55,11 @@ WMain::WMain(wxWindow* parent)
     algoList->SetSelection(0);
 
     // insert list of data templates into wxChoice
-    sortview->FillInputlist(inputTypeChoice);
-    sortview->FillData(0, 100);
+    wxArrayString inputList;
+    sortview->m_array.FillInputlist(inputList);
+    inputTypeChoice->Append(inputList);
+
+    sortview->m_array.FillData(0, 100);
     inputTypeChoice->SetSelection(0);
     arraySizeSlider->SetValue(100);
     SetArraySize(100);
@@ -138,8 +141,8 @@ bool WMain::RunAlgorithm()
     }
     else
     {
-        if (sortview->IsSorted())
-            sortview->FillData( inputTypeChoice->GetSelection(), m_array_size );
+        if (sortview->m_array.IsSorted())
+            sortview->m_array.FillData( inputTypeChoice->GetSelection(), m_array_size );
 
         sortview->SetStepwise(false);
 
@@ -231,7 +234,7 @@ void WMain::OnResetButton(wxCommandEvent&)
 
     runButton->SetValue(false);
 
-    sortview->FillData( inputTypeChoice->GetSelection(), m_array_size );
+    sortview->m_array.FillData( inputTypeChoice->GetSelection(), m_array_size );
 }
 
 void WMain::OnStepButton(wxCommandEvent&)
@@ -274,7 +277,7 @@ void WMain::OnRandomButton(wxCommandEvent&)
     AbortAlgorithm();
 
     algoList->SetSelection( rand() % algoList->GetCount() );
-    sortview->FillData( inputTypeChoice->GetSelection(), m_array_size );
+    sortview->m_array.FillData( inputTypeChoice->GetSelection(), m_array_size );
 
     RunAlgorithm();
 
@@ -336,7 +339,7 @@ void WMain::OnSoundSustainSliderChange(wxScrollEvent &event)
 
 void WMain::OnInversionLabelClick(wxCommandEvent &)
 {
-    sortview->ToggleCalcInversions();
+    sortview->m_array.ToggleCalcInversions();
 }
 
 void WMain::SetSoundSustain(size_t pos)
@@ -399,7 +402,7 @@ void WMain::OnAlgoListDClick(wxCommandEvent&)
     {
         AbortAlgorithm();
 
-        sortview->FillData( inputTypeChoice->GetSelection(), m_array_size );
+        sortview->m_array.FillData( inputTypeChoice->GetSelection(), m_array_size );
     }
 
     // start new one
@@ -422,13 +425,13 @@ void WMain::RefreshTimer::Notify()
     long int compares = g_compare_count;
     wm.labelComparisonsValue->SetLabel(wxString::Format(_("%ld"), compares));
 
-    long int inversions = wm.sortview->GetInversions();
+    long int inversions = wm.sortview->m_array.GetInversions();
     if (inversions >= 0)
         wm.labelInversionCount->SetLabel(wxString::Format(_("%ld"), inversions));
     else
         wm.labelInversionCount->SetLabel(_("skipped"));
 
-    long int runs = wm.sortview->GetRuns();
+    long int runs = wm.sortview->m_array.GetRuns();
     wm.labelRunsCount->SetLabel(wxString::Format(_("%ld"), runs));
 
     // repaint sortview

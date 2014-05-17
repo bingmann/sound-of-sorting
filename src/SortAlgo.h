@@ -1,13 +1,13 @@
 /******************************************************************************
  * src/SortAlgo.h
  *
- * Implementations is many sorting algorithms.
+ * Implementations of many sorting algorithms.
  *
  * Note that these implementations may not be as good/fast as possible. Some
  * are modified so that the visualization is more instructive.
  *
  * Futhermore, some algorithms are annotated using the mark() and watch()
- * functions from WSortView. These functions add colors to the illustratation
+ * functions from SortArray. These functions add colors to the illustratation
  * and thereby makes the algorithm's visualization easier to explain.
  *
  ******************************************************************************
@@ -31,14 +31,14 @@
 #define SORTALGO_H
 
 #include <wx/string.h>
-#include "WSortView.h"
+#include "SortArray.h"
 
 // *** List of Sorting Algorithms
 
 struct AlgoEntry
 {
     wxString name;
-    void (*func)(class WSortView&);
+    void (*func)(class SortArray&);
     unsigned int inversion_count_limit; // count inversions if n <= limit
     wxString text;
 };
@@ -49,51 +49,51 @@ extern const struct AlgoEntry* g_algolist_end;
 
 // *** Sorting Algorithms
 
-void SelectionSort(class WSortView& a);
-void InsertionSort(class WSortView& a);
-void BinaryInsertionSort(class WSortView& a);
+void SelectionSort(class SortArray& a);
+void InsertionSort(class SortArray& a);
+void BinaryInsertionSort(class SortArray& a);
 
-void MergeSort(class WSortView& a);
+void MergeSort(class SortArray& a);
 
 wxArrayString QuickSortPivotText();
 
 enum QuickSortPivotType { PIVOT_FIRST, PIVOT_LAST, PIVOT_MID, PIVOT_RANDOM, PIVOT_MEDIAN3 };
 extern QuickSortPivotType g_quicksort_pivot;
 
-void QuickSortLR(class WSortView& a);
-void QuickSortLL(class WSortView& a);
-void QuickSortTernaryLR(class WSortView& a);
-void QuickSortTernaryLL(class WSortView& a);
-void QuickSortDualPivot(class WSortView& a);
+void QuickSortLR(class SortArray& a);
+void QuickSortLL(class SortArray& a);
+void QuickSortTernaryLR(class SortArray& a);
+void QuickSortTernaryLL(class SortArray& a);
+void QuickSortDualPivot(class SortArray& a);
 
-void BubbleSort(class WSortView& a);
-void CocktailShakerSort(class WSortView& a);
-void CombSort(class WSortView& a);
-void GnomeSort(class WSortView& a);
-void OddEvenSort(class WSortView& a);
+void BubbleSort(class SortArray& a);
+void CocktailShakerSort(class SortArray& a);
+void CombSort(class SortArray& a);
+void GnomeSort(class SortArray& a);
+void OddEvenSort(class SortArray& a);
 
-void ShellSort(WSortView& a);
-void HeapSort(class WSortView& a);
-void SmoothSort(class WSortView& a);
+void ShellSort(SortArray& a);
+void HeapSort(class SortArray& a);
+void SmoothSort(class SortArray& a);
 
-void BitonicSort(WSortView& a);
+void BitonicSort(SortArray& a);
 
-void RadixSortLSD(class WSortView& a);
-void RadixSortMSD(class WSortView& a);
+void RadixSortLSD(class SortArray& a);
+void RadixSortMSD(class SortArray& a);
 
-void StlSort(class WSortView& a);
-void StlStableSort(class WSortView& a);
-void StlHeapSort(class WSortView& a);
+void StlSort(class SortArray& a);
+void StlStableSort(class SortArray& a);
+void StlHeapSort(class SortArray& a);
 
-void TimSort(class WSortView& a);
-void WikiSort(class WSortView& a);
+void TimSort(class SortArray& a);
+void WikiSort(class SortArray& a);
 
-void BogoSort(class WSortView& a);
-void BozoSort(class WSortView& a);
-void StoogeSort(class WSortView& a);
-void SlowSort(class WSortView& a);
+void BogoSort(class SortArray& a);
+void BozoSort(class SortArray& a);
+void StoogeSort(class SortArray& a);
+void SlowSort(class SortArray& a);
 
-void CycleSort(class WSortView& a);
+void CycleSort(class SortArray& a);
 
 // ****************************************************************************
 // *** Iterator Adapter
@@ -103,7 +103,7 @@ void CycleSort(class WSortView& a);
 class MyIterator : public std::iterator<std::random_access_iterator_tag, ArrayItem>
 {
 protected:
-    WSortView*  m_array;
+    SortArray*  m_array;
     size_t      m_pos;
 
 public:
@@ -118,7 +118,7 @@ public:
 
     MyIterator() : m_array(NULL), m_pos(0) {}
 
-    MyIterator(WSortView* A, size_t p) : m_array(A), m_pos(p) {}
+    MyIterator(SortArray* A, size_t p) : m_array(A), m_pos(p) {}
 
     MyIterator(const MyIterator& r) : m_array(r.m_array), m_pos(r.m_pos) {}
 

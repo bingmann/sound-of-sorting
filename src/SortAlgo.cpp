@@ -7,7 +7,7 @@
  * are modified so that the visualization is more instructive.
  *
  * Futhermore, some algorithms are annotated using the mark() and watch()
- * functions from WSortView. These functions add colors to the illustratation
+ * functions from SortArray. These functions add colors to the illustratation
  * and thereby makes the algorithm's visualization easier to explain.
  *
  ******************************************************************************
@@ -120,7 +120,7 @@ const struct AlgoEntry* g_algolist_end = g_algolist + g_algolist_size;
 // ****************************************************************************
 // *** Selection Sort
 
-void SelectionSort(WSortView& A)
+void SelectionSort(SortArray& A)
 {
     volatile ssize_t jMin = 0;
     A.watch(&jMin, 3);
@@ -150,7 +150,7 @@ void SelectionSort(WSortView& A)
 // *** Insertion Sort
 
 // swaps every time (keeps all values visible)
-void InsertionSort(WSortView& A)
+void InsertionSort(SortArray& A)
 {
     for (size_t i = 1; i < A.size(); ++i)
     {
@@ -169,7 +169,7 @@ void InsertionSort(WSortView& A)
 }
 
 // with extra item on stack
-void InsertionSort2(WSortView& A)
+void InsertionSort2(SortArray& A)
 {
     for (size_t i = 1; i < A.size(); ++i)
     {
@@ -189,7 +189,7 @@ void InsertionSort2(WSortView& A)
 }
 
 // swaps every time (keeps all values visible)
-void BinaryInsertionSort(WSortView& A)
+void BinaryInsertionSort(SortArray& A)
 {
     for (size_t i = 1; i < A.size(); ++i)
     {
@@ -223,7 +223,7 @@ void BinaryInsertionSort(WSortView& A)
 
 // by myself (Timo Bingmann)
 
-void Merge(WSortView& A, size_t lo, size_t mid, size_t hi)
+void Merge(SortArray& A, size_t lo, size_t mid, size_t hi)
 {
     // mark merge boundaries
     A.mark(lo);
@@ -259,7 +259,7 @@ void Merge(WSortView& A, size_t lo, size_t mid, size_t hi)
     A.unmark(hi-1);
 }
 
-void MergeSort(WSortView& A, size_t lo, size_t hi)
+void MergeSort(SortArray& A, size_t lo, size_t hi)
 {
     if (lo + 1 < hi)
     {
@@ -272,7 +272,7 @@ void MergeSort(WSortView& A, size_t lo, size_t hi)
     }
 }
 
-void MergeSort(WSortView& A)
+void MergeSort(SortArray& A)
 {
     return MergeSort(A, 0, A.size());
 }
@@ -284,7 +284,7 @@ QuickSortPivotType g_quicksort_pivot = PIVOT_FIRST;
 
 // some quicksort variants use hi inclusive and some exclusive, we require it
 // to be _exclusive_. hi == array.end()!
-ssize_t QuickSortSelectPivot(WSortView& A, ssize_t lo, ssize_t hi)
+ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
 {
     if (g_quicksort_pivot == PIVOT_FIRST)
         return lo;
@@ -333,7 +333,7 @@ wxArrayString QuickSortPivotText()
 
 // by myself (Timo Bingmann), based on Hoare's original code
 
-void QuickSortLR(WSortView& A, ssize_t lo, ssize_t hi)
+void QuickSortLR(SortArray& A, ssize_t lo, ssize_t hi)
 {
     // pick pivot and watch
     volatile ssize_t p = QuickSortSelectPivot(A, lo, hi+1);
@@ -374,7 +374,7 @@ void QuickSortLR(WSortView& A, ssize_t lo, ssize_t hi)
         QuickSortLR(A, i, hi);
 }
 
-void QuickSortLR(WSortView& A)
+void QuickSortLR(SortArray& A)
 {
     return QuickSortLR(A, 0, A.size()-1);
 }
@@ -384,7 +384,7 @@ void QuickSortLR(WSortView& A)
 
 // by myself (Timo Bingmann), based on CLRS' 3rd edition
 
-size_t PartitionLL(WSortView& A, size_t lo, size_t hi)
+size_t PartitionLL(SortArray& A, size_t lo, size_t hi)
 {
     // pick pivot and move to back
     size_t p = QuickSortSelectPivot(A, lo, hi);
@@ -411,7 +411,7 @@ size_t PartitionLL(WSortView& A, size_t lo, size_t hi)
     return i;
 }
 
-void QuickSortLL(WSortView& A, size_t lo, size_t hi)
+void QuickSortLL(SortArray& A, size_t lo, size_t hi)
 {
     if (lo + 1 < hi)
     {
@@ -422,7 +422,7 @@ void QuickSortLL(WSortView& A, size_t lo, size_t hi)
     }
 }
 
-void QuickSortLL(WSortView& A)
+void QuickSortLL(SortArray& A)
 {
     return QuickSortLL(A, 0, A.size());
 }
@@ -432,7 +432,7 @@ void QuickSortLL(WSortView& A)
 
 // by myself (Timo Bingmann), loosely based on multikey quicksort by B&S
 
-void QuickSortTernaryLR(WSortView& A, ssize_t lo, ssize_t hi)
+void QuickSortTernaryLR(SortArray& A, ssize_t lo, ssize_t hi)
 {
     if (hi <= lo) return;
 
@@ -509,7 +509,7 @@ void QuickSortTernaryLR(WSortView& A, ssize_t lo, ssize_t hi)
     QuickSortTernaryLR(A, hi - num_greater + 1, hi);
 }
 
-void QuickSortTernaryLR(WSortView& A)
+void QuickSortTernaryLR(SortArray& A)
 {
     return QuickSortTernaryLR(A, 0, A.size()-1);
 }
@@ -519,7 +519,7 @@ void QuickSortTernaryLR(WSortView& A)
 
 // by myself (Timo Bingmann)
 
-std::pair<ssize_t,ssize_t> PartitionTernaryLL(WSortView& A, ssize_t lo, ssize_t hi)
+std::pair<ssize_t,ssize_t> PartitionTernaryLL(SortArray& A, ssize_t lo, ssize_t hi)
 {
     // pick pivot and swap to back
     ssize_t p = QuickSortSelectPivot(A, lo, hi);
@@ -559,7 +559,7 @@ std::pair<ssize_t,ssize_t> PartitionTernaryLL(WSortView& A, ssize_t lo, ssize_t 
     return std::make_pair(i,j);
 }
 
-void QuickSortTernaryLL(WSortView& A, size_t lo, size_t hi)
+void QuickSortTernaryLL(SortArray& A, size_t lo, size_t hi)
 {
     if (lo + 1 < hi)
     {
@@ -570,7 +570,7 @@ void QuickSortTernaryLL(WSortView& A, size_t lo, size_t hi)
     }
 }
 
-void QuickSortTernaryLL(WSortView& A)
+void QuickSortTernaryLL(SortArray& A)
 {
     return QuickSortTernaryLL(A, 0, A.size());
 }
@@ -580,7 +580,7 @@ void QuickSortTernaryLL(WSortView& A)
 
 // by Sebastian Wild
 
-void dualPivotYaroslavskiy(class WSortView& a, int left, int right)
+void dualPivotYaroslavskiy(class SortArray& a, int left, int right)
 {
     if (right > left)
     {
@@ -634,7 +634,7 @@ void dualPivotYaroslavskiy(class WSortView& a, int left, int right)
     }
 }
 
-void QuickSortDualPivot(class WSortView& a)
+void QuickSortDualPivot(class SortArray& a)
 {
     return dualPivotYaroslavskiy(a, 0, a.size()-1);
 }
@@ -642,7 +642,7 @@ void QuickSortDualPivot(class WSortView& a)
 // ****************************************************************************
 // *** Bubble Sort
 
-void BubbleSort(WSortView& A)
+void BubbleSort(SortArray& A)
 {
     for (size_t i = 0; i < A.size()-1; ++i)
     {
@@ -661,7 +661,7 @@ void BubbleSort(WSortView& A)
 
 // from http://de.wikibooks.org/wiki/Algorithmen_und_Datenstrukturen_in_C/_Shakersort
 
-void CocktailShakerSort(WSortView& A)
+void CocktailShakerSort(SortArray& A)
 {
     size_t lo = 0, hi = A.size()-1, mov = lo;
 
@@ -696,7 +696,7 @@ void CocktailShakerSort(WSortView& A)
 
 // from http://en.wikipediA.org/wiki/Gnome_sort
 
-void GnomeSort(WSortView& A)
+void GnomeSort(SortArray& A)
 {
     for (size_t i = 1; i < A.size(); )
     {
@@ -717,7 +717,7 @@ void GnomeSort(WSortView& A)
 
 // from http://en.wikipediA.org/wiki/Comb_sort
 
-void CombSort(WSortView& A)
+void CombSort(SortArray& A)
 {
     const double shrink = 1.3;
 
@@ -748,7 +748,7 @@ void CombSort(WSortView& A)
 
 // from http://en.wikipediA.org/wiki/Odd%E2%80%93even_sort
 
-void OddEvenSort(WSortView& A)
+void OddEvenSort(SortArray& A)
 {
     bool sorted = false;
 
@@ -781,7 +781,7 @@ void OddEvenSort(WSortView& A)
 
 // with gaps by Robert Sedgewick from http://www.cs.princeton.edu/~rs/shell/shell.c
 
-void ShellSort(WSortView& A)
+void ShellSort(SortArray& A)
 {
     size_t incs[16] = { 1391376, 463792, 198768, 86961, 33936,
                         13776, 4592, 1968, 861, 336,
@@ -822,7 +822,7 @@ uint32_t prevPowerOfTwo(uint32_t x)
     return x - (x >> 1);
 }
 
-void HeapSort(WSortView& A)
+void HeapSort(SortArray& A)
 {
     size_t n = A.size(), i = n / 2;
 
@@ -877,7 +877,7 @@ void HeapSort(WSortView& A)
 
 // by myself (Timo Bingmann)
 
-void RadixSortMSD(WSortView& A, size_t lo, size_t hi, size_t depth)
+void RadixSortMSD(SortArray& A, size_t lo, size_t hi, size_t depth)
 {
     A.mark(lo); A.mark(hi-1);
 
@@ -934,7 +934,7 @@ void RadixSortMSD(WSortView& A, size_t lo, size_t hi, size_t depth)
     }
 }
 
-void RadixSortMSD(WSortView& A)
+void RadixSortMSD(SortArray& A)
 {
     return RadixSortMSD(A, 0, A.size(), 0);
 }
@@ -944,7 +944,7 @@ void RadixSortMSD(WSortView& A)
 
 // by myself (Timo Bingmann)
 
-void RadixSortLSD(WSortView& A)
+void RadixSortLSD(SortArray& A)
 {
     // radix and base calculations
     const unsigned int RADIX = 4;
@@ -990,17 +990,17 @@ void RadixSortLSD(WSortView& A)
 // ****************************************************************************
 // *** Use STL Sorts via Iterator Adapters
 
-void StlSort(WSortView& A)
+void StlSort(SortArray& A)
 {
     std::sort(MyIterator(&A,0), MyIterator(&A,A.size()));
 }
 
-void StlStableSort(WSortView& A)
+void StlStableSort(SortArray& A)
 {
     std::stable_sort(MyIterator(&A,0), MyIterator(&A,A.size()));
 }
 
-void StlHeapSort(WSortView& A)
+void StlHeapSort(SortArray& A)
 {
     std::make_heap(MyIterator(&A,0), MyIterator(&A,A.size()));
     std::sort_heap(MyIterator(&A,0), MyIterator(&A,A.size()));
@@ -1011,7 +1011,7 @@ void StlHeapSort(WSortView& A)
 
 // by myself (Timo Bingmann)
 
-bool BogoCheckSorted(WSortView& A)
+bool BogoCheckSorted(SortArray& A)
 {
     size_t i;
     value_type prev = A[0];
@@ -1036,7 +1036,7 @@ bool BogoCheckSorted(WSortView& A)
     return false;
 }
 
-void BogoSort(WSortView& A)
+void BogoSort(SortArray& A)
 {
     // keep a permutation of [0,size)
     std::vector<size_t> perm(A.size());
@@ -1086,7 +1086,7 @@ void BogoSort(WSortView& A)
     }
 }
 
-void BozoSort(WSortView& A)
+void BozoSort(SortArray& A)
 {
     srand(time(NULL));
 
@@ -1109,7 +1109,7 @@ namespace BitonicSortNS {
 
 static const bool ASCENDING = true;    // sorting direction
 
-static void compare(WSortView& A, int i, int j, bool dir)
+static void compare(SortArray& A, int i, int j, bool dir)
 {
     if (dir == (A[i] > A[j]))
         A.swap(i, j);
@@ -1122,7 +1122,7 @@ static int greatestPowerOfTwoLessThan(int n)
     return k >> 1;
 }
 
-static void bitonicMerge(WSortView& A, int lo, int n, bool dir)
+static void bitonicMerge(SortArray& A, int lo, int n, bool dir)
 {
     if (n > 1)
     {
@@ -1136,7 +1136,7 @@ static void bitonicMerge(WSortView& A, int lo, int n, bool dir)
     }
 }
 
-static void bitonicSort(WSortView& A, int lo, int n, bool dir)
+static void bitonicSort(SortArray& A, int lo, int n, bool dir)
 {
     if (n > 1)
     {
@@ -1149,7 +1149,7 @@ static void bitonicSort(WSortView& A, int lo, int n, bool dir)
 
 } // namespace BitonicSortNS
 
-void BitonicSort(WSortView& A)
+void BitonicSort(SortArray& A)
 {
     BitonicSortNS::bitonicSort(A, 0, A.size(), BitonicSortNS::ASCENDING);
 }
@@ -1170,7 +1170,7 @@ static const int LP[] = {
     866988873 // the next number is > 31 bits.
 };
 
-static void sift(WSortView& A, int pshift, int head)
+static void sift(SortArray& A, int pshift, int head)
 {
     // we do not use Floyd's improvements to the heapsort sift, because we
     // are not doing what heapsort does - always moving nodes from near
@@ -1201,7 +1201,7 @@ static void sift(WSortView& A, int pshift, int head)
     A.set(head, val);
 }
 
-static void trinkle(WSortView& A, int p, int pshift, int head, bool isTrusty)
+static void trinkle(SortArray& A, int p, int pshift, int head, bool isTrusty)
 {
     value_type val = A[head];
 
@@ -1239,7 +1239,7 @@ static void trinkle(WSortView& A, int p, int pshift, int head, bool isTrusty)
     }
 }
 
-void sort(WSortView& A, int lo, int hi)
+void sort(SortArray& A, int lo, int hi)
 {
     int head = lo; // the offset of the first element of the prefix into m
 
@@ -1322,7 +1322,7 @@ void sort(WSortView& A, int lo, int hi)
 
 } // namespace SmoothSortNS
 
-void SmoothSort(WSortView& A)
+void SmoothSort(SortArray& A)
 {
     return SmoothSortNS::sort(A, 0, A.size()-1);
 }
@@ -1330,7 +1330,7 @@ void SmoothSort(WSortView& A)
 // ****************************************************************************
 // *** Stooge Sort
 
-void StoogeSort(WSortView& A, int i, int j)
+void StoogeSort(SortArray& A, int i, int j)
 {
     if (A[i] > A[j])
     {
@@ -1353,7 +1353,7 @@ void StoogeSort(WSortView& A, int i, int j)
     }
 }
 
-void StoogeSort(WSortView& A)
+void StoogeSort(SortArray& A)
 {
     StoogeSort(A, 0, A.size()-1);
 }
@@ -1361,7 +1361,7 @@ void StoogeSort(WSortView& A)
 // ****************************************************************************
 // *** Slow Sort
 
-void SlowSort(WSortView& A, int i, int j)
+void SlowSort(SortArray& A, int i, int j)
 {
     if (i >= j) return;
 
@@ -1380,7 +1380,7 @@ void SlowSort(WSortView& A, int i, int j)
     A.unmark(j);
 }
 
-void SlowSort(WSortView& A)
+void SlowSort(SortArray& A)
 {
     SlowSort(A, 0, A.size()-1);
 }
@@ -1390,7 +1390,7 @@ void SlowSort(WSortView& A)
 
 // Adapted from http://en.wikipedia.org/wiki/Cycle_sort
 
-void CycleSort(WSortView& array, ssize_t n)
+void CycleSort(SortArray& array, ssize_t n)
 {
     volatile ssize_t cycleStart = 0;
     array.watch(&cycleStart, 16);
@@ -1434,7 +1434,7 @@ void CycleSort(WSortView& array, ssize_t n)
     array.unwatch_all();
 }
 
-void CycleSort(WSortView& A)
+void CycleSort(SortArray& A)
 {
     CycleSort(A, A.size());
 }

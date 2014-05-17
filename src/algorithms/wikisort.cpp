@@ -572,10 +572,10 @@ void Sort(Iterator first, Iterator last, const Comparison compare)
 
 struct ColoringComparator
 {
-    WSortView& m_array;
+    SortArray& m_array;
     const ArrayItem *m_begin, *m_end;
 
-    ColoringComparator(WSortView& A)
+    ColoringComparator(SortArray& A)
         : m_array(A),
           m_begin( &(A.direct(0)) ),
           m_end( &(A.direct(A.size()-1)) )
@@ -598,7 +598,7 @@ struct ColoringComparator
     }
 };
 
-void WikiSort(WSortView& A)
+void WikiSort(SortArray& A)
 {
     ColoringComparator cmp(A);
 

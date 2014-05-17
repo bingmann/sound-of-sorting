@@ -667,7 +667,7 @@ inline void timsort(RandomAccessIterator first, RandomAccessIterator last, LessF
 
 } // namespace TimSortNS
 
-void TimSort(WSortView& A)
+void TimSort(SortArray& A)
 {
     TimSortNS::timsort(MyIterator(&A,0), MyIterator(&A,A.size()));
 }

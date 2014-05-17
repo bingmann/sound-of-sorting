@@ -260,7 +260,7 @@ void SoundCallback(void* udata, Uint8 *stream, int len)
 
         for (size_t i = 0; i < s_access_list.size(); ++i)
         {
-            double relindex = s_access_list[i] / (double)sv.array_max();
+            double relindex = s_access_list[i] / (double)sv.m_array.array_max();
             double freq = arrayindex_to_frequency(relindex);
 
             add_oscillator( freq, p, p + i * pscale,

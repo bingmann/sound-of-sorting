@@ -26,6 +26,7 @@
 #include <wx/wx.h>
 #include <wx/image.h>
 
+#include "SortArray.h"
 #include "WSortView.h"
 #include "wxg/WMain_wxg.h"
 

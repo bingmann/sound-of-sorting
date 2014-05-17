@@ -8,6 +8,7 @@ sound_of_sorting_SOURCES = \
 	wxg/WAbout_wxg.cpp wxg/WAbout_wxg.h \
 	WSortView.cpp WSortView.h \
 	SortSound.cpp \
+	SortArray.cpp SortArray.h \
 	SortAlgo.cpp SortAlgo.h \
 	wxClickText.cpp wxClickText.h \
 	algorithms/timsort.cpp \
