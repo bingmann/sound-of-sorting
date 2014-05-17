@@ -928,8 +928,8 @@ void RadixSortMSD(SortArray& A, size_t lo, size_t hi, size_t depth)
     size_t sum = lo;
     for (size_t i = 0; i < RADIX; ++i)
     {
-        if (count[i] <= 1) continue;
-        RadixSortMSD(A, sum, sum+count[i], depth+1);
+        if (count[i] > 1)
+            RadixSortMSD(A, sum, sum+count[i], depth+1);
         sum += count[i];
     }
 }
