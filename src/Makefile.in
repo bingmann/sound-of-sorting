@@ -54,6 +54,8 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 bin_PROGRAMS = sound-of-sorting$(EXEEXT)
+noinst_PROGRAMS = sorting-test$(EXEEXT)
+TESTS = sorting-test$(EXEEXT)
 @GOT_RESCOMP_TRUE@am__append_1 = resources.o
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
@@ -66,11 +68,16 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
-PROGRAMS = $(bin_PROGRAMS)
+PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
+am__objects_1 = SortArray.$(OBJEXT) SortSound.$(OBJEXT) \
+	SortAlgo.$(OBJEXT) timsort.$(OBJEXT) wikisort.$(OBJEXT)
+am_sorting_test_OBJECTS = SortTest.$(OBJEXT) $(am__objects_1)
+sorting_test_OBJECTS = $(am_sorting_test_OBJECTS)
+sorting_test_LDADD = $(LDADD)
+sorting_test_DEPENDENCIES = $(am__append_1)
 am_sound_of_sorting_OBJECTS = WMain.$(OBJEXT) WMain_wxg.$(OBJEXT) \
-	WAbout_wxg.$(OBJEXT) WSortView.$(OBJEXT) SortSound.$(OBJEXT) \
-	SortArray.$(OBJEXT) SortAlgo.$(OBJEXT) wxClickText.$(OBJEXT) \
-	timsort.$(OBJEXT) wikisort.$(OBJEXT)
+	WAbout_wxg.$(OBJEXT) WSortView.$(OBJEXT) wxClickText.$(OBJEXT) \
+	$(am__objects_1)
 sound_of_sorting_OBJECTS = $(am_sound_of_sorting_OBJECTS)
 sound_of_sorting_LDADD = $(LDADD)
 sound_of_sorting_DEPENDENCIES = $(am__append_1)
@@ -87,8 +94,8 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(sound_of_sorting_SOURCES)
-DIST_SOURCES = $(sound_of_sorting_SOURCES)
+SOURCES = $(sorting_test_SOURCES) $(sound_of_sorting_SOURCES)
+DIST_SOURCES = $(sorting_test_SOURCES) $(sound_of_sorting_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -96,6 +103,10 @@ am__can_run_installinfo = \
   esac
 ETAGS = etags
 CTAGS = ctags
+am__tty_colors_dummy = \
+  mgn= red= grn= lgn= blu= brg= std=; \
+  am__color_tests=no
+am__tty_colors = $(am__tty_colors_dummy)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -213,17 +224,23 @@ target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+COMMON = SortArray.cpp SortArray.h \
+	SortSound.cpp \
+	SortAlgo.cpp SortAlgo.h \
+	algorithms/timsort.cpp \
+	algorithms/wikisort.cpp
+
 sound_of_sorting_SOURCES = \
 	WMain.cpp WMain.h \
 	wxg/WMain_wxg.cpp wxg/WMain_wxg.h \
 	wxg/WAbout_wxg.cpp wxg/WAbout_wxg.h \
 	WSortView.cpp WSortView.h \
-	SortSound.cpp \
-	SortArray.cpp SortArray.h \
-	SortAlgo.cpp SortAlgo.h \
 	wxClickText.cpp wxClickText.h \
-	algorithms/timsort.cpp \
-	algorithms/wikisort.cpp
+	$(COMMON)
+
+sorting_test_SOURCES = \
+	SortTest.cpp \
+	$(COMMON)
 
 AM_CXXFLAGS = -W -Wall @WX_CXXFLAGS@ @SDL_CFLAGS@
 LDADD = @WX_LIBS@ @SDL_LIBS@ $(am__append_1)
@@ -305,6 +322,12 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+
+clean-noinstPROGRAMS:
+	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+sorting-test$(EXEEXT): $(sorting_test_OBJECTS) $(sorting_test_DEPENDENCIES) $(EXTRA_sorting_test_DEPENDENCIES) 
+	@rm -f sorting-test$(EXEEXT)
+	$(CXXLINK) $(sorting_test_OBJECTS) $(sorting_test_LDADD) $(LIBS)
 sound-of-sorting$(EXEEXT): $(sound_of_sorting_OBJECTS) $(sound_of_sorting_DEPENDENCIES) $(EXTRA_sound_of_sorting_DEPENDENCIES) 
 	@rm -f sound-of-sorting$(EXEEXT)
 	$(CXXLINK) $(sound_of_sorting_OBJECTS) $(sound_of_sorting_LDADD) $(LIBS)
@@ -318,6 +341,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SortAlgo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SortArray.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SortSound.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SortTest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WAbout_wxg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WMain.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WMain_wxg.Po@am__quote@
@@ -339,34 +363,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
-
-WMain_wxg.o: wxg/WMain_wxg.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT WMain_wxg.o -MD -MP -MF $(DEPDIR)/WMain_wxg.Tpo -c -o WMain_wxg.o `test -f 'wxg/WMain_wxg.cpp' || echo '$(srcdir)/'`wxg/WMain_wxg.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/WMain_wxg.Tpo $(DEPDIR)/WMain_wxg.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wxg/WMain_wxg.cpp' object='WMain_wxg.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o WMain_wxg.o `test -f 'wxg/WMain_wxg.cpp' || echo '$(srcdir)/'`wxg/WMain_wxg.cpp
-
-WMain_wxg.obj: wxg/WMain_wxg.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT WMain_wxg.obj -MD -MP -MF $(DEPDIR)/WMain_wxg.Tpo -c -o WMain_wxg.obj `if test -f 'wxg/WMain_wxg.cpp'; then $(CYGPATH_W) 'wxg/WMain_wxg.cpp'; else $(CYGPATH_W) '$(srcdir)/wxg/WMain_wxg.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/WMain_wxg.Tpo $(DEPDIR)/WMain_wxg.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wxg/WMain_wxg.cpp' object='WMain_wxg.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o WMain_wxg.obj `if test -f 'wxg/WMain_wxg.cpp'; then $(CYGPATH_W) 'wxg/WMain_wxg.cpp'; else $(CYGPATH_W) '$(srcdir)/wxg/WMain_wxg.cpp'; fi`
-
-WAbout_wxg.o: wxg/WAbout_wxg.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT WAbout_wxg.o -MD -MP -MF $(DEPDIR)/WAbout_wxg.Tpo -c -o WAbout_wxg.o `test -f 'wxg/WAbout_wxg.cpp' || echo '$(srcdir)/'`wxg/WAbout_wxg.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/WAbout_wxg.Tpo $(DEPDIR)/WAbout_wxg.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wxg/WAbout_wxg.cpp' object='WAbout_wxg.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o WAbout_wxg.o `test -f 'wxg/WAbout_wxg.cpp' || echo '$(srcdir)/'`wxg/WAbout_wxg.cpp
-
-WAbout_wxg.obj: wxg/WAbout_wxg.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT WAbout_wxg.obj -MD -MP -MF $(DEPDIR)/WAbout_wxg.Tpo -c -o WAbout_wxg.obj `if test -f 'wxg/WAbout_wxg.cpp'; then $(CYGPATH_W) 'wxg/WAbout_wxg.cpp'; else $(CYGPATH_W) '$(srcdir)/wxg/WAbout_wxg.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/WAbout_wxg.Tpo $(DEPDIR)/WAbout_wxg.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wxg/WAbout_wxg.cpp' object='WAbout_wxg.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o WAbout_wxg.obj `if test -f 'wxg/WAbout_wxg.cpp'; then $(CYGPATH_W) 'wxg/WAbout_wxg.cpp'; else $(CYGPATH_W) '$(srcdir)/wxg/WAbout_wxg.cpp'; fi`
 
 timsort.o: algorithms/timsort.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT timsort.o -MD -MP -MF $(DEPDIR)/timsort.Tpo -c -o timsort.o `test -f 'algorithms/timsort.cpp' || echo '$(srcdir)/'`algorithms/timsort.cpp
@@ -395,6 +391,34 @@ wikisort.obj: algorithms/wikisort.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='algorithms/wikisort.cpp' object='wikisort.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wikisort.obj `if test -f 'algorithms/wikisort.cpp'; then $(CYGPATH_W) 'algorithms/wikisort.cpp'; else $(CYGPATH_W) '$(srcdir)/algorithms/wikisort.cpp'; fi`
+
+WMain_wxg.o: wxg/WMain_wxg.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT WMain_wxg.o -MD -MP -MF $(DEPDIR)/WMain_wxg.Tpo -c -o WMain_wxg.o `test -f 'wxg/WMain_wxg.cpp' || echo '$(srcdir)/'`wxg/WMain_wxg.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/WMain_wxg.Tpo $(DEPDIR)/WMain_wxg.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wxg/WMain_wxg.cpp' object='WMain_wxg.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o WMain_wxg.o `test -f 'wxg/WMain_wxg.cpp' || echo '$(srcdir)/'`wxg/WMain_wxg.cpp
+
+WMain_wxg.obj: wxg/WMain_wxg.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT WMain_wxg.obj -MD -MP -MF $(DEPDIR)/WMain_wxg.Tpo -c -o WMain_wxg.obj `if test -f 'wxg/WMain_wxg.cpp'; then $(CYGPATH_W) 'wxg/WMain_wxg.cpp'; else $(CYGPATH_W) '$(srcdir)/wxg/WMain_wxg.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/WMain_wxg.Tpo $(DEPDIR)/WMain_wxg.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wxg/WMain_wxg.cpp' object='WMain_wxg.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o WMain_wxg.obj `if test -f 'wxg/WMain_wxg.cpp'; then $(CYGPATH_W) 'wxg/WMain_wxg.cpp'; else $(CYGPATH_W) '$(srcdir)/wxg/WMain_wxg.cpp'; fi`
+
+WAbout_wxg.o: wxg/WAbout_wxg.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT WAbout_wxg.o -MD -MP -MF $(DEPDIR)/WAbout_wxg.Tpo -c -o WAbout_wxg.o `test -f 'wxg/WAbout_wxg.cpp' || echo '$(srcdir)/'`wxg/WAbout_wxg.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/WAbout_wxg.Tpo $(DEPDIR)/WAbout_wxg.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wxg/WAbout_wxg.cpp' object='WAbout_wxg.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o WAbout_wxg.o `test -f 'wxg/WAbout_wxg.cpp' || echo '$(srcdir)/'`wxg/WAbout_wxg.cpp
+
+WAbout_wxg.obj: wxg/WAbout_wxg.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT WAbout_wxg.obj -MD -MP -MF $(DEPDIR)/WAbout_wxg.Tpo -c -o WAbout_wxg.obj `if test -f 'wxg/WAbout_wxg.cpp'; then $(CYGPATH_W) 'wxg/WAbout_wxg.cpp'; else $(CYGPATH_W) '$(srcdir)/wxg/WAbout_wxg.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/WAbout_wxg.Tpo $(DEPDIR)/WAbout_wxg.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='wxg/WAbout_wxg.cpp' object='WAbout_wxg.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o WAbout_wxg.obj `if test -f 'wxg/WAbout_wxg.cpp'; then $(CYGPATH_W) 'wxg/WAbout_wxg.cpp'; else $(CYGPATH_W) '$(srcdir)/wxg/WAbout_wxg.cpp'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -462,6 +486,99 @@ cscopelist:  $(HEADERS) $(SOURCES) $(LISP)
 distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
+check-TESTS: $(TESTS)
+	@failed=0; all=0; xfail=0; xpass=0; skip=0; \
+	srcdir=$(srcdir); export srcdir; \
+	list=' $(TESTS) '; \
+	$(am__tty_colors); \
+	if test -n "$$list"; then \
+	  for tst in $$list; do \
+	    if test -f ./$$tst; then dir=./; \
+	    elif test -f $$tst; then dir=; \
+	    else dir="$(srcdir)/"; fi; \
+	    if $(TESTS_ENVIRONMENT) $${dir}$$tst $(AM_TESTS_FD_REDIRECT); then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *[\ \	]$$tst[\ \	]*) \
+		xpass=`expr $$xpass + 1`; \
+		failed=`expr $$failed + 1`; \
+		col=$$red; res=XPASS; \
+	      ;; \
+	      *) \
+		col=$$grn; res=PASS; \
+	      ;; \
+	      esac; \
+	    elif test $$? -ne 77; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *[\ \	]$$tst[\ \	]*) \
+		xfail=`expr $$xfail + 1`; \
+		col=$$lgn; res=XFAIL; \
+	      ;; \
+	      *) \
+		failed=`expr $$failed + 1`; \
+		col=$$red; res=FAIL; \
+	      ;; \
+	      esac; \
+	    else \
+	      skip=`expr $$skip + 1`; \
+	      col=$$blu; res=SKIP; \
+	    fi; \
+	    echo "$${col}$$res$${std}: $$tst"; \
+	  done; \
+	  if test "$$all" -eq 1; then \
+	    tests="test"; \
+	    All=""; \
+	  else \
+	    tests="tests"; \
+	    All="All "; \
+	  fi; \
+	  if test "$$failed" -eq 0; then \
+	    if test "$$xfail" -eq 0; then \
+	      banner="$$All$$all $$tests passed"; \
+	    else \
+	      if test "$$xfail" -eq 1; then failures=failure; else failures=failures; fi; \
+	      banner="$$All$$all $$tests behaved as expected ($$xfail expected $$failures)"; \
+	    fi; \
+	  else \
+	    if test "$$xpass" -eq 0; then \
+	      banner="$$failed of $$all $$tests failed"; \
+	    else \
+	      if test "$$xpass" -eq 1; then passes=pass; else passes=passes; fi; \
+	      banner="$$failed of $$all $$tests did not behave as expected ($$xpass unexpected $$passes)"; \
+	    fi; \
+	  fi; \
+	  dashes="$$banner"; \
+	  skipped=""; \
+	  if test "$$skip" -ne 0; then \
+	    if test "$$skip" -eq 1; then \
+	      skipped="($$skip test was not run)"; \
+	    else \
+	      skipped="($$skip tests were not run)"; \
+	    fi; \
+	    test `echo "$$skipped" | wc -c` -le `echo "$$banner" | wc -c` || \
+	      dashes="$$skipped"; \
+	  fi; \
+	  report=""; \
+	  if test "$$failed" -ne 0 && test -n "$(PACKAGE_BUGREPORT)"; then \
+	    report="Please report to $(PACKAGE_BUGREPORT)"; \
+	    test `echo "$$report" | wc -c` -le `echo "$$banner" | wc -c` || \
+	      dashes="$$report"; \
+	  fi; \
+	  dashes=`echo "$$dashes" | sed s/./=/g`; \
+	  if test "$$failed" -eq 0; then \
+	    col="$$grn"; \
+	  else \
+	    col="$$red"; \
+	  fi; \
+	  echo "$${col}$$dashes$${std}"; \
+	  echo "$${col}$$banner$${std}"; \
+	  test -z "$$skipped" || echo "$${col}$$skipped$${std}"; \
+	  test -z "$$report" || echo "$${col}$$report$${std}"; \
+	  echo "$${col}$$dashes$${std}"; \
+	  test "$$failed" -eq 0; \
+	else :; fi
+
 distdir: $(DISTFILES)
 	@srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
@@ -493,6 +610,7 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
 all-am: Makefile $(PROGRAMS)
 installdirs:
@@ -531,7 +649,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-noinstPROGRAMS \
+	mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -598,17 +717,18 @@ ps-am:
 
 uninstall-am: uninstall-binPROGRAMS
 
-.MAKE: install-am install-strip
+.MAKE: check-am install-am install-strip
 
-.PHONY: CTAGS GTAGS all all-am check check-am clean clean-binPROGRAMS \
-	clean-generic cscopelist ctags distclean distclean-compile \
-	distclean-generic distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-binPROGRAMS \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
+.PHONY: CTAGS GTAGS all all-am check check-TESTS check-am clean \
+	clean-binPROGRAMS clean-generic clean-noinstPROGRAMS \
+	cscopelist ctags distclean distclean-compile distclean-generic \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-binPROGRAMS install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
 	uninstall-am uninstall-binPROGRAMS

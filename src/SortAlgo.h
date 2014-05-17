@@ -39,7 +39,10 @@ struct AlgoEntry
 {
     wxString name;
     void (*func)(class SortArray&);
-    unsigned int inversion_count_limit; // count inversions if n <= limit
+    // maximum item count for test runs
+    unsigned int max_testsize;
+    // count inversions if n <= limit
+    unsigned int inversion_count_limit;
     wxString text;
 };
 
