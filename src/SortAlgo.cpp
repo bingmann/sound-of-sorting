@@ -84,7 +84,11 @@ const struct AlgoEntry g_algolist[] =
       wxEmptyString },
     { _("Odd-Even Sort"), &OddEvenSort, UINT_MAX, 1024,
       wxEmptyString },
-    { _("Bitonic Sort"), &BitonicSort, UINT_MAX, UINT_MAX,
+    // older sequential implementation, which really makes little sense to do
+    //{ _("Bitonic Sort"), &BitonicSort, UINT_MAX, UINT_MAX, wxEmptyString },
+    { _("Batcher's Bitonic Sort"), &BitonicSortNetwork, UINT_MAX, UINT_MAX,
+      wxEmptyString },
+    { _("Batcher's Odd-Even Merge Sort"), &BatcherSortNetwork, UINT_MAX, UINT_MAX,
       wxEmptyString },
     { _("Cycle Sort"), &CycleSort, 512, UINT_MAX,
       wxEmptyString },
@@ -822,6 +826,13 @@ uint32_t prevPowerOfTwo(uint32_t x)
     return x - (x >> 1);
 }
 
+int largestPowerOfTwoLessThan(int n)
+{
+    int k = 1;
+    while (k < n) k = k << 1;
+    return k >> 1;
+}
+
 void HeapSort(SortArray& A)
 {
     size_t n = A.size(), i = n / 2;
@@ -1115,18 +1126,11 @@ static void compare(SortArray& A, int i, int j, bool dir)
         A.swap(i, j);
 }
 
-static int greatestPowerOfTwoLessThan(int n)
-{
-    int k = 1;
-    while (k < n) k = k << 1;
-    return k >> 1;
-}
-
 static void bitonicMerge(SortArray& A, int lo, int n, bool dir)
 {
     if (n > 1)
     {
-        int m = greatestPowerOfTwoLessThan(n);
+        int m = largestPowerOfTwoLessThan(n);
 
         for (int i = lo; i < lo + n - m; i++)
             compare(A, i, i+m, dir);
@@ -1152,6 +1156,227 @@ static void bitonicSort(SortArray& A, int lo, int n, bool dir)
 void BitonicSort(SortArray& A)
 {
     BitonicSortNS::bitonicSort(A, 0, A.size(), BitonicSortNS::ASCENDING);
+}
+
+// ****************************************************************************
+// *** Bitonic Sort as "Parallel" Sorting Network
+
+// from http://www.iti.fh-flensburg.de/lang/algorithmen/sortieren/bitonic/oddn.htm
+
+// modified to first record the recursively generated swap sequence, and then
+// sort it back into the order a parallel sorting network would perform the
+// swaps in
+
+namespace BitonicSortNetworkNS {
+
+struct swappair_type
+{
+    // swapped positions
+    int i,j;
+
+    // depth of recursions: sort / merge
+    int sort_depth, merge_depth;
+
+    swappair_type(int _i, int _j, int _sort_depth, int _merge_depth)
+        : i(_i), j(_j),
+          sort_depth(_sort_depth), merge_depth(_merge_depth)
+    { }
+
+    // order relation for sorting swaps
+    bool operator < (const swappair_type& b) const
+    {
+        if (sort_depth != b.sort_depth)
+            return sort_depth > b.sort_depth;
+
+        if (merge_depth != b.merge_depth)
+            return merge_depth < b.merge_depth;
+
+        return i < b.i;
+    }
+};
+
+typedef std::vector<swappair_type> sequence_type;
+std::vector<swappair_type> sequence;
+
+void replay(SortArray& A)
+{
+    for (sequence_type::const_iterator si = sequence.begin();
+         si != sequence.end(); ++si)
+    {
+        if (A[si->i] > A[si->j])
+            A.swap(si->i, si->j);
+    }
+}
+
+static const bool ASCENDING = true; // sorting direction
+
+static void compare(SortArray& /* A */, int i, int j, bool dir,
+                    int sort_depth, int merge_depth)
+{
+    // if (dir == (A[i] > A[j])) A.swap(i, j);
+
+    if (dir)
+        sequence.push_back( swappair_type(i,j, sort_depth, merge_depth) );
+    else
+        sequence.push_back( swappair_type(j,i, sort_depth, merge_depth) );
+}
+
+static void bitonicMerge(SortArray& A, int lo, int n, bool dir,
+                         int sort_depth, int merge_depth)
+{
+    if (n > 1)
+    {
+        int m = largestPowerOfTwoLessThan(n);
+
+        for (int i = lo; i < lo + n - m; i++)
+            compare(A, i, i + m, dir, sort_depth, merge_depth);
+
+        bitonicMerge(A, lo, m, dir, sort_depth, merge_depth+1);
+        bitonicMerge(A, lo + m, n - m, dir, sort_depth, merge_depth+1);
+    }
+}
+
+static void bitonicSort(SortArray& A, int lo, int n, bool dir, int sort_depth)
+{
+    if (n > 1)
+    {
+        int m = n / 2;
+        bitonicSort(A, lo, m, !dir, sort_depth+1);
+        bitonicSort(A, lo + m, n - m, dir, sort_depth+1);
+        bitonicMerge(A, lo, n, dir, sort_depth, 0);
+    }
+}
+
+void sort(SortArray& A)
+{
+    sequence.clear();
+    bitonicSort(A, 0, A.size(), BitonicSortNS::ASCENDING, 0);
+    std::sort(sequence.begin(), sequence.end());
+    replay(A);
+    sequence.clear();
+}
+
+} // namespace BitonicSortNS
+
+void BitonicSortNetwork(SortArray& A)
+{
+    BitonicSortNetworkNS::sort(A);
+}
+
+// ****************************************************************************
+// *** Batcher's Odd-Even Merge Sort as "Parallel" Sorting Network
+
+// from http://www.iti.fh-flensburg.de/lang/algorithmen/sortieren/networks/oemen.htm
+
+// modified to first record the recursively generated swap sequence, and then
+// sort it back into the order a parallel sorting network would perform the
+// swaps in
+
+namespace BatcherSortNetworkNS {
+
+struct swappair_type
+{
+    // swapped positions
+    int i,j;
+
+    // depth of recursions: sort / merge
+    int sort_depth, merge_depth;
+
+    swappair_type(int _i, int _j, int _sort_depth, int _merge_depth)
+        : i(_i), j(_j),
+          sort_depth(_sort_depth), merge_depth(_merge_depth)
+    { }
+
+    // order relation for sorting swaps
+    bool operator < (const swappair_type& b) const
+    {
+        if (sort_depth != b.sort_depth)
+            return sort_depth > b.sort_depth;
+
+        if (merge_depth != b.merge_depth)
+            return merge_depth > b.merge_depth;
+
+        return i < b.i;
+    }
+};
+
+typedef std::vector<swappair_type> sequence_type;
+std::vector<swappair_type> sequence;
+
+void replay(SortArray& A)
+{
+    for (sequence_type::const_iterator si = sequence.begin();
+         si != sequence.end(); ++si)
+    {
+        if (A[si->i] > A[si->j])
+            A.swap(si->i, si->j);
+    }
+}
+
+static void compare(SortArray& A, int i, int j,
+                    int sort_depth, int merge_depth)
+{
+    // skip all swaps beyond end of array
+    ASSERT(i <= j);
+    if (j >= (int)A.size()) return;
+
+    sequence.push_back( swappair_type(i,j, sort_depth, merge_depth) );
+
+    //if (A[i] > A[j]) A.swap(i, j);
+}
+
+// lo is the starting position and n is the length of the piece to be merged, r
+// is the distance of the elements to be compared
+static void oddEvenMerge(SortArray& A, int lo, int n, int r,
+                         int sort_depth, int merge_depth)
+{
+    int m = r * 2;
+    if (m < n)
+    {
+        // even subsequence
+        oddEvenMerge(A, lo, n, m, sort_depth, merge_depth+1);
+        // odd subsequence
+        oddEvenMerge(A, lo + r, n, m, sort_depth, merge_depth+1);
+
+        for (int i = lo + r; i + r < lo + n; i += m)
+            compare(A, i, i + r, sort_depth, merge_depth);
+    }
+    else {
+        compare(A, lo, lo + r, sort_depth, merge_depth);
+    }
+}
+
+// sorts a piece of length n of the array starting at position lo
+static void oddEvenMergeSort(SortArray& A, int lo, int n,
+                             int sort_depth)
+{
+    if (n > 1)
+    {
+        int m = n / 2;
+        oddEvenMergeSort(A, lo, m, sort_depth+1);
+        oddEvenMergeSort(A, lo + m, m, sort_depth+1);
+        oddEvenMerge(A, lo, n, 1, sort_depth, 0);
+    }
+}
+
+void sort(SortArray& A)
+{
+    sequence.clear();
+
+    unsigned int n = largestPowerOfTwoLessThan(A.size());
+    if (n != A.size()) n *= 2;
+
+    oddEvenMergeSort(A, 0, n, 0);
+    std::sort(sequence.begin(), sequence.end());
+    replay(A);
+    sequence.clear();
+}
+
+} // namespace BatcherSortNetworkNS
+
+void BatcherSortNetwork(SortArray& A)
+{
+    BatcherSortNetworkNS::sort(A);
 }
 
 // ****************************************************************************

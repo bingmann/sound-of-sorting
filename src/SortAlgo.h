@@ -80,6 +80,8 @@ void HeapSort(class SortArray& a);
 void SmoothSort(class SortArray& a);
 
 void BitonicSort(SortArray& a);
+void BitonicSortNetwork(SortArray& a);
+void BatcherSortNetwork(SortArray& a);
 
 void RadixSortLSD(class SortArray& a);
 void RadixSortMSD(class SortArray& a);
