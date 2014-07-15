@@ -22,6 +22,7 @@
 
 #include <wx/app.h>
 #include <wx/stopwatch.h>
+#include <wx/cmdline.h>
 
 #include "SortArray.h"
 #include "SortAlgo.h"
@@ -33,12 +34,20 @@ class SortTestApp : public wxAppConsole
 public:
     virtual bool OnInit();
     virtual int OnRun();
+    virtual void OnInitCmdLine(wxCmdLineParser& parser);
+    virtual bool OnCmdLineParsed(wxCmdLineParser& parser);
+
+private:
+    wxString m_filter;
 };
 
 IMPLEMENT_APP_CONSOLE(SortTestApp);
 
 bool SortTestApp::OnInit()
 {
+    if (!wxAppConsole::OnInit())
+        return false;
+
     return true;
 }
 
@@ -86,6 +95,9 @@ int SortTestApp::OnRun()
     {
         const AlgoEntry& ae = g_algolist[algoi];
 
+        if (!m_filter.IsEmpty() && !ae.name.Contains(m_filter))
+            continue;
+
         wxPrintf(_T("-----------------------------------------------------\n"));
         wxPrintf(_T("Testing %s\n"), ae.name.c_str());
 
@@ -128,4 +140,39 @@ int SortTestApp::OnRun()
     }
 
     return all_good ? 0 : -1;
+}
+
+static const wxCmdLineEntryDesc g_cmdLineDesc[] =
+{
+    { wxCMD_LINE_SWITCH, _T("h"), _T("help"),
+      _T("displays help on the command line parameters"),
+      wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
+
+    { wxCMD_LINE_PARAM, wxEmptyString, wxEmptyString,
+      _T("filter"),
+      wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL },
+
+    { wxCMD_LINE_NONE, wxEmptyString, wxEmptyString,
+      wxEmptyString,
+      wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL }
+};
+
+void SortTestApp::OnInitCmdLine(wxCmdLineParser& parser)
+{
+    parser.SetDesc(g_cmdLineDesc);
+    parser.SetSwitchChars(_T("-"));
+}
+
+bool SortTestApp::OnCmdLineParsed(wxCmdLineParser& parser)
+{
+    // to get the unnamed parameters
+    for (size_t i = 0; i < parser.GetParamCount(); i++)
+    {
+        if (!m_filter.IsEmpty())
+            m_filter.Append(_T(" "));
+
+        m_filter.Append(parser.GetParam(i));
+    }
+
+    return true;
 }
