@@ -1172,12 +1172,13 @@ namespace BitonicSortNetworkNS {
 struct swappair_type
 {
     // swapped positions
-    int i,j;
+    unsigned int i,j;
 
     // depth of recursions: sort / merge
-    int sort_depth, merge_depth;
+    unsigned int sort_depth, merge_depth;
 
-    swappair_type(int _i, int _j, int _sort_depth, int _merge_depth)
+    swappair_type(unsigned int _i, unsigned int _j,
+                  unsigned int _sort_depth, unsigned int _merge_depth)
         : i(_i), j(_j),
           sort_depth(_sort_depth), merge_depth(_merge_depth)
     { }
@@ -1210,8 +1211,8 @@ void replay(SortArray& A)
 
 static const bool ASCENDING = true; // sorting direction
 
-static void compare(SortArray& /* A */, int i, int j, bool dir,
-                    int sort_depth, int merge_depth)
+static void compare(SortArray& /* A */, unsigned int i, unsigned int j, bool dir,
+                    unsigned int sort_depth, unsigned int merge_depth)
 {
     // if (dir == (A[i] > A[j])) A.swap(i, j);
 
@@ -1221,14 +1222,14 @@ static void compare(SortArray& /* A */, int i, int j, bool dir,
         sequence.push_back( swappair_type(j,i, sort_depth, merge_depth) );
 }
 
-static void bitonicMerge(SortArray& A, int lo, int n, bool dir,
-                         int sort_depth, int merge_depth)
+static void bitonicMerge(SortArray& A, unsigned int lo, unsigned int n, bool dir,
+                         unsigned int sort_depth, unsigned int merge_depth)
 {
     if (n > 1)
     {
-        int m = largestPowerOfTwoLessThan(n);
+        unsigned int m = largestPowerOfTwoLessThan(n);
 
-        for (int i = lo; i < lo + n - m; i++)
+        for (unsigned int i = lo; i < lo + n - m; i++)
             compare(A, i, i + m, dir, sort_depth, merge_depth);
 
         bitonicMerge(A, lo, m, dir, sort_depth, merge_depth+1);
@@ -1236,11 +1237,12 @@ static void bitonicMerge(SortArray& A, int lo, int n, bool dir,
     }
 }
 
-static void bitonicSort(SortArray& A, int lo, int n, bool dir, int sort_depth)
+static void bitonicSort(SortArray& A, unsigned int lo, unsigned int n, bool dir,
+                        unsigned int sort_depth)
 {
     if (n > 1)
     {
-        int m = n / 2;
+        unsigned int m = n / 2;
         bitonicSort(A, lo, m, !dir, sort_depth+1);
         bitonicSort(A, lo + m, n - m, dir, sort_depth+1);
         bitonicMerge(A, lo, n, dir, sort_depth, 0);
@@ -1277,12 +1279,13 @@ namespace BatcherSortNetworkNS {
 struct swappair_type
 {
     // swapped positions
-    int i,j;
+    unsigned int i,j;
 
     // depth of recursions: sort / merge
-    int sort_depth, merge_depth;
+    unsigned int sort_depth, merge_depth;
 
-    swappair_type(int _i, int _j, int _sort_depth, int _merge_depth)
+    swappair_type(unsigned int _i, unsigned int _j,
+                  unsigned int _sort_depth, unsigned int _merge_depth)
         : i(_i), j(_j),
           sort_depth(_sort_depth), merge_depth(_merge_depth)
     { }
@@ -1313,12 +1316,12 @@ void replay(SortArray& A)
     }
 }
 
-static void compare(SortArray& A, int i, int j,
-                    int sort_depth, int merge_depth)
+static void compare(SortArray& A, unsigned int i, unsigned int j,
+                    unsigned int sort_depth, unsigned int merge_depth)
 {
     // skip all swaps beyond end of array
-    ASSERT(i <= j);
-    if (j >= (int)A.size()) return;
+    ASSERT(i < j);
+    if (j >= A.size()) return;
 
     sequence.push_back( swappair_type(i,j, sort_depth, merge_depth) );
 
@@ -1327,10 +1330,10 @@ static void compare(SortArray& A, int i, int j,
 
 // lo is the starting position and n is the length of the piece to be merged, r
 // is the distance of the elements to be compared
-static void oddEvenMerge(SortArray& A, int lo, int n, int r,
-                         int sort_depth, int merge_depth)
+static void oddEvenMerge(SortArray& A, unsigned int lo, unsigned int n, unsigned int r,
+                         unsigned int sort_depth, unsigned int merge_depth)
 {
-    int m = r * 2;
+    unsigned int m = r * 2;
     if (m < n)
     {
         // even subsequence
@@ -1338,7 +1341,7 @@ static void oddEvenMerge(SortArray& A, int lo, int n, int r,
         // odd subsequence
         oddEvenMerge(A, lo + r, n, m, sort_depth, merge_depth+1);
 
-        for (int i = lo + r; i + r < lo + n; i += m)
+        for (unsigned int i = lo + r; i + r < lo + n; i += m)
             compare(A, i, i + r, sort_depth, merge_depth);
     }
     else {
@@ -1347,12 +1350,12 @@ static void oddEvenMerge(SortArray& A, int lo, int n, int r,
 }
 
 // sorts a piece of length n of the array starting at position lo
-static void oddEvenMergeSort(SortArray& A, int lo, int n,
-                             int sort_depth)
+static void oddEvenMergeSort(SortArray& A, unsigned int lo, unsigned int n,
+                             unsigned int sort_depth)
 {
     if (n > 1)
     {
-        int m = n / 2;
+        unsigned int m = n / 2;
         oddEvenMergeSort(A, lo, m, sort_depth+1);
         oddEvenMergeSort(A, lo + m, m, sort_depth+1);
         oddEvenMerge(A, lo, n, 1, sort_depth, 0);
