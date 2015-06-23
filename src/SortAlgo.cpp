@@ -54,6 +54,9 @@ const struct AlgoEntry g_algolist[] =
     { _("Merge Sort"), &MergeSort, UINT_MAX, 512,
       _("Merge sort which merges two sorted sequences into a shadow array,"
         "and then copies it back to the shown array.") },
+    { _("Merge Sort (iterative)"), &MergeSortIterative, UINT_MAX, 512,
+      _("Merge sort variant which iteratively merges "
+        "subarrays of sizes of powers of two.") },
     { _("Quick Sort (LR ptrs)"), &QuickSortLR, UINT_MAX, UINT_MAX,
       _("Quick sort variant with left and right pointers.") },
     { _("Quick Sort (LL ptrs)"), &QuickSortLL, UINT_MAX, UINT_MAX,
@@ -279,6 +282,18 @@ void MergeSort(SortArray& A, size_t lo, size_t hi)
 void MergeSort(SortArray& A)
 {
     return MergeSort(A, 0, A.size());
+}
+
+void MergeSortIterative(SortArray& A)
+{
+    for (size_t s = 1; s < A.size(); s *= 2)
+    {
+        for (size_t i = 0; i + s < A.size(); i += 2 * s)
+        {
+            Merge(A, i, i + s,
+                  std::min(i + 2 * s, A.size()));
+        }
+    }
 }
 
 // ****************************************************************************

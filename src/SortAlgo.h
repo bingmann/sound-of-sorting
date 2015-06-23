@@ -57,6 +57,7 @@ void InsertionSort(class SortArray& a);
 void BinaryInsertionSort(class SortArray& a);
 
 void MergeSort(class SortArray& a);
+void MergeSortIterative(class SortArray& a);
 
 wxArrayString QuickSortPivotText();
 
