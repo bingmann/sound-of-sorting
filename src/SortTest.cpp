@@ -144,16 +144,15 @@ int SortTestApp::OnRun()
 
 static const wxCmdLineEntryDesc g_cmdLineDesc[] =
 {
-    { wxCMD_LINE_SWITCH, _T("h"), _T("help"),
-      _T("displays help on the command line parameters"),
+    { wxCMD_LINE_SWITCH, "h", "help",
+      wxTRANSLATE("displays help on the command line parameters"),
       wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
 
-    { wxCMD_LINE_PARAM, wxEmptyString, wxEmptyString,
-      _T("filter"),
+    { wxCMD_LINE_PARAM, "", "",
+      wxTRANSLATE("filter"),
       wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL },
 
-    { wxCMD_LINE_NONE, wxEmptyString, wxEmptyString,
-      wxEmptyString,
+    { wxCMD_LINE_NONE, "", "", "",
       wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL }
 };
 
