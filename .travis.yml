@@ -20,12 +20,13 @@ env:
 install:
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   - sudo apt-get -qq update
-  - sudo apt-get install libsdl1.2-dev libwxgtk2.8-dev
-  - if [ "$BUILD_CXX" == "g++-4.4" ]; then sudo apt-get install g++-4.4; fi
-  - if [ "$BUILD_CXX" == "g++-4.6" ]; then sudo apt-get install g++-4.6; fi
-  - if [ "$BUILD_CXX" == "g++-4.7" ]; then sudo apt-get install g++-4.7; fi
-  - if [ "$BUILD_CXX" == "g++-4.8" ]; then sudo apt-get install g++-4.8; fi
-  - if [ "$BUILD_CXX" == "g++-4.9" ]; then sudo apt-get install g++-4.9; fi
+  - sudo apt-get install libsdl1.2-dev
+  - if [ "$BUILD_CXX" == "g++-4.4" ]; then sudo apt-get install g++-4.4 libwxgtk2.8-dev; fi
+  - if [ "$BUILD_CXX" == "g++-4.6" ]; then sudo apt-get install g++-4.6 libwxgtk2.8-dev; fi
+  - if [ "$BUILD_CXX" == "g++-4.7" ]; then sudo apt-get install g++-4.7 libwxgtk2.8-dev; fi
+  - if [ "$BUILD_CXX" == "g++-4.8" ]; then sudo apt-get install g++-4.8 libwxgtk3.0-dev; fi
+  - if [ "$BUILD_CXX" == "g++-4.9" ]; then sudo apt-get install g++-4.9 libwxgtk3.0-dev; fi
+  - if [ "$BUILD_CXX" == "clang++" ]; then sudo apt-get install libwxgtk3.0-dev; fi
 
 before_script:
   - mkdir build && cd build && ../configure CC=$BUILD_CC CXX=$BUILD_CXX
