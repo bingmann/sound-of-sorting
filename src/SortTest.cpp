@@ -144,6 +144,19 @@ int SortTestApp::OnRun()
 
 static const wxCmdLineEntryDesc g_cmdLineDesc[] =
 {
+#if wxCHECK_VERSION(2,9,0)
+    { wxCMD_LINE_SWITCH, "h", "help",
+      "displays help on the command line parameters",
+      wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
+
+    { wxCMD_LINE_PARAM, NULL, NULL,
+      "filter",
+      wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL },
+
+    { wxCMD_LINE_NONE, NULL, NULL,
+      NULL,
+      wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL }
+#else
     { wxCMD_LINE_SWITCH, _T("h"), _T("help"),
       _T("displays help on the command line parameters"),
       wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
@@ -155,6 +168,7 @@ static const wxCmdLineEntryDesc g_cmdLineDesc[] =
     { wxCMD_LINE_NONE, wxEmptyString, wxEmptyString,
       wxEmptyString,
       wxCMD_LINE_VAL_NONE, wxCMD_LINE_PARAM_OPTIONAL }
+#endif
 };
 
 void SortTestApp::OnInitCmdLine(wxCmdLineParser& parser)
