@@ -162,7 +162,7 @@ public:
     { return &(m_array->get_mutable(m_pos)); }
 
     reference operator[](const difference_type& n) const
-    { return m_array->get_mutable(n); }
+    { return m_array->get_mutable(m_pos + n); }
 
     bool operator==(const MyIterator& r)
     { return (m_array == r.m_array) && (m_pos == r.m_pos); }
