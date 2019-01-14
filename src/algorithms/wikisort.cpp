@@ -210,7 +210,7 @@ void Sort(Iterator first, Iterator last, const Comparison compare)
     // (this is essentially fixed-point math, where we manually check for and handle overflow)
     const size_t base_size = 8;
     const size_t power_of_two = FloorPowerOfTwo(size);
-    const size_t fractional_base = power_of_two / base_size;
+	const size_t fractional_base = size < base_size ? 1 : power_of_two / base_size;
     size_t fractional_step = size % fractional_base;
     size_t decimal_step = size / fractional_base;
 
