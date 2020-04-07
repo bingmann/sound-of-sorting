@@ -103,3 +103,4 @@ facilities. If you want to contribute a sorting algorithm, please notify me.
 ## Exits
 
 Written 2013-05-22 by Timo Bingmann
+[![Run on Repl.it](https://repl.it/badge/github/bingmann/sound-of-sorting)](https://repl.it/github/bingmann/sound-of-sorting)
