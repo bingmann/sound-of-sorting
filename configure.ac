@@ -60,8 +60,8 @@ AC_LANG([C++])
 
 # check for SDL
 
-SDL_VERSION=1.2.8
-AM_PATH_SDL($SDL_VERSION,
+SDL_VERSION=2
+AM_PATH_SDL2($SDL_VERSION,
             :,
 	    AC_MSG_ERROR([*** SDL version $SDL_VERSION not found!])
 )
