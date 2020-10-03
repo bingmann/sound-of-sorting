@@ -6,6 +6,7 @@ Makefile
 .deps
 *.o
 /src/sound-of-sorting
+/src/sorting-test
 
 # ignore backup files
 /src/wxg/*~
