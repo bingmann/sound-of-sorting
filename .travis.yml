@@ -15,7 +15,7 @@ env:
 
 install:
   - sudo apt-get -qq update
-  - sudo apt-get install libsdl1.2-dev libwxgtk3.0-dev
+  - sudo apt-get install libsdl2-dev libwxgtk3.0-dev
 
 before_script:
   - mkdir build && cd build && ../configure CC=$BUILD_CC CXX=$BUILD_CXX

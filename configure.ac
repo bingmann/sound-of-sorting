@@ -8,7 +8,7 @@ AC_CONFIG_AUX_DIR(acscripts)
 
 AC_CANONICAL_TARGET
 
-AM_INIT_AUTOMAKE(foreign)
+AM_INIT_AUTOMAKE(foreign subdir-objects)
 #AM_MAINTAINER_MODE
 
 # check for Win32 system and set compilation flag.
