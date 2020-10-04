@@ -9,24 +9,13 @@ env:
     - CXXFLAGS="-W -Wall"
   matrix:
     # gcc builds
-    - BUILD_CC="gcc-4.4" BUILD_CXX="g++-4.4"
-    - BUILD_CC="gcc-4.6" BUILD_CXX="g++-4.6"
-    - BUILD_CC="gcc-4.7" BUILD_CXX="g++-4.7"
-    - BUILD_CC="gcc-4.8" BUILD_CXX="g++-4.8"
-    # not yet: - BUILD_CC="gcc-4.9" BUILD_CXX="g++-4.9"
+    - BUILD_CC="gcc" BUILD_CXX="g++"
     # clang builds
     - BUILD_CC="clang" BUILD_CXX="clang++"
 
 install:
-  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   - sudo apt-get -qq update
-  - sudo apt-get install libsdl1.2-dev
-  - if [ "$BUILD_CXX" == "g++-4.4" ]; then sudo apt-get install g++-4.4 libwxgtk2.8-dev; fi
-  - if [ "$BUILD_CXX" == "g++-4.6" ]; then sudo apt-get install g++-4.6 libwxgtk2.8-dev; fi
-  - if [ "$BUILD_CXX" == "g++-4.7" ]; then sudo apt-get install g++-4.7 libwxgtk2.8-dev; fi
-  - if [ "$BUILD_CXX" == "g++-4.8" ]; then sudo apt-get install g++-4.8 libwxgtk3.0-dev; fi
-  - if [ "$BUILD_CXX" == "g++-4.9" ]; then sudo apt-get install g++-4.9 libwxgtk3.0-dev; fi
-  - if [ "$BUILD_CXX" == "clang++" ]; then sudo apt-get install libwxgtk2.8-dev; fi
+  - sudo apt-get install libsdl1.2-dev libwxgtk3.0-dev
 
 before_script:
   - mkdir build && cd build && ../configure CC=$BUILD_CC CXX=$BUILD_CXX
