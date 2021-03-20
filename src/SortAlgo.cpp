@@ -1076,7 +1076,7 @@ void CombSort(SortArray& A)
     while ((gap > 1) || swapped)
     {
         if (gap > 1) {
-            gap = (uint8_t)(gap * shrinkdnom / shrinknumr);
+            gap = (size_t)(gap * shrinkdnom / shrinknumr);
         }
 
         swapped = false;
