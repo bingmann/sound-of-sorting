@@ -78,7 +78,7 @@ void WSortView::DoDelay(double delay)
 {
     // must be called by the algorithm thread
     ASSERT(wmain->m_thread);
-    ASSERT(wxThread::GetCurrentId() == wmain->m_thread->GetId());
+    //ASSERT(wxThread::GetCurrentId() == wmain->m_thread->GetId());
 
     if (wmain->m_thread_terminate)
         wmain->m_thread->Exit();

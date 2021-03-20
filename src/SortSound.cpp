@@ -62,7 +62,7 @@ protected:
 
 public:
     /// construct new oscillator
-    Oscillator(double freq, size_t tstart, size_t duration = 44100 / 8)
+    Oscillator(double freq, size_t tstart, size_t duration = 44100 / 1)
         : m_freq(freq), m_tstart(tstart),
           m_tend( m_tstart + duration ),
           m_duration(duration)
@@ -75,6 +75,12 @@ public:
     static double wave_sin(double x)
     {
         return sin(x * 2*M_PI);
+    }
+
+    /// simple tangent wave
+    static double wave_tan(double x)
+    {
+        return tan(x * M_PI);
     }
 
     /// sin^3 wave
@@ -94,12 +100,26 @@ public:
         return 4.0 * x - 4.0;
     }
 
+    /// square wave
+    static double wave_square(double x)
+    {
+    	return 2*(((int)floor(x*2))&1)-1;
+    }
+
+    /// square wave
+    static double wave_saw(double x)
+    {
+    	return fmod(x,1.)*2-1;
+    }
+
     /// picking a waveform
     static double wave(double x)
     {
         //return wave_sin(x);
         //return wave_sin3(x);
-        return wave_triangle(x);
+        //return wave_triangle(x);
+        return wave_square(x);
+        //return wave_saw(x);
     }
 
     // *** Envelope
@@ -112,8 +132,21 @@ public:
 
         // simple envelope functions:
 
+        //return 1.0; // box
+        //return (0.5-fabs(x-0.5)); // triangle
+        double q = x-0.5; q=0.25-(q*q); q*=q; return q; // pseudo hanning
+        //return (0.25-0.375*cos(M_PI*2*x)+0.15*cos(M_PI*4*x)-0.025*cos(M_PI*6*x)); // pseudo gaussian
+        //double q = cos(M_PI*2*x); return (0.1-0.3*q+0.3*(q*q)-0.1*(q*q*q)); // optimised pseudo gaussian
+        //return 1.-cos(M_PI*2 * x); // hanning
+	/*if(x<=0.||x>=1.)return 0.;
+	if(x<=0.25)return(-8*pow(x,2)+32*pow(x,3));
+	if(x>=0.75)return(-8*pow(1.-x,2)+32*pow(1.-x,3));
+	if(x<=0.5)return(1.+-40.*pow(.5-x,2.)+96*pow(.5-x,3.));
+	if(x>=0.5)return(1.+-40.*pow(x-.5,2.)+96*pow(x-.5,3.));
+	return 0; // cubic spline (sometimes goes negative)*/
         //return 1.0 - x;
         //return cos(M_PI_2 * x);
+//return next()/2147483648.-1.;
 
         // *** ADSR envelope
 
@@ -218,7 +251,8 @@ void SoundAccess(size_t i)
 /// function mapping array index (normalized to [0,1]) to frequency
 static double arrayindex_to_frequency(double aindex)
 {
-    return 120 + 1200 * (aindex*aindex);
+    //return 120 + 1200 * (aindex*aindex);
+    return pow(2., (65./19.)*aindex-(35./19.))*440.; // more distinct low frequencies than in quadratic
 }
 
 /// reset internal sound data (called from main thread)

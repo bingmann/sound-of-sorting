@@ -51,12 +51,16 @@ const struct AlgoEntry g_algolist[] =
       wxEmptyString },
     { _("Binary Insertion Sort"), &BinaryInsertionSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
-    { _("Merge Sort"), &MergeSort, UINT_MAX, 512,
+    { _("Merge Sort"), &MergeSort, UINT_MAX, UINT_MAX,
       _("Merge sort which merges two sorted sequences into a shadow array,"
         "and then copies it back to the shown array.") },
-    { _("Merge Sort (iterative)"), &MergeSortIterative, UINT_MAX, 512,
+    { _("Merge Sort (iterative)"), &MergeSortIterative, UINT_MAX, UINT_MAX,
       _("Merge sort variant which iteratively merges "
         "subarrays of sizes of powers of two.") },
+    { _("Merge Sort 2"), &MergeSort2, UINT_MAX, UINT_MAX,
+      _("Merge sort which uses binary insertion sort up to 256 inversions.") },
+    { _("Adaptive Merge Sort"), &AdaptiveMergeSort, UINT_MAX, UINT_MAX,
+      _("Uses adaptive binary insertion sort in it with an adaptive limit for insertion runs") },
     { _("Quick Sort (LR ptrs)"), &QuickSortLR, UINT_MAX, UINT_MAX,
       _("Quick sort variant with left and right pointers.") },
     { _("Quick Sort (LL ptrs)"), &QuickSortLL, UINT_MAX, UINT_MAX,
@@ -73,29 +77,44 @@ const struct AlgoEntry g_algolist[] =
         "two at left and one at right.") },
     { _("Bubble Sort"), &BubbleSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
+    { _("Bubble Sort 2"), &BubbleSort2, UINT_MAX, UINT_MAX,
+      wxEmptyString },
     { _("Cocktail Shaker Sort"), &CocktailShakerSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
     { _("Gnome Sort"), &GnomeSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
     { _("Comb Sort"), &CombSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
-    { _("Shell Sort"), &ShellSort, UINT_MAX, 1024,
+    { _("Comb Sort 11"), &CombSort11, UINT_MAX, UINT_MAX,
       wxEmptyString },
+    { _("Shell Sort"), &ShellSort, UINT_MAX, UINT_MAX,
+      _("Uses 1391376, 463792, 198768, 86961, 33936, 13776, 4592, 1968, 861, 336, 112, 48, 21, 7, 3, 1") },
+    { _("Shell Sort 2"), &ShellSort2, UINT_MAX, UINT_MAX,
+      _("Uses division by 2 but adds 1 if even") },
+    { _("Shell Sort 3"), &ShellSort3, UINT_MAX, UINT_MAX,
+      _("Uses division by 3 but to the nearest gap that is true mod 3") },
     { _("Heap Sort"), &HeapSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
-    { _("Smooth Sort"), &SmoothSort, UINT_MAX, 1024,
+    { _("Smooth Sort"), &SmoothSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
-    { _("Odd-Even Sort"), &OddEvenSort, UINT_MAX, 1024,
+    { _("Odd-Even Sort"), &OddEvenSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
     // older sequential implementation, which really makes little sense to do
-    //{ _("Bitonic Sort"), &BitonicSort, UINT_MAX, UINT_MAX, wxEmptyString },
+    { _("Bitonic Sort"), &BitonicSort, UINT_MAX, UINT_MAX,
+      wxEmptyString },
     { _("Batcher's Bitonic Sort"), &BitonicSortNetwork, UINT_MAX, UINT_MAX,
       wxEmptyString },
     { _("Batcher's Odd-Even Merge Sort"), &BatcherSortNetwork, UINT_MAX, UINT_MAX,
       wxEmptyString },
+    { _("Iterative Bitonic Sort"), &ItBitonic, UINT_MAX, UINT_MAX,
+      wxEmptyString },
+    { _("Iterative Odd Even Merge Sort"), &ItOddEvenMerge, UINT_MAX, UINT_MAX,
+      wxEmptyString },
+    { _("Iterative Pairwise Sorting Network"), &ItPairwise, UINT_MAX, UINT_MAX,
+      wxEmptyString },
     { _("Cycle Sort"), &CycleSort, 512, UINT_MAX,
       wxEmptyString },
-    { _("Radix Sort (LSD)"), &RadixSortLSD, UINT_MAX, 512,
+    { _("Radix Sort (LSD)"), &RadixSortLSD, UINT_MAX, UINT_MAX,
       _("Least significant digit radix sort, which copies item into a shadow "
         "array during counting.") },
     { _("Radix Sort (MSD)"), &RadixSortMSD, UINT_MAX, UINT_MAX,
@@ -114,9 +133,11 @@ const struct AlgoEntry g_algolist[] =
       wxEmptyString },
     { _("Bozo Sort"), &BozoSort, 10, UINT_MAX,
       wxEmptyString },
-    { _("Stooge Sort"), &StoogeSort, 256, inversion_count_instrumented,
+    { _("Stupid Sort"), &StupidSort, 256, UINT_MAX,
       wxEmptyString },
-    { _("Slow Sort"), &SlowSort, 128, inversion_count_instrumented,
+    { _("Stooge Sort"), &StoogeSort, 256, UINT_MAX,
+      wxEmptyString },
+    { _("Slow Sort"), &SlowSort, 128, UINT_MAX,
       wxEmptyString }
 };
 
@@ -139,7 +160,7 @@ void SelectionSort(SortArray& A)
         for (size_t j = i+1; j < A.size(); ++j)
         {
             if (A[j] < A[jMin]) {
-                A.mark_swap(j, jMin);
+                //A.mark_swap(j, jMin);
                 jMin = j;
             }
         }
@@ -206,7 +227,7 @@ void BinaryInsertionSort(SortArray& A)
         int lo = 0, hi = i;
         while (lo < hi) {
             int mid = (lo + hi) / 2;
-            if (key <= A[mid])
+            if (key < A[mid])
                 hi = mid;
             else
                 lo = mid + 1;
@@ -296,6 +317,238 @@ void MergeSortIterative(SortArray& A)
     }
 }
 
+uint8_t numberOfTrailingZeros(uint64_t a){
+	uint8_t i;
+	for(i=0; i<64; i++){
+		if(a%2){
+			return i;
+		}
+		a /= 2;
+	}
+	return i;
+}
+
+void merge2(SortArray& array, value_type* merge, int min1, int max1, int min2, int max2) {
+      if ((min2 - min1) <= (max2 - max1)){
+        for (int g = 0; g < (min2 - min1); g++){
+		merge[g]=array[max1-g];
+        }
+        int point1 = min2;
+        int point2 = (min2 - min1) - 1;
+        int point3 = min1;
+        while ((point1 <= max2) && (point2 >= 0)){
+            if (array[point1] < merge[point2]){
+		array.set(point3, array[point1]);
+                point3++;
+                point1++;
+            }
+            else{
+		array.set(point3, merge[point2]);
+                point2--;
+                point3++;
+            }
+        }
+        while ((point2 >= 0)){
+		array.set(point3, merge[point2]);
+                point2--;
+                point3++;
+        }
+      }
+      else {
+        for (int g = 0; g < (max2 - max1); g++){
+		merge[g]=array[min2+g];
+        }
+        int point1 = max1;
+        int point2 = (max2 - max1) - 1;
+        int point3 = max2;
+        while ((point1 >= min1) && (point2 >= 0)){
+            if (array[point1] > merge[point2]){
+		array.set(point3, array[point1]);
+                point3--;
+                point1--;
+            }
+            else{
+		array.set(point3, merge[point2]);
+                point2--;
+                point3--;
+            }
+        }
+        while ((point2 >= 0)){
+		array.set(point3, merge[point2]);
+                point2--;
+                point3--;
+        }
+      }
+    }
+
+void MergeSort2(SortArray& a)
+{
+	int length = a.size();
+	int limit = 256;
+        int sequence = 0;
+        int* stack = (int*)malloc((int)floor(log(length+0.0)/log(2.0)+2.0)*sizeof(int));
+        stack[0]=0;
+        int stackend = 0;
+        value_type* merge = (value_type*)malloc(length/2*sizeof(value_type));
+        int count = 0;
+        int i = 0;
+        int start = 0;
+        int test = start;
+        int start2 = start;
+        int end = length;
+        int flag = 0;
+        while (test < (end - 1)) {
+        count = 0;
+        i = test + 1;
+        start2 = test;
+        flag = 0;
+        while (i < end && flag == 0) {
+            int lo = start2, hi = i;
+
+            while (lo < hi) {
+                int mid = lo + ((hi - lo) / 2); // avoid int overflow!
+                if (a[i] < a[mid]) { // do NOT move equal elements to right of inserted element; this maintains stability!
+                    hi = mid;
+                }
+                else {
+                    lo = mid + 1;
+                }
+            }
+
+            // item has to go into position lo
+            count += (i - lo);
+            if (count > limit){
+            flag = 1;
+            }
+            else {
+            if (i > lo){
+            int j = i - 1;
+
+            while (j >= lo)
+            {
+			a.swap(j+1, j);
+                j--;
+            }
+
+            }
+            i++;
+            }
+            test = i;
+        }
+        sequence++;
+        stackend++;
+        stack[stackend] = test;
+        for (int r = 0; r < numberOfTrailingZeros(sequence); r++){
+            merge2(a, merge, stack[stackend - 2], stack[stackend - 1] - 1, stack[stackend - 1], stack[stackend] - 1);
+            stackend--;
+            stack[stackend] = stack[stackend+1];
+        }
+        }
+        if (stack[stackend] == (end - 1)){
+            stackend++;
+            stack[stackend]=end;
+        }
+        while (stackend > 1){
+            merge2(a, merge, stack[stackend - 2], stack[stackend - 1] - 1, stack[stackend - 1], stack[stackend] - 1);
+            stackend--;
+            stack[stackend] = stack[stackend+1];
+        }
+        free(stack);
+}
+
+void AdaptiveMergeSort(SortArray& a)
+{
+	int length = a.size();
+        int sequence = 0;
+        int* stack = (int*)malloc((int)floor(log(length+0.0)/log(2.0)+2.0)*sizeof(int));
+        stack[0]=0;
+        int stackend = 0;
+        value_type* merge = (value_type*)malloc(length/2*sizeof(value_type));
+        int count = 0;
+        int i = 0;
+        int start = 0;
+        int test = start;
+        int start2 = start;
+        int end = length;
+        int flag = 0;
+        while (test < (end - 1)) {
+        count = 0;
+        i = test + 1;
+        start2 = test;
+        flag = 0;
+        bool dir = 0;
+        while (i < end && flag == 0) {
+	if((i-start2)==16&&count>90){
+		dir=1;
+		for(int q=0; q<(i-start2)/2; q++){
+			a.swap(start2+q, i-1-q);
+		}
+		count = 120-count;
+	}
+            int v = (2*count/(i-start2))+1;
+            int lo = std::max(i-v, start2), hi = i;
+            while((lo>=start2)&&((a[i]<a[lo])^dir)){
+		lo-=v; hi-=v;
+            }
+            lo++;
+            if(lo<start2)lo=start2;
+            while (lo < hi) {
+                int mid = lo + ((hi - lo) / 2); // avoid int overflow!
+                if ((a[mid] > a[i])^dir) { // do NOT move equal elements to right of inserted element; this maintains stability!
+                    hi = mid;
+                }
+                else {
+                    lo = mid + 1;
+                }
+            }
+            ArrayItem num = a[i];
+	int limit = (int)((i-start2)*(log2((double)(i-start2)))*1.5);
+            // item has to go into position lo
+            count += (i - lo);
+            if (count > limit && (i-start2)>=16){
+            flag = 1;
+            }
+            else {
+            if (i > lo){
+            int j = i - 1;
+
+            while (j >= lo)
+            {
+			a.swap(j+1, j);
+                j--;
+            }
+
+            }
+            i++;
+            }
+            test = i;
+        }
+        if(dir){
+		for(int q=0; q<(test-start2)/2; q++){
+			a.swap(start2+q, test-1-q);
+		}
+        }
+        sequence++;
+        stackend++;
+        stack[stackend] = test;
+        for (int r = 0; r < numberOfTrailingZeros(sequence); r++){
+            merge2(a, merge, stack[stackend - 2], stack[stackend - 1] - 1, stack[stackend - 1], stack[stackend] - 1);
+            stackend--;
+            stack[stackend] = stack[stackend+1];
+        }
+        }
+        if (stack[stackend] == (end - 1)){
+            stackend++;
+            stack[stackend]=end;
+        }
+        while (stackend > 1){
+            merge2(a, merge, stack[stackend - 2], stack[stackend - 1] - 1, stack[stackend - 1], stack[stackend] - 1);
+            stackend--;
+            stack[stackend] = stack[stackend+1];
+        }
+        free(stack);
+}
+
 // ****************************************************************************
 // *** Quick Sort Pivot Selection
 
@@ -331,6 +584,45 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
             : (A[mid] > A[hi-1] ? mid : (A[lo] < A[hi-1] ? lo : hi-1));
     }
 
+    if (g_quicksort_pivot == PIVOT_NINTHER)
+    {
+        ssize_t mid = (lo + hi) / 2;
+    	if(hi-lo<=2)return lo;
+    	if(hi-lo<=8)
+        return A[lo] < A[mid]
+            ? (A[mid] < A[hi-1] ? mid : (A[lo] < A[hi-1] ? hi-1 : lo))
+            : (A[mid] > A[hi-1] ? mid : (A[lo] < A[hi-1] ? lo : hi-1));
+        ssize_t a = (lo);
+        ssize_t c = (lo + lo + hi + 1) / 3;
+        ssize_t g = (hi) - (c - a);
+        ssize_t k = (hi);
+        ssize_t b = (a + c) / 2;
+        ssize_t h = (g + k) / 2;
+        ssize_t d = (c) ;
+        ssize_t f = (g) ;
+        ssize_t e = (d + f) / 2;
+
+        ssize_t x;
+        ssize_t y;
+        ssize_t z;
+
+        x = A[a] < A[b]
+            ? (A[b] < A[c-1] ? b : (A[a] < A[c-1] ? c-1 : a))
+            : (A[b] > A[c-1] ? b : (A[a] < A[c-1] ? a : c-1));
+
+        y = A[d] < A[e]
+            ? (A[e] < A[f-1] ? e : (A[d] < A[f-1] ? f-1 : d))
+            : (A[e] > A[f-1] ? e : (A[d] < A[f-1] ? d : f-1));
+
+        z = A[g] < A[h]
+            ? (A[h] < A[k-1] ? h : (A[g] < A[k-1] ? k-1 : g))
+            : (A[h] > A[k-1] ? h : (A[g] < A[k-1] ? g : k-1));
+
+        return A[x] < A[y]
+            ? (A[y] < A[z-1] ? y : (A[x] < A[z-1] ? z-1 : x))
+            : (A[y] > A[z-1] ? y : (A[x] < A[z-1] ? x : z-1));
+    }
+
     return lo;
 }
 
@@ -343,6 +635,7 @@ wxArrayString QuickSortPivotText()
     sl.Add( _("Middle Item") );
     sl.Add( _("Random Item") );
     sl.Add( _("Median of Three") );
+    sl.Add( _("Ninther") );
 
     return sl;
 }
@@ -667,11 +960,31 @@ void BubbleSort(SortArray& A)
     {
         for (size_t j = 0; j < A.size()-1 - i; ++j)
         {
-            if (A[j] > A[j + 1])
+            if (A[j + 1] < A[j])
             {
                 A.swap(j, j+1);
             }
         }
+    }
+}
+
+void BubbleSort2(SortArray& A)
+{
+    size_t lo = 0, hi = A.size()-1, mov = lo;
+
+    while (lo < hi)
+    {
+    	mov = lo;
+        for (size_t i = lo; i < hi; ++i)
+        {
+            if (A[i+1] < A[i])
+            {
+                A.swap(i, i+1);
+                mov = i;
+            }
+        }
+
+        hi = mov;
     }
 }
 
@@ -682,7 +995,7 @@ void BubbleSort(SortArray& A)
 
 void CocktailShakerSort(SortArray& A)
 {
-    size_t lo = 0, hi = A.size()-1, mov = lo;
+    size_t lo = 0, hi = A.size()-1, mov = hi;
 
     while (lo < hi)
     {
@@ -699,7 +1012,7 @@ void CocktailShakerSort(SortArray& A)
 
         for (size_t i = lo; i < hi; ++i)
         {
-            if (A[i] > A[i+1])
+            if (A[i+1] < A[i])
             {
                 A.swap(i, i+1);
                 mov = i;
@@ -731,6 +1044,22 @@ void GnomeSort(SortArray& A)
     }
 }
 
+void StupidSort(SortArray& A)
+{
+    for (size_t i = 1; i < A.size(); )
+    {
+        if (A[i] >= A[i-1])
+        {
+            ++i;
+        }
+        else
+        {
+            A.swap(i, i-1);
+            i = 1;
+        }
+    }
+}
+
 // ****************************************************************************
 // *** Comb Sort
 
@@ -738,7 +1067,8 @@ void GnomeSort(SortArray& A)
 
 void CombSort(SortArray& A)
 {
-    const double shrink = 1.3;
+    const unsigned long long shrinknumr = 13;
+    const unsigned long long shrinkdnom = 10;
 
     bool swapped = false;
     size_t gap = A.size();
@@ -746,14 +1076,42 @@ void CombSort(SortArray& A)
     while ((gap > 1) || swapped)
     {
         if (gap > 1) {
-            gap = (size_t)((float)gap / shrink);
+            gap = (uint8_t)(gap * shrinkdnom / shrinknumr);
         }
 
         swapped = false;
 
         for (size_t i = 0; gap + i < A.size(); ++i)
         {
-            if (A[i] > A[i + gap])
+            if (A[i + gap] < A[i])
+            {
+                A.swap(i, i+gap);
+                swapped = true;
+            }
+        }
+    }
+}
+
+void CombSort11(SortArray& A)
+{
+    const unsigned long long shrinknumr = 13;
+    const unsigned long long shrinkdnom = 10;
+
+    bool swapped = false;
+    size_t gap = A.size();
+
+    while ((gap > 1) || swapped)
+    {
+        if (gap > 1) {
+            gap = (size_t)(gap * shrinkdnom / shrinknumr);
+        }
+        if(gap==9||gap==10)gap=11;
+
+        swapped = false;
+
+        for (size_t i = 0; gap + i < A.size(); ++i)
+        {
+            if (A[i + gap] < A[i])
             {
                 A.swap(i, i+gap);
                 swapped = true;
@@ -774,7 +1132,7 @@ void OddEvenSort(SortArray& A)
     while (!sorted)
     {
         sorted = true;
-
+//#pragma omp parallel for
         for (size_t i = 1; i < A.size()-1; i += 2)
         {
             if(A[i] > A[i+1])
@@ -784,6 +1142,7 @@ void OddEvenSort(SortArray& A)
             }
         }
 
+//#pragma omp parallel for
         for (size_t i = 0; i < A.size()-1; i += 2)
         {
             if(A[i] > A[i+1])
@@ -810,16 +1169,53 @@ void ShellSort(SortArray& A)
     {
         for (size_t h = incs[k], i = h; i < A.size(); i++)
         {
-            value_type v = A[i];
             size_t j = i;
 
-            while (j >= h && A[j-h] > v)
+            while (j >= h && A[j-h] > A[j])
             {
-                A.set(j, A[j-h]);
+                A.swap(j, j-h);
                 j -= h;
             }
+        }
+    }
+}
 
-            A.set(j, v);
+void ShellSort2(SortArray& A)
+{
+	size_t gap = A.size();
+
+    while(gap>1)
+    {
+    	gap = (gap>>1)|1;
+        for (size_t h = gap, i = h; i < A.size(); i++)
+        {
+            size_t j = i;
+
+            while (j >= h && A[j-h] > A[j])
+            {
+                A.swap(j, j-h);
+                j -= h;
+            }
+        }
+    }
+}
+
+void ShellSort3(SortArray& A)
+{
+	size_t gap = A.size();
+
+    while(gap>1)
+    {
+    	gap = (gap/9*3)+(gap%9/5+1);
+        for (size_t h = gap, i = h; i < A.size(); i++)
+        {
+            size_t j = i;
+
+            while (j >= h && A[j-h] > A[j])
+            {
+                A.swap(j, j-h);
+                j -= h;
+            }
         }
     }
 }
@@ -913,7 +1309,7 @@ void RadixSortMSD(SortArray& A, size_t lo, size_t hi, size_t depth)
     unsigned int pmax = floor( log(A.array_max()+1) / log(RADIX) );
     ASSERT(depth <= pmax);
 
-    size_t base = pow(RADIX, pmax - depth);
+    size_t base = /*pow(RADIX, pmax - depth)*/1<<((pmax-depth)*2);
 
     // count digits
     std::vector<size_t> count(RADIX, 0);
@@ -979,7 +1375,7 @@ void RadixSortLSD(SortArray& A)
 
     for (unsigned int p = 0; p < pmax; ++p)
     {
-        size_t base = pow(RADIX, p);
+        size_t base = /*pow(RADIX, p);*/1<<(p*2);
 
         // count digits and copy data
         std::vector<size_t> count(RADIX, 0);
@@ -1352,10 +1748,13 @@ static void oddEvenMerge(SortArray& A, unsigned int lo, unsigned int n, unsigned
     if (m < n)
     {
         // even subsequence
-        oddEvenMerge(A, lo, n, m, sort_depth, merge_depth+1);
         // odd subsequence
-        oddEvenMerge(A, lo + r, n, m, sort_depth, merge_depth+1);
+    //#pragma omp parallel for
+    for(int q=0; q<2; q++){
+        oddEvenMerge(A, lo + q*r, n, m, sort_depth, merge_depth+1);
+    }
 
+    //#pragma omp parallel for
         for (unsigned int i = lo + r; i + r < lo + n; i += m)
             compare(A, i, i + r, sort_depth, merge_depth);
     }
@@ -1371,8 +1770,10 @@ static void oddEvenMergeSort(SortArray& A, unsigned int lo, unsigned int n,
     if (n > 1)
     {
         unsigned int m = n / 2;
-        oddEvenMergeSort(A, lo, m, sort_depth+1);
-        oddEvenMergeSort(A, lo + m, m, sort_depth+1);
+    //#pragma omp parallel for
+    for(int q=0; q<2; q++){
+        oddEvenMergeSort(A, lo + q*m, m, sort_depth+1);
+    }
         oddEvenMerge(A, lo, n, 1, sort_depth, 0);
     }
 }
@@ -1395,6 +1796,81 @@ void sort(SortArray& A)
 void BatcherSortNetwork(SortArray& A)
 {
     BatcherSortNetworkNS::sort(A);
+}
+
+void ItBitonic(SortArray& array){
+        int i, j, k;
+        for(k = 2; k < array.size()*2; k = 2 * k) {
+		int m = ((array.size()+(k-1))/k)%2;
+            for(j = k >> 1; j > 0; j = j >> 1) {
+                for(i = 0; i < array.size(); i++) {
+                    int ij = i ^ j;
+                    if((ij) > i && ij < array.size()) {
+                        if((( !(i & k))^(!m)) && array[i] > array[ij])
+                            array.swap(i, ij);
+                        if(((!!(i & k))^(!m)) && array[i] < array[ij])
+                            array.swap(i, ij);
+                    }
+                }
+            }
+        }
+}
+
+void ItOddEvenMerge(SortArray& array){
+        for (int p = 1; p < array.size(); p += p)
+          for (int k = p; k > 0; k /= 2)
+            for (int j = k % p; j + k < array.size(); j += k + k)
+              for (int i = 0; i < k; i++)
+                if ((i + j)/(p + p) == (i + j + k)/(p + p)) {
+			if(i+j+k < array.size()){
+                   if(array[i+j] > array[i+j+k])
+			array.swap(i+j, i+j+k);
+			}
+                }
+}
+
+void ItPairwise(SortArray& a)
+{
+	int start = 0;
+	int end = a.size();
+        int a2 = 1;
+        int b = 0;
+        int c = 0;
+        int d = 0;
+        int e = 0;
+        while (a2 < end){
+            b = start+a2;
+            c = 0;
+            while (b < end){
+                if(a[b-a2]>a[b]) a.swap(b-a2, b);
+                c = (c + 1) % a2;
+                b++;
+                if (c == 0){
+                    b += a2;
+                }
+            }
+            a2 *= 2;
+        }
+        a2 /= 4;
+        e = 1;
+        while (a2 > 0){
+            d = e;
+            while (d > 0){
+                b = start+((d + 1) * a2);
+                c = 0;
+                while (b < end){
+                if(a[b - (d * a2)]>a[b]) a.swap(b - (d * a2), b);
+                    c = (c + 1) % a2;
+                    b++;
+                    if (c == 0){
+                        b += a2;
+                    }
+                }
+                d /= 2;
+            }
+            a2 /= 2;
+            e = (e * 2) + 1;
+        }
 }
 
 // ****************************************************************************

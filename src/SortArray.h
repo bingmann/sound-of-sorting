@@ -50,6 +50,7 @@ extern size_t       g_compare_count;
 /// globally count the number of array access
 extern size_t       g_access_count;
 
+bool m_switch2;
 // custom struct for array items, which allows detailed counting of comparisons.
 class ArrayItem
 {
@@ -164,7 +165,11 @@ protected:
     /// position of very last get/set accesses (two for swaps)
     Access      m_access1, m_access2;
 
-    /// array of get/set accesses since last paint event
+    Access      m_access3, m_access4;
+    Access      m_access5, m_access6;
+    bool m_switch1;
+
+    /// vector of get/set accesses since last paint event
     std::vector<Access> m_access_list;
 
     /// custom markers in the array, set by algorithm
@@ -248,6 +253,9 @@ public:
     // update inversion count by calculating delta linearly for a swap
     void UpdateInversions(size_t i, size_t j);
 
+    // update inversion count by calculating delta linearly for a write
+    void UpdateInversionsWrite(ArrayItem::value_type i, size_t j);
+
 public:
     /// return array size
     size_t size() const { return m_array.size(); }
@@ -267,8 +275,14 @@ public:
     const ArrayItem& operator[](size_t i)
     {
         ASSERT(i < m_array.size());
-
-        if (m_access1.index != i)
+	if(m_switch2){
+		m_access3=m_access5;m_access4=m_access6;
+		m_switch2 = 0;
+		m_switch1 = 0;
+	}
+                m_switch1 ? m_access6 = i : m_access5 = i ;
+                m_switch1 ^= 1;
+        if (m_access3.index != i&&m_access4.index != i)
         {
             {
                 wxMutexLocker lock(m_mutex);
@@ -335,7 +349,7 @@ public:
     void set(size_t i, const ArrayItem& v)
     {
         ASSERT(i < m_array.size());
-
+	ArrayItem::value_type q = m_array[i].get_direct();
         {
             wxMutexLocker lock(m_mutex);
             ASSERT(lock.IsOk());
@@ -346,7 +360,7 @@ public:
             m_array[i] = v;
         }
 
-        RecalcInversions();
+        UpdateInversionsWrite(q, i); // update inversion count
         OnAccess();
     }
 
@@ -357,22 +371,29 @@ public:
         ASSERT(i < m_array.size());
         ASSERT(j < m_array.size());
 
-        {
-            wxMutexLocker lock(m_mutex);
+	if(m_switch2){
+		m_access3=m_access5;m_access4=m_access6;
+		m_switch2 = 0;
+	}
+                m_access6 = j ; m_access5 = i ;
+                m_switch1 = 0;
+        if (m_access3.index != i&&m_access4.index != i){
+            {wxMutexLocker lock(m_mutex);
             ASSERT(lock.IsOk());
-
             m_access1 = i;
-            m_access2 = j;
-
-            m_access_list.push_back(i);
-            m_access_list.push_back(j);
+            m_access_list.push_back(i);}
+        OnAccess();
         }
-
         UpdateInversions(i, j); // update inversion count
-
-        OnAccess();
         std::swap(m_array[i], m_array[j]);
+        if (m_access3.index != j&&m_access4.index != j){
+            {wxMutexLocker lock(m_mutex);
+            ASSERT(lock.IsOk());
+            m_access2 = j;
+            m_access_list.push_back(j);}
         OnAccess();
+        }
+		m_switch2 = 1;
         m_access2 = -1;
     }
 
@@ -417,7 +438,8 @@ public:
     /// Unmark all array indexes.
     void unmark_all()
     {
-        m_access1 = m_access2 = -1;
+        m_access1 = m_access2 = m_access3 = m_access4 = m_access5 = m_access6 = -1;
+        m_switch1 = m_switch2 = 0;
         std::fill(m_mark.begin(), m_mark.end(), 0);
 
         wxMutexLocker lock(m_mutex);

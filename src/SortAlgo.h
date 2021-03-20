@@ -58,10 +58,12 @@ void BinaryInsertionSort(class SortArray& a);
 
 void MergeSort(class SortArray& a);
 void MergeSortIterative(class SortArray& a);
+void MergeSort2(class SortArray& a);
+void AdaptiveMergeSort(class SortArray& a);
 
 wxArrayString QuickSortPivotText();
 
-enum QuickSortPivotType { PIVOT_FIRST, PIVOT_LAST, PIVOT_MID, PIVOT_RANDOM, PIVOT_MEDIAN3 };
+enum QuickSortPivotType { PIVOT_FIRST, PIVOT_LAST, PIVOT_MID, PIVOT_RANDOM, PIVOT_MEDIAN3, PIVOT_NINTHER };
 extern QuickSortPivotType g_quicksort_pivot;
 
 void QuickSortLR(class SortArray& a);
@@ -71,18 +73,25 @@ void QuickSortTernaryLL(class SortArray& a);
 void QuickSortDualPivot(class SortArray& a);
 
 void BubbleSort(class SortArray& a);
+void BubbleSort2(class SortArray& a);
 void CocktailShakerSort(class SortArray& a);
 void CombSort(class SortArray& a);
+void CombSort11(class SortArray& a);
 void GnomeSort(class SortArray& a);
 void OddEvenSort(class SortArray& a);
 
 void ShellSort(SortArray& a);
+void ShellSort2(SortArray& a);
+void ShellSort3(SortArray& a);
 void HeapSort(class SortArray& a);
 void SmoothSort(class SortArray& a);
 
 void BitonicSort(SortArray& a);
 void BitonicSortNetwork(SortArray& a);
 void BatcherSortNetwork(SortArray& a);
+void ItBitonic(SortArray& a);
+void ItOddEvenMerge(SortArray& a);
+void ItPairwise(SortArray& a);
 
 void RadixSortLSD(class SortArray& a);
 void RadixSortMSD(class SortArray& a);
@@ -98,6 +107,7 @@ void BogoSort(class SortArray& a);
 void BozoSort(class SortArray& a);
 void StoogeSort(class SortArray& a);
 void SlowSort(class SortArray& a);
+void StupidSort(class SortArray& a);
 
 void CycleSort(class SortArray& a);
 

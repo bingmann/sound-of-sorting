@@ -19,6 +19,50 @@
  * You should have received a copy of the GNU General Public License along with
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************************/
+#define MSW_PERFORMANCECOUNTER 1
+
+#include <stdint.h>
+
+static inline uint32_t rotl(const uint32_t x, uint8_t k) {
+	return (x << k) | (x >> (32 - k));
+}
+
+static uint32_t s[4];
+
+uint32_t next(void) {
+	const uint32_t result = rotl(s[0] + s[3], 7) + s[0];
+	const uint32_t t = s[1] << 9;
+	s[2] ^= s[0];
+	s[3] ^= s[1];
+	s[1] ^= s[2];
+	s[0] ^= s[3];
+	s[2] ^= t;
+	s[3] = rotl(s[3], 11);
+	return result;
+}
+
+void seed(uint64_t x){
+	uint64_t z = (x += 0x9e3779b97f4a7c15);
+	z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
+	z = (z ^ (z >> 27)) * 0x94d049bb133111eb;
+	s[0] = (z ^ (z >> 31)) >> 32;
+	s[1] = (z ^ (z >> 31)) & 4294967295;
+	z = (x += 0x9e3779b97f4a7c15);
+	z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
+	z = (z ^ (z >> 27)) * 0x94d049bb133111eb;
+	s[2] = (z ^ (z >> 31)) >> 32;
+	s[3] = (z ^ (z >> 31)) & 4294967295;
+}
+
+#include "SortArray.cpp"
+#include "SortSound.cpp"
+#include "SortAlgo.cpp"
+#include "algorithms/timsort.cpp"
+#include "algorithms/wikisort.cpp"
+#include "wxg/WMain_wxg.cpp"
+#include "wxg/WAbout_wxg.cpp"
+#include "WSortView.cpp"
+#include "wxClickText.cpp"
 
 #include "WMain.h"
 #include "SortAlgo.h"
@@ -26,9 +70,12 @@
 
 #include "wxg/WAbout_wxg.h"
 
+//#include <../src/common/threadinfo.cpp>
+
 WMain::WMain(wxWindow* parent)
     : WMain_wxg(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE)
 {
+	seed(time(NULL));
     m_thread = NULL;
     g_sound_on = false;
 
@@ -37,12 +84,13 @@ WMain::WMain(wxWindow* parent)
     infoTextctrl->Hide();
 
     // program icon
-    {    
+    {
         #include "sos.xpm"
 	SetIcon( wxIcon(sos) );
     }
 
     // program version
+    #define PACKAGE_VERSION "test"
     SetTitle(_("The Sound of Sorting " PACKAGE_VERSION " - http://panthema.net/2013/sound-of-sorting"));
 
     // resize right split window
@@ -73,8 +121,8 @@ WMain::WMain(wxWindow* parent)
     SetDelay(1000);
 
     // set default sound sustain
-    soundSustainSlider->SetValue(700);
-    SetSoundSustain(700);
+    soundSustainSlider->SetValue(602);
+    SetSoundSustain(602);
 
     // create audio output
     SDL_AudioSpec sdlaudiospec;
@@ -83,7 +131,7 @@ WMain::WMain(wxWindow* parent)
     sdlaudiospec.freq = 44100;
     sdlaudiospec.format = AUDIO_S16SYS;
     sdlaudiospec.channels = 1;    	/* 1 = mono, 2 = stereo */
-    sdlaudiospec.samples = 4096;  	/* Good low-latency value for callback */
+    sdlaudiospec.samples = 512;  	/* Good low-latency value for callback */
     sdlaudiospec.callback = SoundCallback;
     sdlaudiospec.userdata = sortview;
 
@@ -276,7 +324,7 @@ void WMain::OnRandomButton(wxCommandEvent&)
 {
     AbortAlgorithm();
 
-    algoList->SetSelection( rand() % algoList->GetCount() );
+    algoList->SetSelection( next() % algoList->GetCount() );
     sortview->m_array.FillData( inputTypeChoice->GetSelection(), m_array_size );
 
     RunAlgorithm();
@@ -318,18 +366,23 @@ void WMain::SetDelay(size_t pos)
     // different slider scale for Linux/GTK: (faster)
 #if __WXGTK__ || MSW_PERFORMANCECOUNTER
     g_delay = pow(base, pos / 2000.0 * log(2 * 1000.0 * 10.0) / log(base)) / 10.0;
+    //g_delay = pow((pow(2000., 1./7.15)) * (pos/2000.0), 7.15);
+    if (pos < 500) g_delay = (pos*.000639559)*((pos-500)*(pos-500)/250000.) + g_delay*(1.-((pos-500)*(pos-500)/250000.));
+    if (pos <= 100) g_delay = pos/1000.;
 #else
     // other systems probably have sucking real-time performance anyway
     g_delay = pow(base, pos / 2000.0 * log(2 * 1000.0) / log(base));
-#endif
     if (pos == 0) g_delay = 0;
+#endif
 
     if (g_delay > 10)
         labelDelayValue->SetLabel(wxString::Format(_("%.0f ms"), g_delay));
     else if (g_delay > 1)
         labelDelayValue->SetLabel(wxString::Format(_("%.1f ms"), g_delay));
-    else
+    else if (g_delay > .1)
         labelDelayValue->SetLabel(wxString::Format(_("%.2f ms"), g_delay));
+    else
+        labelDelayValue->SetLabel(wxString::Format(_("%.3f ms"), g_delay));
 }
 
 void WMain::OnSoundSustainSliderChange(wxScrollEvent &event)
@@ -347,7 +400,7 @@ void WMain::SetSoundSustain(size_t pos)
     // scale slider with this base to 50
     const double base = 4;
 
-    g_sound_sustain = pow(base, pos / 2000.0 * log(50) / log(base));
+    g_sound_sustain = pow(base, pos / 2000.0 * log(100) / log(base));
 
     labelSoundSustainValue->SetLabel(wxString::Format(_("%.1f"), g_sound_sustain));
 
@@ -465,7 +518,6 @@ public:
     virtual int OnExit()
     {
         SDL_Quit();
-
         // return the standard exit code
         return wxApp::OnExit();
     }
