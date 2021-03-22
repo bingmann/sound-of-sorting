@@ -24,8 +24,6 @@
 #include "SortArray.h"
 #include "SortAlgo.h"
 
-#include <algorithm>
-
 extern void SoundAccess(size_t i);
 
 // *****************************************************************************

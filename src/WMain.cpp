@@ -19,7 +19,11 @@
  * You should have received a copy of the GNU General Public License along with
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************************/
+#ifdef _WIN32
 #define MSW_PERFORMANCECOUNTER 1
+#else
+#define __WXGTK__
+#endif
 
 #include <stdint.h>
 

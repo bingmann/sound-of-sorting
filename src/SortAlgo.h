@@ -102,6 +102,9 @@ void StlHeapSort(class SortArray& a);
 
 void TimSort(class SortArray& a);
 void WikiSort(class SortArray& a);
+void GrailSort(class SortArray& a);
+void LazyStableSort(class SortArray& a);
+void RotateMergeSort(class SortArray& a);
 
 void BogoSort(class SortArray& a);
 void BozoSort(class SortArray& a);
