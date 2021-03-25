@@ -75,8 +75,10 @@ void QuickSortDualPivot(class SortArray& a);
 void BubbleSort(class SortArray& a);
 void BubbleSort2(class SortArray& a);
 void CocktailShakerSort(class SortArray& a);
+void CashewSort(class SortArray& a);
 void CombSort(class SortArray& a);
 void CombSort11(class SortArray& a);
+void BrickSort(class SortArray& a);
 void GnomeSort(class SortArray& a);
 void OddEvenSort(class SortArray& a);
 
@@ -113,6 +115,15 @@ void SlowSort(class SortArray& a);
 void StupidSort(class SortArray& a);
 
 void CycleSort(class SortArray& a);
+
+void ParBitonic(SortArray& a);
+void ParOddEvenMerge(SortArray& a);
+void ParPairwise(SortArray& a);
+void ParOddEvenSort(class SortArray& a);
+void ParBrickSort(class SortArray& a);
+
+void ZvaraySort(class SortArray& a);
+void BubblegumHillSort(class SortArray& a);
 
 // ****************************************************************************
 // *** Iterator Adapter

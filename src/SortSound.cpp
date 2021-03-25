@@ -103,10 +103,10 @@ public:
     /// square wave
     static double wave_square(double x)
     {
-    	return 2*(((int)floor(x*2))&1)-1;
+    	return 2.*(fmod(x,1.)<0.5)-1.;
     }
 
-    /// square wave
+    /// saw wave
     static double wave_saw(double x)
     {
     	return fmod(x,1.)*2-1;
@@ -117,7 +117,7 @@ public:
     {
         //return wave_sin(x);
         //return wave_sin3(x);
-        //return wave_triangle(x);
+	//return wave_triangle(x);
         return wave_square(x);
         //return wave_saw(x);
     }
@@ -313,7 +313,7 @@ void SoundCallback(void* udata, Uint8 *stream, int len)
             double relindex = s_access_list[i] / (double)sv.m_array.array_max();
             double freq = arrayindex_to_frequency(relindex);
 
-            add_oscillator( freq, p, p + i * pscale,
+            add_oscillator( freq, p, p + (i+next()/4294967296.) * pscale,
                             g_delay / 1000.0 * g_sound_sustain * s_samplerate );
         }
 
@@ -323,9 +323,9 @@ void SoundCallback(void* udata, Uint8 *stream, int len)
     // calculate waveform
     std::vector<double> wave(size, 0.0);
     size_t wavecount = 0;
-
+#pragma omp parallel for
     for (std::vector<Oscillator>::const_iterator it = s_osclist.begin();
-         it != s_osclist.end(); ++it)
+         it < s_osclist.end(); ++it)
     {
         if (!it->is_done(p))
         {

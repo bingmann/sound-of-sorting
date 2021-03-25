@@ -81,11 +81,15 @@ const struct AlgoEntry g_algolist[] =
       wxEmptyString },
     { _("Cocktail Shaker Sort"), &CocktailShakerSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
+    { _("Cashew Sort"), &CashewSort, UINT_MAX, UINT_MAX,
+      wxEmptyString },
     { _("Gnome Sort"), &GnomeSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
     { _("Comb Sort"), &CombSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
     { _("Comb Sort 11"), &CombSort11, UINT_MAX, UINT_MAX,
+      wxEmptyString },
+    { _("Brick Sort"), &BrickSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
     { _("Shell Sort"), &ShellSort, UINT_MAX, UINT_MAX,
       _("Uses 1391376, 463792, 198768, 86961, 33936, 13776, 4592, 1968, 861, 336, 112, 48, 21, 7, 3, 1") },
@@ -139,12 +143,26 @@ const struct AlgoEntry g_algolist[] =
       wxEmptyString },
     { _("Bozo Sort"), &BozoSort, 10, UINT_MAX,
       wxEmptyString },
+    { _("Zvaray Sort"), &ZvaraySort, 10, UINT_MAX,
+      wxEmptyString },
+    { _("Bubblegum Hill Sort"), &BubblegumHillSort, 10, UINT_MAX,
+      wxEmptyString },
     { _("Stupid Sort"), &StupidSort, 256, UINT_MAX,
       wxEmptyString },
     { _("Stooge Sort"), &StoogeSort, 256, UINT_MAX,
       wxEmptyString },
     { _("Slow Sort"), &SlowSort, 128, UINT_MAX,
-      wxEmptyString }
+      wxEmptyString },
+    { _("Parallel Bitonic Sort"), &ParBitonic, UINT_MAX, UINT_MAX,
+      wxEmptyString },
+    { _("Parallel Odd Even Merge Sort"), &ParOddEvenMerge, UINT_MAX, UINT_MAX,
+      wxEmptyString },
+    { _("Parallel Pairwise Sorting Network"), &ParPairwise, UINT_MAX, UINT_MAX,
+      wxEmptyString },
+    { _("Parallel Odd-Even Sort"), &ParOddEvenSort, UINT_MAX, UINT_MAX,
+      wxEmptyString },
+    { _("Parallel Brick Sort"), &ParBrickSort, UINT_MAX, UINT_MAX,
+      wxEmptyString },
 };
 
 const size_t g_algolist_size = sizeof(g_algolist) / sizeof(g_algolist[0]);
@@ -1029,6 +1047,58 @@ void CocktailShakerSort(SortArray& A)
     }
 }
 
+void CashewSort(SortArray& A)
+{
+    size_t lo = 0, hi = A.size()-1, mov = lo;
+
+    while (lo < hi)
+    {
+        for (size_t i = lo; i < hi; ++i)
+        {
+            if (A[i+1] < A[i])
+            {
+                A.swap(i, i+1);
+                mov = i;
+            }
+        }
+
+        hi = mov;
+
+        for (size_t i = lo; i < hi; ++i)
+        {
+            if (A[i+1] < A[i])
+            {
+                A.swap(i, i+1);
+                mov = i;
+            }
+        }
+
+        hi = mov;
+
+        for (size_t i = hi; i > lo; --i)
+        {
+            if (A[i-1] > A[i])
+            {
+                A.swap(i-1, i);
+                mov = i;
+            }
+        }
+
+        lo = mov;
+
+        for (size_t i = hi; i > lo; --i)
+        {
+            if (A[i-1] > A[i])
+            {
+                A.swap(i-1, i);
+                mov = i;
+            }
+        }
+
+        lo = mov;
+    }
+}
+
 // ****************************************************************************
 // *** Gnome Sort
 
@@ -1082,7 +1152,7 @@ void CombSort(SortArray& A)
     while ((gap > 1) || swapped)
     {
         if (gap > 1) {
-            gap = (uint8_t)(gap * shrinkdnom / shrinknumr);
+            gap = (size_t)(gap * shrinkdnom / shrinknumr);
         }
 
         swapped = false;
@@ -1126,6 +1196,78 @@ void CombSort11(SortArray& A)
     }
 }
 
+void BrickSort(SortArray& A)
+{
+    const unsigned long long shrinknumr = 6;
+    const unsigned long long shrinkdnom = 5;
+
+    bool swapped = false;
+    size_t gap = A.size();
+
+    while ((gap > 1) || swapped)
+    {
+        if (gap > 1) {
+            gap = (size_t)(gap * shrinkdnom / shrinknumr);
+        }
+
+        swapped = false;
+
+        for (size_t i = 0; gap + i < A.size(); ++i)
+        {
+            if (!((i/gap)&1) && A[i + gap] < A[i])
+            {
+                A.swap(i, i+gap);
+                swapped = true;
+            }
+        }
+        for (size_t i = 0; gap + i < A.size(); ++i)
+        {
+            if ( ((i/gap)&1) && A[i + gap] < A[i])
+            {
+                A.swap(i, i+gap);
+                swapped = true;
+            }
+        }
+    }
+}
+
+void ParBrickSort(SortArray& A)
+{
+    const unsigned long long shrinknumr = 6;
+    const unsigned long long shrinkdnom = 5;
+
+    bool swapped = false;
+    size_t gap = A.size();
+
+    while ((gap > 1) || swapped)
+    {
+        if (gap > 1) {
+            gap = (size_t)(gap * shrinkdnom / shrinknumr);
+        }
+
+        swapped = false;
+
+        #pragma omp parallel for
+        for (size_t i = 0; i < A.size()-gap; ++i)
+        {
+            if (!((i/gap)&1) && A[i + gap] < A[i])
+            {
+                A.swap(i, i+gap);
+                swapped = true;
+            }
+        }
+        #pragma omp parallel for
+        for (size_t i = 0; i < A.size()-gap; ++i)
+        {
+            if ( ((i/gap)&1) && A[i + gap] < A[i])
+            {
+                A.swap(i, i+gap);
+                swapped = true;
+            }
+        }
+    }
+}
+
 // ****************************************************************************
 // *** Odd-Even Sort
 
@@ -1160,6 +1302,35 @@ void OddEvenSort(SortArray& A)
     }
 }
 
+void ParOddEvenSort(SortArray& A)
+{
+    bool sorted = false;
+
+    while (!sorted)
+    {
+        sorted = true;
+#pragma omp parallel for
+        for (size_t i = 1; i < A.size()-1; i += 2)
+        {
+            if(A[i] > A[i+1])
+            {
+                A.swap(i, i+1);
+                sorted = false;
+            }
+        }
+
+#pragma omp parallel for
+        for (size_t i = 0; i < A.size()-1; i += 2)
+        {
+            if(A[i] > A[i+1])
+            {
+                A.swap(i, i+1);
+                sorted = false;
+            }
+        }
+    }
+}
+
 // ****************************************************************************
 // *** Shell Sort
 
@@ -1167,6 +1338,10 @@ void OddEvenSort(SortArray& A)
 
 void ShellSort(SortArray& A)
 {
+   /* for (size_t j = 0; j < A.size(); ++j)
+       {A.mark(j, log((j+1)) / log(2) + 4);
+       	A.mark(j, 0);
+       }*/
     size_t incs[16] = { 1391376, 463792, 198768, 86961, 33936,
                         13776, 4592, 1968, 861, 336,
                         112, 48, 21, 7, 3, 1 };
@@ -1263,6 +1438,7 @@ void HeapSort(SortArray& A)
         if (i > 0) {
             // build heap, sift A[i] down the heap
             i--;
+            A.mark(i, log(prevPowerOfTwo(i+1)) / log(2) + 4);
         }
         else {
             // pop largest element from heap: swap front to back, and sift
@@ -1293,9 +1469,6 @@ void HeapSort(SortArray& A)
                 break;
             }
         }
-
-        // mark heap levels with different colors
-        A.mark(i, log(prevPowerOfTwo(i+1)) / log(2) + 4);
     }
 
 }
@@ -1516,15 +1689,76 @@ void BogoSort(SortArray& A)
 
 void BozoSort(SortArray& A)
 {
-    srand(time(NULL));
-
     while (1)
     {
         // check if array is sorted
         if (BogoCheckSorted(A)) break;
 
         // swap two random items
-        A.swap(rand() % A.size(), rand() % A.size());
+        A.swap(next() % A.size(), next() % A.size());
+    }
+}
+
+void ZvaraySort(SortArray& A){
+    while (1)
+    {
+        // check if array is sorted
+        if (BogoCheckSorted(A)) break;
+
+        // swap six random items
+        size_t r[6];
+        for(int i=0; i<6; i++)r[i]=next()%A.size();
+        for(int i=6; i>1; i--){
+		A.swap(r[i-1], r[next()%i]);
+        }
+    }
+}
+
+void BubblegumHillSort(SortArray& A){
+    // keep a permutation of [0,size)
+    std::vector<size_t> perm(A.size());
+
+    for (size_t i = 0; i < A.size(); ++i)
+        perm[i] = i;
+    while (1)
+    {
+        // check if array is sorted
+        if (BogoCheckSorted(A)) break;
+
+        // swap eleven random items
+        size_t r[11];
+        for(int i=0; i<11; i++)r[i]=next()%A.size();
+        for(int i=11; i>1; i--){
+		A.swap(r[i-1], r[next()%(i-1)]);
+
+	// permute array in-place
+        std::vector<char> pmark(A.size(), 0);
+
+        for (size_t i = 0; i < A.size(); ++i)
+        {
+            if (pmark[i]) continue;
+
+            // walk a cycle
+            size_t j = i;
+
+            //std::cout << "cycle start " << j << " -> " << perm[j] << "\n";
+
+            while ( perm[j] != i )
+            {
+                ASSERT(!pmark[j]);
+                A.swap(j, perm[j]);
+                pmark[j] = 1;
+
+                j = perm[j];
+                //std::cout << "cycle step " << j << " -> " << perm[j] << "\n";
+            }
+            //std::cout << "cycle end\n";
+
+            ASSERT(!pmark[j]);
+            pmark[j] = 1;
+        }
+
+        }
     }
 }
 
@@ -1822,6 +2056,25 @@ void ItBitonic(SortArray& array){
         }
 }
 
+void ParBitonic(SortArray& array){
+        int i, j, k;
+        for(k = 2; k < array.size()*2; k = 2 * k) {
+		int m = ((array.size()+(k-1))/k)%2;
+            for(j = k >> 1; j > 0; j = j >> 1) {
+#pragma omp parallel for
+                for(i = 0; i < array.size(); i++) {
+                    int ij = i ^ j;
+                    if((ij) > i && ij < array.size()) {
+                        if((( !(i & k))^(!m)) && array[i] > array[ij])
+                            array.swap(i, ij);
+                        if(((!!(i & k))^(!m)) && array[i] < array[ij])
+                            array.swap(i, ij);
+                    }
+                }
+            }
+        }
+}
+
 void ItOddEvenMerge(SortArray& array){
         for (int p = 1; p < array.size(); p += p)
           for (int k = p; k > 0; k /= 2)
@@ -1831,6 +2084,20 @@ void ItOddEvenMerge(SortArray& array){
 			if(i+j+k < array.size()){
                    if(array[i+j] > array[i+j+k])
 			array.swap(i+j, i+j+k);
+			}
+                }
+}
+
+void ParOddEvenMerge(SortArray& array){
+        for (int p = 1; p < array.size(); p += p)
+          for (int k = p; k > 0; k /= 2)
+#pragma omp parallel for
+            for (int j = k % p; j < array.size(); j ++ )
+              if (!((j-k%p)/k%2))
+                if ((j)/(p + p) == (j + k)/(p + p)) {
+			if(j+k < array.size()){
+                   if(array[j] > array[j+k])
+			array.swap(j, j+k);
 			}
                 }
 }
@@ -1871,6 +2138,43 @@ void ItPairwise(SortArray& a)
                     if (c == 0){
                         b += a2;
                     }
+                }
+                d /= 2;
+            }
+            a2 /= 2;
+            e = (e * 2) + 1;
+        }
+}
+
+void ParPairwise(SortArray& a)
+{
+	int start = 0;
+	int end = a.size();
+        int a2 = 1;
+        int b = 0;
+        int c = 0;
+        int d = 0;
+        int e = 0;
+        while (a2 < end){
+            c = 0;
+#pragma omp parallel for
+            for (b=0; b < end-start-a2; b++){
+		if(!(b/a2%2))
+                if(a[b+start]>a[b+start+a2]) a.swap(b+start, b+start+a2);
+            }
+            a2 *= 2;
+        }
+        a2 /= 4;
+        e = 1;
+        while (a2 > 0){
+            d = e;
+            while (d > 0){
+                c = 0;
+#pragma omp parallel for
+                for (b=start+((d + 1) * a2); b < end; b++){
+			if(!((b-start+((d + 1) * a2))/a2%2))
+			if(a[b - (d * a2)]>a[b]) a.swap(b - (d * a2), b);
+
                 }
                 d /= 2;
             }

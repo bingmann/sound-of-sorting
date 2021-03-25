@@ -95,7 +95,7 @@ WMain::WMain(wxWindow* parent)
 
     // program version
     #define PACKAGE_VERSION "test"
-    SetTitle(_("The Sound of Sorting " PACKAGE_VERSION " - http://panthema.net/2013/sound-of-sorting"));
+    SetTitle(_("The Sound of Sorting " PACKAGE_VERSION " - https://github.com/yg8ijvjvjv/sound-of-sorting"));
 
     // resize right split window
     splitter_0->SetSashPosition(GetSize().x - 280);
@@ -132,7 +132,7 @@ WMain::WMain(wxWindow* parent)
     SDL_AudioSpec sdlaudiospec;
 
     // Set the audio format
-    sdlaudiospec.freq = 44100;
+    sdlaudiospec.freq = s_samplerate;
     sdlaudiospec.format = AUDIO_S16SYS;
     sdlaudiospec.channels = 1;    	/* 1 = mono, 2 = stereo */
     sdlaudiospec.samples = 512;  	/* Good low-latency value for callback */
