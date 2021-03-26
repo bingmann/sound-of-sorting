@@ -147,6 +147,8 @@ const struct AlgoEntry g_algolist[] =
       wxEmptyString },
     { _("Bubblegum Hill Sort"), &BubblegumHillSort, 10, UINT_MAX,
       wxEmptyString },
+    { _("Bubblegum Hill Sort II"), &BubblegumHillSortII, 10, UINT_MAX,
+      wxEmptyString },
     { _("Stupid Sort"), &StupidSort, 256, UINT_MAX,
       wxEmptyString },
     { _("Stooge Sort"), &StoogeSort, 256, UINT_MAX,
@@ -1758,6 +1760,26 @@ void BubblegumHillSort(SortArray& A){
             pmark[j] = 1;
         }
 
+        }
+    }
+}
+
+void BubblegumHillSortII(SortArray& A){
+        bool swapped = 1;
+    while (1)
+    {
+        // check if array is sorted
+        if (swapped && BogoCheckSorted(A)) break;
+	swapped = 0;
+        // swap eleven random items
+        size_t r[11];
+        for(int i=0; i<11; i++)r[i]=next()%A.size();
+        for(int i=11; i>1; i--){
+		int q = next()%(i-1);
+		if(r[q]>r[i-1] ? A[r[q]]<A[r[i-1]] : A[r[q]]>A[r[i-1]]){
+			A.swap(r[i-1], r[q]);
+			swapped = 1;
+		}
         }
     }
 }
