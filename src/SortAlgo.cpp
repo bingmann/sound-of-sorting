@@ -51,8 +51,10 @@ const struct AlgoEntry g_algolist[] =
       wxEmptyString },
     { _("Binary Insertion Sort"), &BinaryInsertionSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
+    { _("Adaptive Binary Insertion Sort"), &AdBinaryInsertionSort, UINT_MAX, UINT_MAX,
+      wxEmptyString },
     { _("Merge Sort"), &MergeSort, UINT_MAX, UINT_MAX,
-      _("Merge sort which merges two sorted sequences into a shadow array,"
+      _("Merge sort which merges two sorted sequences into a shadow array, "
         "and then copies it back to the shown array.") },
     { _("Merge Sort (iterative)"), &MergeSortIterative, UINT_MAX, UINT_MAX,
       _("Merge sort variant which iteratively merges "
@@ -61,6 +63,8 @@ const struct AlgoEntry g_algolist[] =
       _("Merge sort which uses binary insertion sort up to 256 inversions.") },
     { _("Adaptive Merge Sort"), &AdaptiveMergeSort, UINT_MAX, UINT_MAX,
       _("Uses adaptive binary insertion sort in it with an adaptive limit for insertion runs") },
+    { _("Linked Merge Sort"), &LinkedMergeSort, UINT_MAX, UINT_MAX,
+      _("Merge sort which relies on links to determine the locations of the items.") },
     { _("Quick Sort (LR ptrs)"), &QuickSortLR, UINT_MAX, UINT_MAX,
       _("Quick sort variant with left and right pointers.") },
     { _("Quick Sort (LL ptrs)"), &QuickSortLL, UINT_MAX, UINT_MAX,
@@ -127,7 +131,13 @@ const struct AlgoEntry g_algolist[] =
       wxEmptyString },
     { _("std::stable_sort (gcc)"), &StlStableSort, UINT_MAX, inversion_count_instrumented,
       wxEmptyString },
+    { _("std::stable_sort (gcc) in-place"), &StlInPlaceStableSort, UINT_MAX, inversion_count_instrumented,
+      wxEmptyString },
     { _("std::sort_heap (gcc)"), &StlHeapSort, UINT_MAX, inversion_count_instrumented,
+      wxEmptyString },
+    { _("std::__insertion_sort (gcc)"), &StlInsertion, UINT_MAX, inversion_count_instrumented,
+      wxEmptyString },
+    { _("std::rotate (insertion) (gcc)"), &StlRotateInsert, UINT_MAX, inversion_count_instrumented,
       wxEmptyString },
     { _("Tim Sort"), &TimSort, UINT_MAX, inversion_count_instrumented,
       wxEmptyString },
@@ -147,7 +157,7 @@ const struct AlgoEntry g_algolist[] =
       wxEmptyString },
     { _("Bubblegum Hill Sort"), &BubblegumHillSort, 10, UINT_MAX,
       wxEmptyString },
-    { _("Bubblegum Hill Sort II"), &BubblegumHillSortII, 10, UINT_MAX,
+    { _("Bubblegum Hill Sort II"), &BubblegumHillSortII, 256, UINT_MAX,
       wxEmptyString },
     { _("Stupid Sort"), &StupidSort, 256, UINT_MAX,
       wxEmptyString },
@@ -272,6 +282,45 @@ void BinaryInsertionSort(SortArray& A)
     }
 }
 
+void AdBinaryInsertionSort(SortArray& a)
+{
+	int length = a.size();
+        int count = 0;
+        int start = 0;
+        int start2 = start;
+        int end = length;
+        int flag = 0;
+        count = 0;
+        flag = 0;
+        for (int i = start + 1; i < end; i++) {
+            int v = (2*count/(i-start2))+1;
+            int lo = std::max(i-v, start2), hi = i;
+            while((lo>=start2)&&((a[i]<a[lo]))){
+		lo-=v; hi-=v;
+            }
+            lo++;
+            if(lo<start2)lo=start2;
+            while (lo < hi) {
+                int mid = lo + ((hi - lo) / 2); // avoid int overflow!
+                if ((a[mid] > a[i])) { // do NOT move equal elements to right of inserted element; this maintains stability!
+                    hi = mid;
+                }
+                else {
+                    lo = mid + 1;
+                }
+            }
+// item has to go into position lo
+            count += (i - lo);
+            int j = i - 1;
+
+            while (j >= lo)
+            {
+			a.swap(j+1, j);
+                j--;
+            }
+        }
+}
+
 // ****************************************************************************
 // *** Merge Sort (out-of-place with sentinels)
 
@@ -294,7 +343,7 @@ void Merge(SortArray& A, size_t lo, size_t mid, size_t hi)
         // copy out for fewer time steps
         value_type ai = A[i], aj = A[j];
 
-        out[o++] = (ai < aj ? (++i, ai) : (++j, aj));
+        out[o++] = (ai <= aj ? (++i, ai) : (++j, aj));
     }
 
     // copy rest
@@ -329,6 +378,83 @@ void MergeSort(SortArray& A, size_t lo, size_t hi)
 void MergeSort(SortArray& A)
 {
     return MergeSort(A, 0, A.size());
+}
+
+void LinkedMerge(SortArray& A, size_t lo, size_t mid, size_t hi, std::vector<size_t>& buffer)
+{
+    // mark merge boundaries
+    A.mark(lo);
+    A.mark(mid,3);
+    A.mark(hi-1);
+
+    // allocate output
+    //std::vector<value_type> out(hi-lo);
+    for(int i=0; i<mid-lo; i++){
+	buffer[i]=i; // what merge location each array item is
+	buffer[i+(mid-lo)]=i; // where in the array each merge item is
+    }
+
+    // merge
+    size_t i = lo, j = mid, o = 0; // first and second halves
+    while (i < mid && j < hi)
+    {
+        // copy out for fewer time steps
+        value_type ai = A[buffer[i-lo+(mid-lo)]+lo], aj = A[j];
+	if(ai<=aj){
+		A.swap(o+lo, buffer[i-lo+(mid-lo)]+lo);
+		buffer[buffer[i-lo+(mid-lo)]%(mid-lo)]=buffer[(o)%(mid-lo)];
+		buffer[buffer[(o)%(mid-lo)]+(mid-lo)]=buffer[i-lo+(mid-lo)];
+		++i;
+	}
+	else{
+		A.swap(o+lo, j);
+		buffer[(j-lo)%(mid-lo)]=buffer[(o)%(mid-lo)];
+		buffer[buffer[(o)%(mid-lo)]+(mid-lo)]=j-lo;
+		++j;
+
+	}
+	o++;
+    }
+
+    // copy rest
+    while (i < mid){
+		A.swap(o+lo, buffer[i-lo+(mid-lo)]+lo);
+		buffer[buffer[i-lo+(mid-lo)]%(mid-lo)]=buffer[(o)%(mid-lo)];
+		buffer[buffer[(o)%(mid-lo)]+(mid-lo)]=buffer[i-lo+(mid-lo)];
+		++i;
+		++o;
+    }
+    //while (j < hi) out[o++] = A[j++];
+
+    //ASSERT(o == hi-lo);
+
+    A.unmark(mid);
+
+    // copy back
+    /*for (i = 0; i < hi-lo; ++i)
+        A.set(lo + i, out[i]);*/
+
+    A.unmark(lo);
+    A.unmark(hi-1);
+}
+
+void LinkedMergeSort(SortArray& A, size_t lo, size_t hi, std::vector<size_t>& buffer)
+{
+    if (lo + 1 < hi)
+    {
+        size_t mid = (lo + hi) / 2;
+
+        LinkedMergeSort(A, lo, mid, buffer);
+        LinkedMergeSort(A, mid, hi, buffer);
+
+        LinkedMerge(A, lo, mid, hi, buffer);
+    }
+}
+
+void LinkedMergeSort(SortArray& A)
+{
+	std::vector<size_t> buffer(A.size());
+    return LinkedMergeSort(A, 0, A.size(), buffer);
 }
 
 void MergeSortIterative(SortArray& A)
@@ -579,6 +705,7 @@ void AdaptiveMergeSort(SortArray& a)
 // *** Quick Sort Pivot Selection
 
 QuickSortPivotType g_quicksort_pivot = PIVOT_FIRST;
+QuickSortDualPivotType g_quicksort_dualpivot = DUALPIVOT_FIRSTLAST;
 
 // some quicksort variants use hi inclusive and some exclusive, we require it
 // to be _exclusive_. hi == array.end()!
@@ -594,15 +721,16 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
         return (lo + hi) / 2;
 
     if (g_quicksort_pivot == PIVOT_RANDOM)
-        return lo + (rand() % (hi - lo));
+        return lo + (next() % (hi - lo));
 
     if (g_quicksort_pivot == PIVOT_MEDIAN3)
     {
         ssize_t mid = (lo + hi) / 2;
+    	if(hi-lo<=2)return lo; // skip all comparisons if less than 3 items
 
-        // cases if two are equal
-        if (A[lo] == A[mid]) return lo;
-        if (A[lo] == A[hi-1] || A[mid] == A[hi-1]) return hi-1;
+        // cases if two are equal - skip to make 3 comparisons worst case
+        /*if (A[lo] == A[mid]) return lo;
+        if (A[lo] == A[hi-1] || A[mid] == A[hi-1]) return hi-1;*/
 
         // cases if three are different
         return A[lo] < A[mid]
@@ -614,12 +742,12 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
     {
         ssize_t mid = (lo + hi) / 2;
     	if(hi-lo<=2)return lo;
-    	if(hi-lo<=8)
+    	if(hi-lo<=8) // median of 3 if less than 9 items
         return A[lo] < A[mid]
             ? (A[mid] < A[hi-1] ? mid : (A[lo] < A[hi-1] ? hi-1 : lo))
             : (A[mid] > A[hi-1] ? mid : (A[lo] < A[hi-1] ? lo : hi-1));
         ssize_t a = (lo);
-        ssize_t c = (lo + lo + hi + 1) / 3;
+        ssize_t c = (lo + lo + (hi-1) + 1) / 3;
         ssize_t g = (hi) - (c - a);
         ssize_t k = (hi);
         ssize_t b = (a + c) / 2;
@@ -652,6 +780,33 @@ ssize_t QuickSortSelectPivot(SortArray& A, ssize_t lo, ssize_t hi)
     return lo;
 }
 
+ssize_t* QuickSortSelectDualPivot(SortArray& A, ssize_t lo, ssize_t hi, ssize_t* pivot)
+{
+    if (g_quicksort_dualpivot == DUALPIVOT_FIRSTLAST){
+        pivot[0]=lo; pivot[1]=hi-1; return pivot;
+    }
+    if (g_quicksort_dualpivot == DUALPIVOT_THIRDS){
+        pivot[0]=(lo+lo+(hi-1)+1)/3; pivot[1]=(lo+(hi-1)+(hi-1)+1)/3; return pivot;
+    }
+    if (g_quicksort_dualpivot == DUALPIVOT_RANDOM){
+        pivot[0]=next()%(hi-lo)+lo; pivot[1]=next()%(hi-lo-1)+lo; if(pivot[1]==pivot[0])pivot[1]=hi-1; return pivot;
+    }
+    if (g_quicksort_dualpivot == DUALPIVOT_MEDIAN4){
+		hi-=1;
+    	ssize_t temp;
+        ssize_t mid1 = (lo+lo+hi+1)/3;
+        ssize_t mid2 = (lo+hi+hi+1)/3;
+    	if(hi-lo<=2){pivot[0]=lo; pivot[1]=hi; return pivot;} // skip all comparisons if less than 4 items
+
+    	if(A[lo] > A[mid1]){temp=lo;lo=mid1;mid1=temp;}
+    	if(A[mid2] > A[hi]){temp=mid2;mid2=hi;hi=temp;}
+    	if(A[lo] > A[mid2]){temp=lo;lo=mid2;mid2=temp;}
+    	if(A[mid1] > A[hi]){temp=mid1;mid1=hi;hi=temp;}
+    	pivot[0]=mid1; pivot[1]=mid2; return pivot;
+    }
+    pivot[0]=lo; pivot[1]=hi-1; return pivot;
+}
+
 wxArrayString QuickSortPivotText()
 {
     wxArrayString sl;
@@ -662,6 +817,18 @@ wxArrayString QuickSortPivotText()
     sl.Add( _("Random Item") );
     sl.Add( _("Median of Three") );
     sl.Add( _("Ninther") );
+
+    return sl;
+}
+
+wxArrayString QuickSortDualPivotText()
+{
+    wxArrayString sl;
+
+    sl.Add( _("First and Last Item") );
+    sl.Add( _("Thirds Items") );
+    sl.Add( _("Random Items") );
+    sl.Add( _("Medians of Four") );
 
     return sl;
 }
@@ -922,6 +1089,15 @@ void dualPivotYaroslavskiy(class SortArray& a, int left, int right)
 {
     if (right > left)
     {
+    	ssize_t pivot[2];
+    	QuickSortSelectDualPivot(a, left, right+1, pivot);
+    	if(pivot[1]<pivot[0]){ssize_t a = pivot[1];pivot[1]=pivot[0];pivot[0]=a;}
+    	if(pivot[0]!=left){
+		a.swap(left, pivot[0]);
+    	}
+    	if(pivot[1]!=right){
+		a.swap(right, pivot[1]);
+    	}
         if (a[left] > a[right]) {
             a.swap(left, right);
         }
@@ -1603,10 +1779,46 @@ void StlStableSort(SortArray& A)
     std::stable_sort(MyIterator(&A,0), MyIterator(&A,A.size()));
 }
 
+void StlInPlaceStableSort(SortArray& A)
+{
+      // concept requirements
+      __glibcxx_function_requires(_Mutable_RandomAccessIteratorConcept<
+	    _RandomAccessIterator>)
+      __glibcxx_function_requires(_LessThanComparableConcept<
+	    typename iterator_traits<_RandomAccessIterator>::value_type>)
+      __glibcxx_requires_valid_range(MyIterator(&A,0), MyIterator(&A,A.size()));
+      __glibcxx_requires_irreflexive(MyIterator(&A,0), MyIterator(&A,A.size()));
+
+    std::__inplace_stable_sort(MyIterator(&A,0), MyIterator(&A,A.size()), __gnu_cxx::__ops::__iter_less_iter());
+}
+
 void StlHeapSort(SortArray& A)
 {
     std::make_heap(MyIterator(&A,0), MyIterator(&A,A.size()));
     std::sort_heap(MyIterator(&A,0), MyIterator(&A,A.size()));
+}
+
+void StlInsertion(SortArray& A){
+      __glibcxx_function_requires(_Mutable_RandomAccessIteratorConcept<
+	    _RandomAccessIterator>)
+      __glibcxx_function_requires(_LessThanComparableConcept<
+	    typename iterator_traits<_RandomAccessIterator>::value_type>)
+      __glibcxx_requires_valid_range(MyIterator(&A,0), MyIterator(&A,A.size()));
+      __glibcxx_requires_irreflexive(MyIterator(&A,0), MyIterator(&A,A.size()));
+    std::__insertion_sort(MyIterator(&A,0), MyIterator(&A,A.size()), __gnu_cxx::__ops::__iter_less_iter());
+}
+
+void StlRotateInsert(SortArray& A){      // concept requirements
+      __glibcxx_function_requires(_Mutable_RandomAccessIteratorConcept<
+	    _RandomAccessIterator>)
+      __glibcxx_function_requires(_LessThanComparableConcept<
+	    typename iterator_traits<_RandomAccessIterator>::value_type>)
+      __glibcxx_requires_valid_range(MyIterator(&A,0), MyIterator(&A,A.size()));
+      __glibcxx_requires_irreflexive(MyIterator(&A,0), MyIterator(&A,A.size()));
+
+    for (MyIterator it = MyIterator(&A,0); it != MyIterator(&A,A.size()); ++it) {
+        std::rotate(std::upper_bound(MyIterator(&A,0), it, *it, __gnu_cxx::__ops::__iter_less_iter()), it, it+1);
+    }
 }
 
 // ****************************************************************************

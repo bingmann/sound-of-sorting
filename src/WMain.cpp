@@ -118,7 +118,9 @@ WMain::WMain(wxWindow* parent)
 
     // insert quicksort pivot rules into wxChoice
     pivotRuleChoice->Append( QuickSortPivotText() );
+    dualpivotRuleChoice->Append( QuickSortDualPivotText() );
     pivotRuleChoice->SetSelection(0);
+    dualpivotRuleChoice->SetSelection(0);
 
     // set default speed
     speedSlider->SetValue(1000);
@@ -200,6 +202,7 @@ bool WMain::RunAlgorithm()
 
         g_algo_name = algoList->GetStringSelection();
         g_quicksort_pivot = (QuickSortPivotType)pivotRuleChoice->GetSelection();
+        g_quicksort_dualpivot = (QuickSortDualPivotType)dualpivotRuleChoice->GetSelection();
 
         m_thread = new SortAlgoThread(this, *sortview, algoList->GetSelection());
 
@@ -434,7 +437,9 @@ void WMain::OnAlgoList(wxCommandEvent&)
     wxString text;
 
     bool isQuickSort = (algoList->GetStringSelection().Contains(_("Quick Sort")));
-    panelQuickSortPivot->Show(isQuickSort);
+    bool isDualPivot = (algoList->GetStringSelection().Contains(_("dual pivot")));
+    panelQuickSortPivot->Show(isQuickSort&&!isDualPivot);
+    panelQuickSortDualPivot->Show(isQuickSort&&isDualPivot);
 
     if (sel >= 0 && sel < (int)g_algolist_size && !g_algolist[sel].text.IsEmpty())
     {

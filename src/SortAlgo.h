@@ -55,16 +55,22 @@ extern const struct AlgoEntry* g_algolist_end;
 void SelectionSort(class SortArray& a);
 void InsertionSort(class SortArray& a);
 void BinaryInsertionSort(class SortArray& a);
+void AdBinaryInsertionSort(class SortArray& a);
 
 void MergeSort(class SortArray& a);
 void MergeSortIterative(class SortArray& a);
 void MergeSort2(class SortArray& a);
 void AdaptiveMergeSort(class SortArray& a);
+void LinkedMergeSort(class SortArray& a);
 
 wxArrayString QuickSortPivotText();
+wxArrayString QuickSortDualPivotText();
 
-enum QuickSortPivotType { PIVOT_FIRST, PIVOT_LAST, PIVOT_MID, PIVOT_RANDOM, PIVOT_MEDIAN3, PIVOT_NINTHER };
+enum QuickSortPivotType { PIVOT_FIRST, PIVOT_LAST, PIVOT_MID, PIVOT_RANDOM, PIVOT_MEDIAN3, PIVOT_NINTHER, };
 extern QuickSortPivotType g_quicksort_pivot;
+
+enum QuickSortDualPivotType { DUALPIVOT_FIRSTLAST, DUALPIVOT_THIRDS, DUALPIVOT_RANDOM, DUALPIVOT_MEDIAN4, };
+extern QuickSortDualPivotType g_quicksort_dualpivot;
 
 void QuickSortLR(class SortArray& a);
 void QuickSortLL(class SortArray& a);
@@ -100,7 +106,10 @@ void RadixSortMSD(class SortArray& a);
 
 void StlSort(class SortArray& a);
 void StlStableSort(class SortArray& a);
+void StlInPlaceStableSort(class SortArray& a);
 void StlHeapSort(class SortArray& a);
+void StlInsertion(class SortArray& a);
+void StlRotateInsert(class SortArray& a);
 
 void TimSort(class SortArray& a);
 void WikiSort(class SortArray& a);
