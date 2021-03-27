@@ -134,6 +134,8 @@ void ParBrickSort(class SortArray& a);
 void ZvaraySort(class SortArray& a);
 void BubblegumHillSort(class SortArray& a);
 void BubblegumHillSortII(class SortArray& a);
+void RainbowReefSort(class SortArray& a);
+void SugarCoat5991sort(class SortArray& a);
 
 // ****************************************************************************
 // *** Iterator Adapter

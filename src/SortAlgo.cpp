@@ -149,6 +149,8 @@ const struct AlgoEntry g_algolist[] =
       wxEmptyString },
     { _("Grail Rotate Merge Sort"), &RotateMergeSort, UINT_MAX, UINT_MAX,
       wxEmptyString },
+    { _("Sugar Coat 5991 sort"), &SugarCoat5991sort, UINT_MAX, UINT_MAX,
+      wxEmptyString },
     { _("Bogo Sort"), &BogoSort, 10, UINT_MAX,
       wxEmptyString },
     { _("Bozo Sort"), &BozoSort, 10, UINT_MAX,
@@ -158,6 +160,8 @@ const struct AlgoEntry g_algolist[] =
     { _("Bubblegum Hill Sort"), &BubblegumHillSort, 10, UINT_MAX,
       wxEmptyString },
     { _("Bubblegum Hill Sort II"), &BubblegumHillSortII, 256, UINT_MAX,
+      wxEmptyString },
+    { _("Rainbow Reef Sort"), &RainbowReefSort, 10, UINT_MAX,
       wxEmptyString },
     { _("Stupid Sort"), &StupidSort, 256, UINT_MAX,
       wxEmptyString },
@@ -1821,6 +1825,128 @@ void StlRotateInsert(SortArray& A){      // concept requirements
     }
 }
 
+
+void SugarCoat5991sort(SortArray& A, size_t lo, size_t hi, std::vector<value_type>& buffer, bool mode, bool dir)
+{
+	if(mode){
+	if(hi-lo<=0)return;
+	if(hi-lo==1){A.set(lo, buffer[lo]);return;}
+		if(hi-lo==2){
+		if(buffer[lo]>buffer[lo+1]){A.set(lo, buffer[lo+1]);A.set(lo+1, buffer[lo]);return;}
+		else {A.set(lo, buffer[lo]);A.set(lo+1, buffer[lo+1]);return;} }
+		if(hi-lo==3){
+			if(buffer[lo]>buffer[lo+1]){
+				if(buffer[lo+1]>buffer[lo+2]){A.set(lo, buffer[lo+2]);A.set(lo+1, buffer[lo+1]);A.set(lo+2, buffer[lo]);}
+				else{
+					if(buffer[lo]>buffer[lo+2]){A.set(lo, buffer[lo+1]);A.set(lo+1, buffer[lo+2]);A.set(lo+2, buffer[lo]);}
+					else {A.set(lo, buffer[lo+1]);A.set(lo+1, buffer[lo]);A.set(lo+2, buffer[lo+2]);};}
+			}
+			else{
+				if(buffer[lo+1]>buffer[lo+2])
+					if(buffer[lo]>buffer[lo+2]){A.set(lo, buffer[lo+2]);A.set(lo+1, buffer[lo]);A.set(lo+2, buffer[lo+1]);}
+					else {A.set(lo, buffer[lo]);A.set(lo+1, buffer[lo+2]);A.set(lo+2, buffer[lo+1]);}
+				else {A.set(lo, buffer[lo]);A.set(lo+1, buffer[lo+1]);A.set(lo+2, buffer[lo+2]);} return;
+			}
+		}
+		if(hi-lo==4){
+			A.set(lo, buffer[lo]);
+			A.set(lo+1, buffer[lo+1]);
+			if(A[lo]>A[lo+1])A.swap(lo,lo+1);
+			A.set(lo+2, buffer[lo+2]);
+			A.set(lo+3, buffer[lo+3]);
+			if(A[lo+2]>A[lo+3])A.swap(lo+2,lo+3);
+			if(A[lo]>A[lo+2])A.swap(lo,lo+2);
+			if(A[lo+1]>A[lo+3])A.swap(lo+1,lo+3);
+			if(A[lo+1]>A[lo+2])A.swap(lo+1,lo+2);
+			return;
+		}
+		value_type pivotvalue;
+		if(hi-lo<16){
+			size_t pivot = next()%(hi-lo)+lo;
+			pivotvalue = buffer[pivot];
+		}
+		else{
+			size_t pivot1 = next()%(hi-lo)+lo;
+			size_t pivot2 = next()%(hi-lo)+lo;
+			size_t pivot3 = next()%(hi-lo)+lo;
+			size_t pivot = buffer[pivot1]>buffer[pivot2] ? (buffer[pivot2]>buffer[pivot3] ? pivot2 : (buffer[pivot1]>buffer[pivot3] ? pivot3 : pivot1)) : (buffer[pivot2]>buffer[pivot3] ? (buffer[pivot1]>buffer[pivot3] ? pivot1 : pivot3) : pivot2);
+			pivotvalue = buffer[pivot];
+		}
+		int p = lo;
+		int q = hi-1;
+		int i;
+		if(dir)i=hi-1;else i=lo;
+		size_t point = next()%(hi-lo-1)+lo+1;
+		while(i<hi&&i>=lo){
+			int a = pivotvalue.cmp(buffer[i]);
+			if(a+(dir^(i<point))>0){
+				A.set(p, buffer[i]);
+				p++;
+			}
+			else{
+				A.set(q, buffer[i]);
+				q--;
+			}
+			dir ? i-- : i++;
+		}
+		SugarCoat5991sort(A, lo, p, buffer, 0, 0);
+		SugarCoat5991sort(A, p, hi, buffer, 0, 1);
+	}
+	else{
+	if(hi-lo<=1)return;
+		if(hi-lo==2){ if(A[lo]>A[lo+1])A.swap(lo, lo+1); return;}
+		if(hi-lo==3){ if(A[lo]>A[lo+1])if(A[lo+1]>A[lo+2])A.swap(lo,lo+2);else
+			if(A[lo]>A[lo+2]){A.swap(lo, lo+1);A.swap(lo+1, lo+2);}else A.swap(lo, lo+1);
+			else if(A[lo+1]>A[lo+2]) if(A[lo]>A[lo+2]){A.swap(lo, lo+2);A.swap(lo+1, lo+2);}
+			else A.swap(lo+1, lo+2); else ; return;}
+		if(hi-lo==4){
+			if(A[lo]>A[lo+1])A.swap(lo,lo+1);
+			if(A[lo+2]>A[lo+3])A.swap(lo+2,lo+3);
+			if(A[lo]>A[lo+2])A.swap(lo,lo+2);
+			if(A[lo+1]>A[lo+3])A.swap(lo+1,lo+3);
+			if(A[lo+1]>A[lo+2])A.swap(lo+1,lo+2);
+			return;
+		}
+		value_type pivotvalue;
+		if(hi-lo<16){
+			size_t pivot = next()%(hi-lo)+lo;
+			pivotvalue = A[pivot];
+		}
+		else{
+			size_t pivot1 = next()%(hi-lo)+lo;
+			size_t pivot2 = next()%(hi-lo)+lo;
+			size_t pivot3 = next()%(hi-lo)+lo;
+			size_t pivot = A[pivot1]>A[pivot2] ? (A[pivot2]>A[pivot3] ? pivot2 : (A[pivot1]>A[pivot3] ? pivot3 : pivot1)) : (A[pivot2]>A[pivot3] ? (A[pivot1]>A[pivot3] ? pivot1 : pivot3) : pivot2);
+			pivotvalue = A[pivot];
+		}
+		int p = lo;
+		int q = hi-1;
+		int i;
+		if(dir)i=hi-1;else i=lo;
+		size_t point = next()%(hi-lo-1)+lo+1;
+		while(i<hi&&i>=lo){
+			int a = pivotvalue.cmp(A[i]);
+			if(a+(dir^(i<point))>0){
+				buffer[p] = A[i];
+				p++;
+			}
+			else{
+				buffer[q] = A[i];
+				q--;
+			}
+			dir ? i-- : i++;
+		}
+		SugarCoat5991sort(A, lo, p, buffer, 1, 0);
+		SugarCoat5991sort(A, p, hi, buffer, 1, 1);
+	}
+}
+
+void SugarCoat5991sort(SortArray& A)
+{
+	std::vector<value_type> buffer(A.size());
+    return SugarCoat5991sort(A, 0, A.size(), buffer, 0, 0);
+}
+
 // ****************************************************************************
 // *** BogoSort and more slow sorts
 
@@ -1993,6 +2119,22 @@ void BubblegumHillSortII(SortArray& A){
 			swapped = 1;
 		}
         }
+    }
+}
+
+void RainbowReefSort(SortArray& A){
+    while (1)
+    {
+        // check if array is sorted
+        if (BogoCheckSorted(A)) break;
+
+        // swap nine random items
+        size_t r[9];
+        for(int i=0; i<9; i++){r[i]=next()%A.size();A.mark(r[i], 3);}
+        for(int i=9; i>1; i--){
+		A.swap(r[i-1], r[next()%i]);
+        }
+        A.unmark_all();
     }
 }
 
