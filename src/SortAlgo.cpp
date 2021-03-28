@@ -1826,15 +1826,32 @@ void StlRotateInsert(SortArray& A){      // concept requirements
 }
 
 
+
 void SugarCoat5991sort(SortArray& A, size_t lo, size_t hi, std::vector<value_type>& buffer, bool mode, bool dir)
 {
 	if(mode){
 	if(hi-lo<=0)return;
 	if(hi-lo==1){A.set(lo, buffer[lo]);return;}
 		if(hi-lo==2){
-		if(buffer[lo]>buffer[lo+1]){A.set(lo, buffer[lo+1]);A.set(lo+1, buffer[lo]);return;}
-		else {A.set(lo, buffer[lo]);A.set(lo+1, buffer[lo+1]);return;} }
+		if(dir ? buffer[lo]>=buffer[lo+1] : buffer[lo]>buffer[lo+1]){A.set(lo, buffer[lo+1]);A.set(lo+1, buffer[lo]);return;}
+		else {A.set(lo, buffer[lo]);A.set(lo+1, buffer[lo+1]);}
+				return;}
 		if(hi-lo==3){
+				if(dir){
+			if(buffer[lo]>=buffer[lo+1]){
+				if(buffer[lo+1]>=buffer[lo+2]){A.set(lo, buffer[lo+2]);A.set(lo+1, buffer[lo+1]);A.set(lo+2, buffer[lo]);}
+				else{
+					if(buffer[lo]>=buffer[lo+2]){A.set(lo, buffer[lo+1]);A.set(lo+1, buffer[lo+2]);A.set(lo+2, buffer[lo]);}
+					else {A.set(lo, buffer[lo+1]);A.set(lo+1, buffer[lo]);A.set(lo+2, buffer[lo+2]);};}
+			}
+			else{
+				if(buffer[lo+1]>=buffer[lo+2])
+					if(buffer[lo]>=buffer[lo+2]){A.set(lo, buffer[lo+2]);A.set(lo+1, buffer[lo]);A.set(lo+2, buffer[lo+1]);}
+					else {A.set(lo, buffer[lo]);A.set(lo+1, buffer[lo+2]);A.set(lo+2, buffer[lo+1]);}
+				else {A.set(lo, buffer[lo]);A.set(lo+1, buffer[lo+1]);A.set(lo+2, buffer[lo+2]);} return;
+			}
+				}
+				else{
 			if(buffer[lo]>buffer[lo+1]){
 				if(buffer[lo+1]>buffer[lo+2]){A.set(lo, buffer[lo+2]);A.set(lo+1, buffer[lo+1]);A.set(lo+2, buffer[lo]);}
 				else{
@@ -1847,18 +1864,27 @@ void SugarCoat5991sort(SortArray& A, size_t lo, size_t hi, std::vector<value_typ
 					else {A.set(lo, buffer[lo]);A.set(lo+1, buffer[lo+2]);A.set(lo+2, buffer[lo+1]);}
 				else {A.set(lo, buffer[lo]);A.set(lo+1, buffer[lo+1]);A.set(lo+2, buffer[lo+2]);} return;
 			}
+				}
+				return;
 		}
 		if(hi-lo==4){
-			A.set(lo, buffer[lo]);
-			A.set(lo+1, buffer[lo+1]);
-			if(A[lo]>A[lo+1])A.swap(lo,lo+1);
-			A.set(lo+2, buffer[lo+2]);
-			A.set(lo+3, buffer[lo+3]);
-			if(A[lo+2]>A[lo+3])A.swap(lo+2,lo+3);
-			if(A[lo]>A[lo+2])A.swap(lo,lo+2);
-			if(A[lo+1]>A[lo+3])A.swap(lo+1,lo+3);
-			if(A[lo+1]>A[lo+2])A.swap(lo+1,lo+2);
-			return;
+				std::array<size_t, 4> q;
+				if(dir) q = {lo+3, lo+2, lo+1, lo+0} ; else q = {lo, lo+1, lo+2, lo+3};
+				size_t temp;
+				if(buffer[q[0]]>buffer[q[1]]){temp=q[0];q[0]=q[1];q[1]=temp;}
+				if(buffer[q[1]]>buffer[q[2]]){temp=q[1];q[1]=q[2];q[2]=temp;}
+				if(q[2]!=lo+(2-dir)&&buffer[q[0]]>buffer[q[1]]){temp=q[0];q[0]=q[1];q[1]=temp;}
+				if(buffer[q[1]]>buffer[q[3]]){
+					temp=q[3];q[3]=q[2];q[2]=q[1];q[1]=temp;
+					if(buffer[q[0]]>buffer[q[1]]){temp=q[0];q[0]=q[1];q[1]=temp;}
+				}
+				else{
+					if(buffer[q[2]]>buffer[q[3]]){temp=q[2];q[2]=q[3];q[3]=temp;}
+				}
+				for(int i=0; i<4; i++){
+					A.set(lo+i, buffer[q[i]]);
+				}
+				return;
 		}
 		value_type pivotvalue;
 		if(hi-lo<16){
@@ -1894,18 +1920,43 @@ void SugarCoat5991sort(SortArray& A, size_t lo, size_t hi, std::vector<value_typ
 	}
 	else{
 	if(hi-lo<=1)return;
-		if(hi-lo==2){ if(A[lo]>A[lo+1])A.swap(lo, lo+1); return;}
-		if(hi-lo==3){ if(A[lo]>A[lo+1])if(A[lo+1]>A[lo+2])A.swap(lo,lo+2);else
+		if(hi-lo==2){ if(dir ? A[lo]>=A[lo+1] : A[lo]>A[lo+1])A.swap(lo, lo+1); return;}
+		if(hi-lo==3){ if(dir) {if(A[lo]>=A[lo+1])if(A[lo+1]>=A[lo+2])A.swap(lo,lo+2);else
+			if(A[lo]>=A[lo+2]){A.swap(lo, lo+1);A.swap(lo+1, lo+2);}else A.swap(lo, lo+1);
+			else if(A[lo+1]>=A[lo+2]) if(A[lo]>=A[lo+2]){A.swap(lo, lo+2);A.swap(lo+1, lo+2);}
+			else A.swap(lo+1, lo+2); else ; return;} else
+				{if(A[lo]>A[lo+1])if(A[lo+1]>A[lo+2])A.swap(lo,lo+2);else
 			if(A[lo]>A[lo+2]){A.swap(lo, lo+1);A.swap(lo+1, lo+2);}else A.swap(lo, lo+1);
 			else if(A[lo+1]>A[lo+2]) if(A[lo]>A[lo+2]){A.swap(lo, lo+2);A.swap(lo+1, lo+2);}
-			else A.swap(lo+1, lo+2); else ; return;}
+			else A.swap(lo+1, lo+2); else ; }
+				return;}
 		if(hi-lo==4){
-			if(A[lo]>A[lo+1])A.swap(lo,lo+1);
-			if(A[lo+2]>A[lo+3])A.swap(lo+2,lo+3);
-			if(A[lo]>A[lo+2])A.swap(lo,lo+2);
-			if(A[lo+1]>A[lo+3])A.swap(lo+1,lo+3);
-			if(A[lo+1]>A[lo+2])A.swap(lo+1,lo+2);
-			return;
+				std::array<size_t, 4> q;
+				if(dir) q = {lo+3, lo+2, lo+1, lo+0} ; else q = {lo, lo+1, lo+2, lo+3};
+				size_t temp;
+				if(A[q[0]]>A[q[1]]){temp=q[0];q[0]=q[1];q[1]=temp;}
+				if(A[q[1]]>A[q[2]]){temp=q[1];q[1]=q[2];q[2]=temp;}
+				if(q[2]!=lo+(2-dir)&&A[q[0]]>A[q[1]]){temp=q[0];q[0]=q[1];q[1]=temp;}
+				if(A[q[1]]>A[q[3]]){
+					temp=q[3];q[3]=q[2];q[2]=q[1];q[1]=temp;
+					if(A[q[0]]>A[q[1]]){temp=q[0];q[0]=q[1];q[1]=temp;}
+				}
+				else{
+					if(A[q[2]]>A[q[3]]){temp=q[2];q[2]=q[3];q[3]=temp;}
+				}
+				for(int i=0; i<4; i++){
+					if(q[i]!=lo+i){
+						A.swap(lo+i, q[i]);
+						for(int j=i+1; j<4; j++){
+							if(q[j]==lo+i)q[j]=q[i];
+						}
+					}
+					/*while(q[i]!=lo+i){
+						A.swap(lo+i, q[i]);
+						temp=q[q[i]-lo];q[q[i]-lo]=q[i];q[i]=temp;
+					}*/
+				}
+				return;
 		}
 		value_type pivotvalue;
 		if(hi-lo<16){

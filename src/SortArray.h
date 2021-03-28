@@ -82,28 +82,28 @@ public:
     // *** comparisons
 
     bool operator== (const ArrayItem& v) const
-    { OnComparison(*this,v); return (value == v.value); }
+    { OnComparison(*this,v); return (value/32 == v.value/32); }
 
     bool operator!= (const ArrayItem& v) const
-    { OnComparison(*this,v); return (value != v.value); }
+    { OnComparison(*this,v); return (value/32 != v.value/32); }
 
     bool operator< (const ArrayItem& v) const
-    { OnComparison(*this,v); return (value < v.value); }
+    { OnComparison(*this,v); return (value/32 < v.value/32); }
 
     bool operator<= (const ArrayItem& v) const
-    { OnComparison(*this,v); return (value <= v.value); }
+    { OnComparison(*this,v); return (value/32 <= v.value/32); }
 
     bool operator> (const ArrayItem& v) const
-    { OnComparison(*this,v); return (value > v.value); }
+    { OnComparison(*this,v); return (value/32 > v.value/32); }
 
     bool operator>= (const ArrayItem& v) const
-    { OnComparison(*this,v); return (value >= v.value); }
+    { OnComparison(*this,v); return (value/32 >= v.value/32); }
 
     // ternary comparison which counts just one
     int cmp(const ArrayItem& v) const
     {
         OnComparison(*this,v);
-        return (value == v.value ? 0 : value < v.value ? -1 : +1);
+        return (value/32 == v.value/32 ? 0 : value/32 < v.value/32 ? -1 : +1);
     }
 
     // *** comparisons without sound, counting or delay
