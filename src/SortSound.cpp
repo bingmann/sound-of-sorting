@@ -62,7 +62,7 @@ protected:
 
 public:
     /// construct new oscillator
-    Oscillator(double freq, size_t tstart, size_t duration = 44100 / 8)
+    Oscillator(double freq, size_t tstart, size_t duration = 44100 / 1)
         : m_freq(freq), m_tstart(tstart),
           m_tend( m_tstart + duration ),
           m_duration(duration)
@@ -75,6 +75,12 @@ public:
     static double wave_sin(double x)
     {
         return sin(x * 2*M_PI);
+    }
+
+    /// simple tangent wave
+    static double wave_tan(double x)
+    {
+        return tan(x * M_PI);
     }
 
     /// sin^3 wave
@@ -94,12 +100,26 @@ public:
         return 4.0 * x - 4.0;
     }
 
+    /// square wave
+    static double wave_square(double x)
+    {
+    	return 2.*(fmod(x,1.)<0.5)-1.;
+    }
+
+    /// saw wave
+    static double wave_saw(double x)
+    {
+    	return fmod(x,1.)*2-1;
+    }
+
     /// picking a waveform
     static double wave(double x)
     {
         //return wave_sin(x);
         //return wave_sin3(x);
-        return wave_triangle(x);
+	//return wave_triangle(x);
+        return wave_square(x);
+        //return wave_saw(x);
     }
 
     // *** Envelope
@@ -112,8 +132,21 @@ public:
 
         // simple envelope functions:
 
+        //return 1.0; // box
+        //return (0.5-fabs(x-0.5)); // triangle
+        double q = x-0.5; q=0.25-(q*q); q*=q; return q; // pseudo hanning
+        //return (0.25-0.375*cos(M_PI*2*x)+0.15*cos(M_PI*4*x)-0.025*cos(M_PI*6*x)); // pseudo gaussian
+        //double q = cos(M_PI*2*x); return (0.1-0.3*q+0.3*(q*q)-0.1*(q*q*q)); // optimised pseudo gaussian
+        //return 1.-cos(M_PI*2 * x); // hanning
+	/*if(x<=0.||x>=1.)return 0.;
+	if(x<=0.25)return(-8*pow(x,2)+32*pow(x,3));
+	if(x>=0.75)return(-8*pow(1.-x,2)+32*pow(1.-x,3));
+	if(x<=0.5)return(1.+-40.*pow(.5-x,2.)+96*pow(.5-x,3.));
+	if(x>=0.5)return(1.+-40.*pow(x-.5,2.)+96*pow(x-.5,3.));
+	return 0; // cubic spline (sometimes goes negative)*/
         //return 1.0 - x;
         //return cos(M_PI_2 * x);
+//return next()/2147483648.-1.;
 
         // *** ADSR envelope
 
@@ -218,7 +251,24 @@ void SoundAccess(size_t i)
 /// function mapping array index (normalized to [0,1]) to frequency
 static double arrayindex_to_frequency(double aindex)
 {
-    return 120 + 1200 * (aindex*aindex);
+    //return 120 + 1200 * (aindex*aindex);
+    return pow(2., (65./19.)*aindex-(35./19.))*440.; // more distinct low frequencies than in quadratic
+    /*    double low_c = 65.406;
+    double low_d = 73.416;
+    double low_e = 82.407;
+    double low_g = 97.999;
+    double low_a = 110;
+
+    int index = aindex * 40;
+    float tone;
+    switch (index % 5) {
+        case 0: tone = low_c; break;
+        case 1: tone = low_d; break;
+        case 2: tone = low_e; break;
+        case 3: tone = low_g; break;
+        case 4: tone = low_a; break;
+    }
+    return tone * ((index / 5) + 1);*/
 }
 
 /// reset internal sound data (called from main thread)
@@ -263,7 +313,7 @@ void SoundCallback(void* udata, Uint8 *stream, int len)
             double relindex = s_access_list[i] / (double)sv.m_array.array_max();
             double freq = arrayindex_to_frequency(relindex);
 
-            add_oscillator( freq, p, p + i * pscale,
+            add_oscillator( freq, p, p + (i+next()/4294967296.) * pscale,
                             g_delay / 1000.0 * g_sound_sustain * s_samplerate );
         }
 
@@ -273,9 +323,9 @@ void SoundCallback(void* udata, Uint8 *stream, int len)
     // calculate waveform
     std::vector<double> wave(size, 0.0);
     size_t wavecount = 0;
-
+#pragma omp parallel for
     for (std::vector<Oscillator>::const_iterator it = s_osclist.begin();
-         it != s_osclist.end(); ++it)
+         it < s_osclist.end(); ++it)
     {
         if (!it->is_done(p))
         {

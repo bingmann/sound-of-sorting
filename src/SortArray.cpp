@@ -24,8 +24,6 @@
 #include "SortArray.h"
 #include "SortAlgo.h"
 
-#include <algorithm>
-
 extern void SoundAccess(size_t i);
 
 // *****************************************************************************
@@ -42,6 +40,7 @@ void ArrayItem::OnAccess(const ArrayItem& a)
 
 void ArrayItem::OnComparison(const ArrayItem& a, const ArrayItem& b)
 {
+	m_switch2 = 1;
     ++g_compare_count;
 
     SoundAccess(a.get_direct());
@@ -82,12 +81,13 @@ void SortArray::FinishFill()
     ASSERT(m_array.size() > 0);
 
     // calculate max value in array
-    m_array_max = m_array[0].get_direct();
+    // moved to shuffles
+    /*m_array_max = m_array[0].get_direct();
     for (size_t i = 1; i < size(); ++i)
     {
         if (m_array_max < m_array[i].get_direct())
             m_array_max = m_array[i].get_direct();
-    }
+    }*/
 
     // reset access markers
     unmark_all();
@@ -110,6 +110,21 @@ void SortArray::FillInputlist(wxArrayString& list)
     list.Add(_("Shuffled Cubic"));
     list.Add(_("Shuffled Quintic"));
     list.Add(_("Shuffled n-2 Equal"));
+    list.Add(_("Few Unique 2"));
+    list.Add(_("Few Unique 4"));
+    list.Add(_("Few Unique 8"));
+    list.Add(_("Few Unique 16"));
+    list.Add(_("Nearly Ascending"));
+    list.Add(_("Nearly Descending"));
+    list.Add(_("Pipe Pipe"));
+    list.Add(_("Pipe Organ"));
+    list.Add(_("Organ Pipe"));
+    list.Add(_("Organ Organ"));
+    list.Add(_("High Item"));
+    list.Add(_("Low Item"));
+    list.Add(_("High Item Reverse"));
+    list.Add(_("Low Item Reverse"));
+    list.Add(_("Swapped Half"));
 }
 
 void SortArray::FillData(unsigned int schema, size_t arraysize)
@@ -117,7 +132,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
     if (arraysize == 0) arraysize = 1;
 
     ResetArray(arraysize);
-
+	m_array_max = m_array.size();
     if (schema == 0) // Shuffle of [1,n]
     {
         for (size_t i = 0; i < m_array.size(); ++i)
@@ -133,10 +148,14 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
     else if (schema == 2) // Descending [1,n]
     {
         for (size_t i = 0; i < m_array.size(); ++i)
-            m_array[i] = ArrayItem(m_array.size() - i);
+            m_array[i] = ArrayItem(i+1);
+	for(int i=0; i<m_array.size()/2; i++){
+		std::swap(m_array[i], m_array[m_array.size()-1-i]);
+	}
     }
     else if (schema == 3) // Cubic skew of [1,n]
     {
+    	m_array_max/=3;
         for (size_t i = 0; i < m_array.size(); ++i)
         {
             // normalize to [-1,+1]
@@ -154,6 +173,7 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
     }
     else if (schema == 4) // Quintic skew of [1,n]
     {
+    	m_array_max/=3;
         for (size_t i = 0; i < m_array.size(); ++i)
         {
             // normalize to [-1,+1]
@@ -174,11 +194,124 @@ void SortArray::FillData(unsigned int schema, size_t arraysize)
         m_array[0] = ArrayItem(1);
         for (size_t i = 1; i < m_array.size()-1; ++i)
         {
-            m_array[i] = ArrayItem( arraysize / 2 + 1 );
+            m_array[i] = ArrayItem( ( arraysize + 1 ) / 2 );
         }
         m_array[m_array.size()-1] = ArrayItem(arraysize);
 
         std::random_shuffle(m_array.begin(), m_array.end());
+    }
+    else if (schema >= 6 && schema <= 9) // few unique 2/4/8/16
+    {
+    	int few = 1<<(schema-5);
+        for (size_t i = 0; i < m_array.size(); ++i){
+		m_array[i] = ArrayItem((((((i*few)/m_array.size())*2)+1)*m_array.size())/(few*2)+1);
+        }
+        std::random_shuffle(m_array.begin(), m_array.end());
+    }
+    else if ((schema|1)==11) // nearly sorted/nearly reversed
+    {
+    	int currentLen = m_array.size();
+        for (size_t i = 0; i < currentLen; ++i){
+		m_array[i] = ArrayItem(i+1);
+	}
+            for (int n = 3; n > 0; n--){
+                int u = 0;
+                int i = n;
+                while(i<currentLen){
+                    if (next()%2==0){
+                        std::swap(m_array[i-n], m_array[i]);
+                    }
+                    i++;
+                    u = (u + 1) % n;
+                    if (u == 0){
+                        i += n;
+                    }
+                }
+                u = 0;
+                i = (2*n);
+                while(i<currentLen){
+                    if (next()%2==0){
+                        std::swap(m_array[i-n], m_array[i]);
+                    }
+                    i++;
+                    u = (u + 1) % n;
+                    if (u == 0){
+                        i += n;
+                    }
+                }
+            }
+            if(schema==11){
+		for(int i=0; i<currentLen/2; i++){
+			std::swap(m_array[i], m_array[currentLen-1-i]);
+		}
+            }
+    }
+    else if (schema >= 12 && schema <= 15){
+        for (size_t i = 0; i < m_array.size(); ++i){
+		m_array[i] = ArrayItem(i+1);
+	}
+	std::vector<ArrayItem> temp(m_array.size()/2);
+	for(int i=1; i<m_array.size(); i+=2){
+		temp[i/2]=m_array[i];
+	}
+	for(int i=0; i<(m_array.size()+1)/2; i++){
+		m_array[i] = m_array[i*2];
+	}
+	if(schema&1){
+		for(int i=(m_array.size()+1)/2; i<m_array.size(); i++){
+			m_array[i] = temp[m_array.size()/2-1-(i-(m_array.size()+1)/2)];
+		}
+	}
+	else{
+		for(int i=(m_array.size()+1)/2; i<m_array.size(); i++){
+			m_array[i] = temp[i-(m_array.size()+1)/2];
+		}
+	}
+	if(schema&2){
+		for(int i=0; i<(m_array.size()+1)/2/2; i++){
+			std::swap(m_array[i], m_array[(m_array.size()+1)/2-1-i]);
+		}
+	}
+    }
+    else if (schema == 16) // high item
+    {
+        for (size_t i = 0; i < m_array.size(); ++i)
+            m_array[i] = ArrayItem(i+1);
+	for(int i=1; i<m_array.size(); i++){
+		std::swap(m_array[0], m_array[i]);
+	}
+    }
+    else if (schema == 17) // low item
+    {
+        for (size_t i = 0; i < m_array.size(); ++i)
+            m_array[i] = ArrayItem(i+1);
+	for(int i=m_array.size()-1; i>0; i--){
+		std::swap(m_array[0], m_array[i]);
+	}
+    }
+    else if (schema == 18) // high item reverse
+    {
+        for (size_t i = 0; i < m_array.size(); ++i)
+            m_array[i] = ArrayItem(i+1);
+	for(int i=0; i<(m_array.size()-1)/2; i++){
+		std::swap(m_array[i], m_array[m_array.size()-2-i]);
+	}
+    }
+    else if (schema == 19) // low item reverse
+    {
+        for (size_t i = 0; i < m_array.size(); ++i)
+            m_array[i] = ArrayItem(i+1);
+	for(int i=0; i<(m_array.size()-1)/2; i++){
+		std::swap(m_array[i+1], m_array[m_array.size()-2-i+1]);
+	}
+    }
+    else if (schema == 20)
+    {
+        for (size_t i = 0; i < m_array.size(); ++i)
+            m_array[i] = ArrayItem(i+1);
+	for(int i=0; i<m_array.size()/2; i++){
+		std::swap(m_array[i], m_array[i+m_array.size()/2]);
+	}
     }
     else // fallback
     {
@@ -301,6 +434,38 @@ void SortArray::UpdateInversions(size_t i, size_t j)
         invdelta++;
     if (ilo.greater_direct(ihi))
         invdelta--;
+
+    m_inversions += invdelta;
+}
+
+void SortArray::UpdateInversionsWrite(ArrayItem::value_type i, size_t j)
+{
+    if (!m_calc_inversions) {
+        m_inversions = -1;
+        return;
+    }
+    if (m_inversions < 0) return RecalcInversions();
+
+    ArrayItem::value_type ilo = i;
+    const ArrayItem& ihi = m_array[j];
+    int invdelta = 0;
+
+    for (size_t k = 0; k < j; ++k)
+    {
+        if (m_array[k].get_direct()>(ilo))
+            invdelta--;
+
+        if (m_array[k].greater_direct(ihi))
+            invdelta++;
+    }
+    for (size_t k = j+1; k < m_array.size(); ++k)
+    {
+        if (m_array[k].get_direct()<(ilo))
+            invdelta--;
+
+        if (m_array[k].less_direct(ihi))
+            invdelta++;
+    }
 
     m_inversions += invdelta;
 }

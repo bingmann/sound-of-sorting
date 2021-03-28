@@ -55,14 +55,22 @@ extern const struct AlgoEntry* g_algolist_end;
 void SelectionSort(class SortArray& a);
 void InsertionSort(class SortArray& a);
 void BinaryInsertionSort(class SortArray& a);
+void AdBinaryInsertionSort(class SortArray& a);
 
 void MergeSort(class SortArray& a);
 void MergeSortIterative(class SortArray& a);
+void MergeSort2(class SortArray& a);
+void AdaptiveMergeSort(class SortArray& a);
+void LinkedMergeSort(class SortArray& a);
 
 wxArrayString QuickSortPivotText();
+wxArrayString QuickSortDualPivotText();
 
-enum QuickSortPivotType { PIVOT_FIRST, PIVOT_LAST, PIVOT_MID, PIVOT_RANDOM, PIVOT_MEDIAN3 };
+enum QuickSortPivotType { PIVOT_FIRST, PIVOT_LAST, PIVOT_MID, PIVOT_RANDOM, PIVOT_MEDIAN3, PIVOT_NINTHER, };
 extern QuickSortPivotType g_quicksort_pivot;
+
+enum QuickSortDualPivotType { DUALPIVOT_FIRSTLAST, DUALPIVOT_THIRDS, DUALPIVOT_RANDOM, DUALPIVOT_MEDIAN4, };
+extern QuickSortDualPivotType g_quicksort_dualpivot;
 
 void QuickSortLR(class SortArray& a);
 void QuickSortLL(class SortArray& a);
@@ -71,35 +79,63 @@ void QuickSortTernaryLL(class SortArray& a);
 void QuickSortDualPivot(class SortArray& a);
 
 void BubbleSort(class SortArray& a);
+void BubbleSort2(class SortArray& a);
 void CocktailShakerSort(class SortArray& a);
+void CashewSort(class SortArray& a);
 void CombSort(class SortArray& a);
+void CombSort11(class SortArray& a);
+void BrickSort(class SortArray& a);
 void GnomeSort(class SortArray& a);
 void OddEvenSort(class SortArray& a);
 
 void ShellSort(SortArray& a);
+void ShellSort2(SortArray& a);
+void ShellSort3(SortArray& a);
 void HeapSort(class SortArray& a);
 void SmoothSort(class SortArray& a);
 
 void BitonicSort(SortArray& a);
 void BitonicSortNetwork(SortArray& a);
 void BatcherSortNetwork(SortArray& a);
+void ItBitonic(SortArray& a);
+void ItOddEvenMerge(SortArray& a);
+void ItPairwise(SortArray& a);
 
 void RadixSortLSD(class SortArray& a);
 void RadixSortMSD(class SortArray& a);
 
 void StlSort(class SortArray& a);
 void StlStableSort(class SortArray& a);
+void StlInPlaceStableSort(class SortArray& a);
 void StlHeapSort(class SortArray& a);
+void StlInsertion(class SortArray& a);
+void StlRotateInsert(class SortArray& a);
 
 void TimSort(class SortArray& a);
 void WikiSort(class SortArray& a);
+void GrailSort(class SortArray& a);
+void LazyStableSort(class SortArray& a);
+void RotateMergeSort(class SortArray& a);
 
 void BogoSort(class SortArray& a);
 void BozoSort(class SortArray& a);
 void StoogeSort(class SortArray& a);
 void SlowSort(class SortArray& a);
+void StupidSort(class SortArray& a);
 
 void CycleSort(class SortArray& a);
+
+void ParBitonic(SortArray& a);
+void ParOddEvenMerge(SortArray& a);
+void ParPairwise(SortArray& a);
+void ParOddEvenSort(class SortArray& a);
+void ParBrickSort(class SortArray& a);
+
+void ZvaraySort(class SortArray& a);
+void BubblegumHillSort(class SortArray& a);
+void BubblegumHillSortII(class SortArray& a);
+void RainbowReefSort(class SortArray& a);
+void SugarCoat5991sort(class SortArray& a);
 
 // ****************************************************************************
 // *** Iterator Adapter

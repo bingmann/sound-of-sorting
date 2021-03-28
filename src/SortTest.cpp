@@ -20,12 +20,51 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
+
+#include <algorithm>
+#include <stdint.h>
+
+static inline uint32_t rotl(const uint32_t x, uint8_t k) {
+	return (x << k) | (x >> (32 - k));
+}
+
+static uint32_t s[4];
+
+uint32_t next(void) {
+	const uint32_t result = rotl(s[0] + s[3], 7) + s[0];
+	const uint32_t t = s[1] << 9;
+	s[2] ^= s[0];
+	s[3] ^= s[1];
+	s[1] ^= s[2];
+	s[0] ^= s[3];
+	s[2] ^= t;
+	s[3] = rotl(s[3], 11);
+	return result;
+}
+
+void seed(uint64_t x){
+	uint64_t z = (x += 0x9e3779b97f4a7c15);
+	z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
+	z = (z ^ (z >> 27)) * 0x94d049bb133111eb;
+	s[0] = (z ^ (z >> 31)) >> 32;
+	s[1] = (z ^ (z >> 31)) & 4294967295;
+	z = (x += 0x9e3779b97f4a7c15);
+	z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
+	z = (z ^ (z >> 27)) * 0x94d049bb133111eb;
+	s[2] = (z ^ (z >> 31)) >> 32;
+	s[3] = (z ^ (z >> 31)) & 4294967295;
+}
+
 #include <wx/app.h>
 #include <wx/stopwatch.h>
 #include <wx/cmdline.h>
+    #define PACKAGE_VERSION "test"
 
-#include "SortArray.h"
-#include "SortAlgo.h"
+#include "SortArray.cpp"
+#include "SortSound.cpp"
+#include "SortAlgo.cpp"
+#include "algorithms/timsort.cpp"
+#include "algorithms/wikisort.cpp"
 
 double g_delay = 0;
 
@@ -82,6 +121,8 @@ struct SortedCheck
     }
 };
 
+#define wxPrintf wxLogError
+
 int SortTestApp::OnRun()
 {
     wxPrintf(_T("Sound of Sorting " PACKAGE_VERSION " - Algorithm Tester\n"));
@@ -131,7 +172,7 @@ int SortTestApp::OnRun()
                     all_good = false;
                 }
 
-                wxPrintf(_T("%zu/i%zu -> %ld ms. "), n, inputi, millitime);
+                wxPrintf(_T("%d/i%d -> %ld ms. "), n, inputi, millitime);
                 fflush(stdout);
             }
         }

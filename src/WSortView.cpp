@@ -78,7 +78,7 @@ void WSortView::DoDelay(double delay)
 {
     // must be called by the algorithm thread
     ASSERT(wmain->m_thread);
-    ASSERT(wxThread::GetCurrentId() == wmain->m_thread->GetId());
+    //ASSERT(wxThread::GetCurrentId() == wmain->m_thread->GetId());
 
     if (wmain->m_thread_terminate)
         wmain->m_thread->Exit();
@@ -173,30 +173,31 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
     double wbar = (width - (size-1)) / (double)size;
     if (width <= (size-1)) wbar = 0.0;
 
-    double bstep = wbar + 1.0;
+    double bstep = (width ) / (double)size;
 
     // special case for bstep = 2 pixel -> draw 2 pixel bars instead of 1px
     // bar/1px gaps.
     if ( fabs(wbar - 1.0) < 0.1 && fabs(bstep - 2.0) < 0.1 ) wbar = 2, bstep = 2;
+    if ( fabs(wbar - 0.0) < 0.1 && fabs(bstep - 1.0) < 0.1 ) wbar = 1, bstep = 1;
 
     static const wxPen pens[] = {
         *wxWHITE_PEN,
         *wxRED_PEN,
         *wxGREEN_PEN,
         *wxCYAN_PEN,
-        wxPen(wxColour(255,255,0)),   //  4 yellow
-        wxPen(wxColour(255,0,255)),   //  5 magenta
-        wxPen(wxColour(255,192,128)), //  6 orange
-        wxPen(wxColour(255,128,192)), //  7 pink
-        wxPen(wxColour(128,192,255)), //  8 darker cyan
-        wxPen(wxColour(192,255,128)), //  9 darker green
-        wxPen(wxColour(192,128,255)), // 10 purple
-        wxPen(wxColour(128,255,192)), // 11 light green
-        wxPen(wxColour(128,128,255)), // 12 blue
-        wxPen(wxColour(192,128,192)), // 13 dark purple
-        wxPen(wxColour(128,192,192)), // 14 dark cyan
-        wxPen(wxColour(192,192,128)), // 15 dark yellow
-        wxPen(wxColour(0,128,255)),   // 16 blue/cyan mix
+        wxPen(wxColour(255,255,0)),   //  4 Bright Yellow
+        wxPen(wxColour(255,0,255)),   //  5 Bright Magenta
+        wxPen(wxColour(255,192,128)), //  6 Pale Orange
+        wxPen(wxColour(255,128,192)), //  7 Pale Rose
+        wxPen(wxColour(128,192,255)), //  8 Pale Azure
+        wxPen(wxColour(192,255,128)), //  9 Pale Chartreuse
+        wxPen(wxColour(192,128,255)), // 10 Pale Violet
+        wxPen(wxColour(128,255,192)), // 11 Pale Spring
+        wxPen(wxColour(128,128,255)), // 12 Pale Blue
+        wxPen(wxColour(192,128,192)), // 13 Weak Magenta
+        wxPen(wxColour(128,192,192)), // 14 Weak Cyan
+        wxPen(wxColour(192,192,128)), // 15 Weak Yellow
+        wxPen(wxColour(0,128,255)),   // 16 Bright Azure
     };
 
     static const wxBrush brushes[] = {
@@ -204,25 +205,25 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
         *wxRED_BRUSH,
         *wxGREEN_BRUSH,
         *wxCYAN_BRUSH,
-        wxBrush(wxColour(255,255,0)),   //  4 yellow
-        wxBrush(wxColour(255,0,255)),   //  5 magenta
-        wxBrush(wxColour(255,192,128)), //  6 orange
-        wxBrush(wxColour(255,128,192)), //  7 pink
-        wxBrush(wxColour(128,192,255)), //  8 darker cyan
-        wxBrush(wxColour(192,255,128)), //  9 darker green
-        wxBrush(wxColour(192,128,255)), // 10 purple
-        wxBrush(wxColour(128,255,192)), // 11 light green
-        wxBrush(wxColour(128,128,255)), // 12 blue
-        wxBrush(wxColour(192,128,192)), // 13 dark purple
-        wxBrush(wxColour(128,192,192)), // 14 dark cyan
-        wxBrush(wxColour(192,192,128)), // 15 dark yellow
-        wxBrush(wxColour(0,128,255)),   // 16 blue/cyan mix
+        wxBrush(wxColour(255,255,0)),   //  4 Bright Yellow
+        wxBrush(wxColour(255,0,255)),   //  5 Bright Magenta
+        wxBrush(wxColour(255,192,128)), //  6 Pale Orange
+        wxBrush(wxColour(255,128,192)), //  7 Pale Rose
+        wxBrush(wxColour(128,192,255)), //  8 Pale Azure
+        wxBrush(wxColour(192,255,128)), //  9 Pale Chartreuse
+        wxBrush(wxColour(192,128,255)), // 10 Pale Violet
+        wxBrush(wxColour(128,255,192)), // 11 Pale Spring
+        wxBrush(wxColour(128,128,255)), // 12 Pale Blue
+        wxBrush(wxColour(192,128,192)), // 13 Weak Magenta
+        wxBrush(wxColour(128,192,192)), // 14 Weak Cyan
+        wxBrush(wxColour(192,192,128)), // 15 Weak Yellow
+        wxBrush(wxColour(0,128,255)),   // 16 Bright Azure
     };
 
     wxMutexLocker lock(m_array.m_mutex);
     ASSERT(lock.IsOk());
 
-    for (size_t i = 0; i < size; ++i)
+    for (int i = 0; i < size; ++i)
     {
         int clr = m_array.GetIndexColor(i);
 

@@ -22,9 +22,7 @@ David R. Martin and various Java applets by many college or university staff.
 ## Website and License
 
 The current source package and some binaries can be downloaded from
-http://panthema.net/2013/sound-of-sorting/
-
-Some YouTube videos are also linked on above webpage.
+https://github.com/yg8ijvjvjv/sound-of-sorting/
 
 The program and code is published under the GNU General Public License v3
 (GPL), which can also be found in the file COPYING. A few of the sorting
@@ -44,8 +42,7 @@ is created. When "Sound" is activated, the program will generate sound effects
 on the default audio output. The "Speed" slider changes the algorithms
 execution speed by adding a delay for each array access.
 
-*Due to the 1ms resolution of timers on Windows, the speed scale is
-  smaller. The Linux version has a higher time resoltion \< 1ms!*
+*Both Windows and Linux versions have a higher time resolution of 0.001 ms!*
 
 The algorithm's visualization contains mostly white bars representing the value
 of the array position corresponding to the x-axis. When the algorithm gets or
@@ -60,12 +57,12 @@ to algorithms often using extra memory or local variables, the array access
 counter highly depends on the actual algorithm implementation.
 
 The generated sound effects depend on the values being compared. Only
-comparisons yield sound output (except for in radix/bucket sort)! The length of
+comparisons yield sound output (except for in distributive sorts)! The length of
 each comparison's sound effect can be modified using the "Sound Sustain"
 slider. The frequency of the sound is calculated from the compared values. The
-sound wave itself is triangular and modulated with an ADSR envelope. This
+sound wave itself is square wave and modulated with a smooth curve. This
 yields the "8-bit game tune" feeling. An item value is scaled (with double
-precision) to the frequency range 120 Hz - 1,212 Hz, which is large but not too
+precision) to the frequency range 120 Hz - 1300 Hz, which is large but not too
 high to be annoying.
 
 ## Source Code Overview and Implementation Notes
@@ -92,13 +89,11 @@ class.
 
 On each comparison, the values are used to generate sound. All sound generating
 methods are in `SortSound.cpp`. The main class here is an `Oscillator`, which
-generates an enveloped triangular waveform of a specific frequency. Oscillators
+generates an enveloped square waveform of a specific frequency. Oscillators
 are mixed together for the output sound. The output volume is scaled
 automatically depending on the number of oscillators active.
 
-For (somewhat) rapid development with wxWidgets, the wxGlade dialog generator
-tool is use. The public version of the Sound of Sorting contains no recording
-facilities. If you want to contribute a sorting algorithm, please notify me.
+If you want to contribute a sorting algorithm, please notify me.
 
 ## Exits
 
