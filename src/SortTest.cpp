@@ -21,8 +21,9 @@
  ******************************************************************************/
 
 #include <wx/app.h>
-#include <wx/stopwatch.h>
 #include <wx/cmdline.h>
+#include <wx/stopwatch.h>
+#include <wx/wxcrtvararg.h>
 
 #include "SortArray.h"
 #include "SortAlgo.h"
