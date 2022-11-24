@@ -37,7 +37,7 @@ WMain::WMain(wxWindow* parent)
     infoTextctrl->Hide();
 
     // program icon
-    {    
+    {
         #include "sos.xpm"
 	SetIcon( wxIcon(sos) );
     }
@@ -61,8 +61,8 @@ WMain::WMain(wxWindow* parent)
 
     sortview->m_array.FillData(0, 100);
     inputTypeChoice->SetSelection(0);
-    arraySizeSlider->SetValue(100);
-    SetArraySize(100);
+    arraySizeSlider->SetValue(40);
+    SetArraySize(40);
 
     // insert quicksort pivot rules into wxChoice
     pivotRuleChoice->Append( QuickSortPivotText() );
@@ -82,7 +82,7 @@ WMain::WMain(wxWindow* parent)
     // Set the audio format
     sdlaudiospec.freq = 44100;
     sdlaudiospec.format = AUDIO_S16SYS;
-    sdlaudiospec.channels = 1;    	/* 1 = mono, 2 = stereo */
+    sdlaudiospec.channels = 2;    	/* 1 = mono, 2 = stereo */
     sdlaudiospec.samples = 4096;  	/* Good low-latency value for callback */
     sdlaudiospec.callback = SoundCallback;
     sdlaudiospec.userdata = sortview;
