@@ -5,8 +5,12 @@ bin_PROGRAMS = sound-of-sorting
 COMMON = SortArray.cpp SortArray.h \
 	SortSound.cpp \
 	SortAlgo.cpp SortAlgo.h \
+	algorithms/flansort.cpp \
+	algorithms/grailsort.cpp \
+	algorithms/pdqsort.cpp \
 	algorithms/timsort.cpp \
 	algorithms/wikisort.cpp
+	
 
 sound_of_sorting_SOURCES = \
 	WMain.cpp WMain.h \
@@ -24,15 +28,16 @@ sorting_test_SOURCES = \
 	SortTest.cpp \
 	$(COMMON)
 
-AM_CXXFLAGS = -W -Wall @WX_CXXFLAGS@ @SDL_CFLAGS@
-LDADD = @WX_LIBS@ @SDL_LIBS@
+AM_CXXFLAGS = -W -Wall @WX_CXXFLAGS@ $(filter-out -Dmain=SDL_main, @SDL_CFLAGS@)
+LDADD = 
 
 if GOT_RESCOMP
 resources.o: resources.rc
 	$(WX_RESCOMP) $(srcdir)/resources.rc resources.o
-
 LDADD += resources.o
 endif
+
+LDADD += @WX_LIBS@ @SDL_LIBS@
 
 EXTRA_DIST = \
 	resources.rc sos.ico sos.xpm \

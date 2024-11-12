@@ -34,7 +34,11 @@ void WAbout_wxg::set_properties()
 {
     // begin wxGlade: WAbout_wxg::set_properties
     SetTitle(_("About"));
-    labelTitle->SetFont(wxFont(14, wxDEFAULT, wxNORMAL, wxNORMAL, 0, wxT("")));
+    #if wxCHECK_VERSION(3, 1, 6)
+        labelTitle->SetFont(wxFont(14, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+    #else
+        labelTitle->SetFont(wxFont(14, wxDEFAULT, wxNORMAL, wxNORMAL, 0, wxT("")));
+    #endif
     // end wxGlade
 }
 

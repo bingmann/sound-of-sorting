@@ -32,7 +32,7 @@ if test "$CFLAGS" == ""; then
     CFLAGS="-g -Wno-unused-local-typedefs"
 fi
 if test "$CXXFLAGS" == ""; then
-    CXXFLAGS="-g -Wno-unused-local-typedefs"
+    CXXFLAGS="-O2 -Wno-unused-local-typedefs"
 fi
 
 # enable full optimization by configure switch

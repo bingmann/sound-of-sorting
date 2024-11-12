@@ -200,7 +200,7 @@ class TimSort
             while(runHi < hi && compare.lt(*runHi, *(runHi - 1))) {
                 ++runHi;
             }
-            std::reverse(lo, runHi);
+            counted_reverse(lo, runHi);
         }
         else { // ascending
             while(runHi < hi && compare.ge(*runHi, *(runHi - 1))) {

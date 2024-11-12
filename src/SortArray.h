@@ -24,7 +24,8 @@
 #ifndef SORT_ARRAY_HEADER
 #define SORT_ARRAY_HEADER
 
-#include <vector>
+#include <array>
+#include <atomic>
 #include <algorithm>
 #include <stdlib.h>
 
@@ -49,6 +50,139 @@ extern size_t       g_compare_count;
 
 /// globally count the number of array access
 extern size_t       g_access_count;
+
+extern size_t m_swaps;
+
+// Custom counted swap function
+template <typename T>
+constexpr
+void counted_swap(T & a, T & b) {
+    std::swap(a, b);
+    ++m_swaps;
+}
+
+// Custom counted iter_swap function
+template <typename Iterator>
+constexpr
+void counted_iter_swap(Iterator a, Iterator b) {
+    std::iter_swap(a, b);
+    ++m_swaps;
+}
+
+// Custom counted swap_ranges function
+template <typename ForwardIt1, typename ForwardIt2>
+constexpr
+ForwardIt2 counted_swap_ranges(ForwardIt1 first1, ForwardIt1 last1, ForwardIt2 first2) {
+    while (first1 != last1) {
+        counted_iter_swap(first1, first2);
+        ++first1; 
+        ++first2;
+    }
+    return first2;
+}
+
+template<class ForwardIt>
+constexpr
+ForwardIt counted_rotate(ForwardIt first, ForwardIt middle, ForwardIt last)
+{
+    if (first == middle) { return last; }
+    if (middle == last) { return first; }
+
+    ForwardIt write = first;
+    ForwardIt next_read = first;
+
+    for (ForwardIt read = middle; read != last; ++write, ++read)
+    {
+        if (write == next_read) { next_read = read; }
+        counted_iter_swap(write, read);
+    }
+
+    counted_rotate(write, next_read, last);
+    return write;
+}
+
+template<class BidirIt>
+constexpr
+void counted_reverse(BidirIt first, BidirIt last)
+{
+    using iter_cat = typename std::iterator_traits<BidirIt>::iterator_category;
+    if (std::is_base_of<std::random_access_iterator_tag, iter_cat>::value)
+    {
+        if (first == last) { return; }
+        for (--last; first < last; (void)++first, --last)
+        { counted_iter_swap(first, last); }
+    }
+    else
+    {
+        while (first != last && first != --last)
+        { counted_iter_swap(first++, last); }
+    }
+}
+
+template <typename RandomIt, typename Compare = std::less<typename RandomIt::value_type>>
+void counted_make_heap(RandomIt first, RandomIt last, Compare comp = Compare())
+{
+    if (last - first < 2) return;
+
+    auto n = std::distance(first, last);
+    for (auto i = (n / 2) - 1; i >= 0; --i)
+    {
+        sift_down(first, last, i, comp);
+    }
+}
+
+template <typename RandomIt, typename Compare>
+void sift_down(RandomIt first, RandomIt last, std::size_t index, Compare comp)
+{
+    size_t n = std::distance(first, last);
+    size_t current = index;
+
+    while (true)
+    {
+        size_t left_child = 2 * current + 1;
+        size_t right_child = 2 * current + 2;
+        size_t largest = current;
+
+        if (left_child < n && comp(first[largest], first[left_child])) 
+        { largest = left_child; }
+
+        if (right_child < n && comp(first[largest], first[right_child])) 
+        { largest = right_child; }
+
+        if (largest == current) { break; }
+        counted_swap(first[current], first[largest]);
+        current = largest;
+    }
+}
+
+template <typename RandomIt, typename Compare = std::less<typename RandomIt::value_type>>
+void counted_sort_heap(RandomIt first, RandomIt last, Compare comp = Compare())
+{
+    while (last - first > 1)
+    {
+        counted_iter_swap(first, last - 1);
+        sift_down(first, last - 1, 0, comp);
+        --last;
+    }
+}
+
+template<class ForwardIt, class UnaryPred>
+ForwardIt counted_partition(ForwardIt first, ForwardIt last, UnaryPred p)
+{
+    first = std::find_if_not(first, last, p);
+    if (first == last) { return first; }
+
+    for (auto i = std::next(first); i != last; ++i)
+    {
+        if (p(*i))
+        {
+            counted_iter_swap(i, first);
+            ++first;
+        }
+    }
+
+    return first;
+}
 
 // custom struct for array items, which allows detailed counting of comparisons.
 class ArrayItem
@@ -78,7 +212,16 @@ public:
     const value_type& get_direct() const
     { return value; }
 
-    // *** comparisons
+    ArrayItem& operator= (const ArrayItem& other)
+    {
+        if (this != &other)
+        {
+            this->value = other.value;
+        }
+        return *this;
+    }
+
+    operator int() const { return value; }
 
     bool operator== (const ArrayItem& v) const
     { OnComparison(*this,v); return (value == v.value); }
@@ -171,7 +314,7 @@ protected:
     std::vector<unsigned char>   m_mark;
 
     /// custom watched index pointers in the array, set by algorithm
-    std::vector< std::pair<volatile ssize_t*,unsigned char> > m_watch;
+    std::vector< std::pair<std::atomic<ssize_t>*,unsigned char> > m_watch;
 
     /// flag for sorted array
     bool        m_is_sorted;
@@ -197,6 +340,9 @@ public:
 
     /// turn on/off calculation of inversions
     void SetCalcInversions(bool on);
+
+    void AddInversions(size_t i);
+    void RemoveInversions(size_t i);
 
     /// toggle boolean to calculate inversions
     void ToggleCalcInversions();
@@ -231,7 +377,7 @@ public:
     void FinishFill();
 
     /// save access to array, forwards to sound system
-    void SaveAccess(size_t i);
+    // void SaveAccess(size_t i);
 
     /// check if index matches one of the watched pointers
     short InAccessList(ssize_t idx);
@@ -335,6 +481,7 @@ public:
     void set(size_t i, const ArrayItem& v)
     {
         ASSERT(i < m_array.size());
+        RemoveInversions(i);
 
         {
             wxMutexLocker lock(m_mutex);
@@ -346,7 +493,7 @@ public:
             m_array[i] = v;
         }
 
-        RecalcInversions();
+        AddInversions(i);
         OnAccess();
     }
 
@@ -363,6 +510,7 @@ public:
 
             m_access1 = i;
             m_access2 = j;
+            ++m_swaps;
 
             m_access_list.push_back(i);
             m_access_list.push_back(j);
@@ -373,7 +521,7 @@ public:
         OnAccess();
         std::swap(m_array[i], m_array[j]);
         OnAccess();
-        m_access2 = -1;
+        m_access2 = -1;       
     }
 
     /// Touch an item of the array: set color till next frame is outputted.
@@ -425,14 +573,14 @@ public:
         m_access_list.clear();
     }
 
-    /// Highly experimental method to _track_ array live indexes. For this, the
-    /// index must be marked volatile!.
-    void watch(volatile ssize_t* idxptr, unsigned char color = 2)
+    // Highly experimental method to _track_ array live indexes.
+    // The index must be created as std::atomic to ensure thread safety
+    void watch(std::atomic<ssize_t>* idxptr, unsigned char color = 2)
     {
         wxMutexLocker lock(m_mutex);
         ASSERT(lock.IsOk());
 
-        m_watch.push_back( std::make_pair(idxptr,color) );
+        m_watch.push_back( std::make_pair(idxptr, color));
     }
 
     /// Release all tracked live array indexes.

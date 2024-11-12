@@ -29,7 +29,7 @@
 WMain::WMain(wxWindow* parent)
     : WMain_wxg(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE)
 {
-    m_thread = NULL;
+    m_thread = nullptr;
     g_sound_on = false;
 
     recordButton->Hide();
@@ -47,6 +47,7 @@ WMain::WMain(wxWindow* parent)
 
     // resize right split window
     splitter_0->SetSashPosition(GetSize().x - 280);
+    splitter_0->SetMinimumPaneSize(1);
 
     // insert list of algorithms into wxListBox
     for (const AlgoEntry* ae = g_algolist; ae != g_algolist_end; ++ae)
@@ -88,7 +89,7 @@ WMain::WMain(wxWindow* parent)
     sdlaudiospec.userdata = sortview;
 
     // Open the audio device, forcing the desired format
-    if ( SDL_OpenAudio(&sdlaudiospec, NULL) < 0 ) {
+    if ( SDL_OpenAudio(&sdlaudiospec, nullptr) < 0 ) {
         wxLogError(_("Couldn't open audio: ") + wxString(SDL_GetError(), wxConvISO8859_1));
         soundButton->Disable();
     }
@@ -116,6 +117,7 @@ BEGIN_EVENT_TABLE(WMain, WMain_wxg)
     EVT_TOGGLEBUTTON(ID_SOUND_BUTTON, WMain::OnSoundButton)
     EVT_BUTTON(ID_RANDOM_BUTTON, WMain::OnRandomButton)
     EVT_BUTTON(wxID_ABOUT, WMain::OnAboutButton)
+    EVT_SPLITTER_DCLICK(wxID_ANY, WMain::OnDClick)
 
     EVT_COMMAND_SCROLL(ID_SPEED_SLIDER, WMain::OnSpeedSliderChange)
     EVT_COMMAND_SCROLL(ID_SOUND_SUSTAIN_SLIDER, WMain::OnSoundSustainSliderChange)
@@ -162,19 +164,33 @@ bool WMain::RunAlgorithm()
     }
 }
 
+void WMain::OnDClick(wxSplitterEvent& event) { event.Veto(); }
+
 void WMain::AbortAlgorithm()
 {
     if (!m_thread) return;
-
+    
     m_thread_terminate = true;
-    if (m_thread->IsPaused()) m_thread->Resume();
+    if (soundButton->GetValue() == true)
+    {
+        SoundReset();
+        g_sound_on = false;
+        SDL_PauseAudio(1);
+    }
+
+    if (m_thread->IsPaused()) { m_thread->Resume(); }
     sortview->SetStepwise(false);
 
-    m_thread->Wait();
+    while (m_thread->IsAlive()) { wxMilliSleep(1); }
     g_algo_running = false;
+    if (soundButton->GetValue() == true)
+    {
+        g_sound_on = true;
+        SDL_PauseAudio(0);
+    }
 
     delete m_thread;
-    m_thread = NULL;
+    m_thread = nullptr;
 }
 
 void WMain::OnRunButton(wxCommandEvent &event)
@@ -182,11 +198,9 @@ void WMain::OnRunButton(wxCommandEvent &event)
     // join finished thread
     if (m_thread && !m_thread->IsAlive())
     {
-        m_thread->Wait();
         g_algo_running = false;
-
         delete m_thread;
-        m_thread = NULL;
+        m_thread = nullptr;
     }
 
     if (event.IsChecked())
@@ -221,7 +235,7 @@ void WMain::OnRunFinished(wxCommandEvent&)
         g_algo_running = false;
 
         delete m_thread;
-        m_thread = NULL;
+        m_thread = nullptr;
     }
 
     runButton->SetValue(false);
@@ -317,19 +331,23 @@ void WMain::SetDelay(size_t pos)
 
     // different slider scale for Linux/GTK: (faster)
 #if __WXGTK__ || MSW_PERFORMANCECOUNTER
+    // 0.001 ms formula, tested on Windows
+    // Warning! The slider will never go past 0.005 ms with this formula
+    // g_delay = pow(base, pos / 15000.0 * log(2 * 1000.0 * 10.0) / log(base)) / 800.0;
     g_delay = pow(base, pos / 2000.0 * log(2 * 1000.0 * 10.0) / log(base)) / 10.0;
 #else
     // other systems probably have sucking real-time performance anyway
     g_delay = pow(base, pos / 2000.0 * log(2 * 1000.0) / log(base));
+    
 #endif
-    if (pos == 0) g_delay = 0;
+    if (pos == 0) g_delay = 0.1;
 
     if (g_delay > 10)
         labelDelayValue->SetLabel(wxString::Format(_("%.0f ms"), g_delay));
     else if (g_delay > 1)
-        labelDelayValue->SetLabel(wxString::Format(_("%.1f ms"), g_delay));
-    else
         labelDelayValue->SetLabel(wxString::Format(_("%.2f ms"), g_delay));
+    else
+        labelDelayValue->SetLabel(wxString::Format(_("%.3f ms"), g_delay));
 }
 
 void WMain::OnSoundSustainSliderChange(wxScrollEvent &event)
@@ -425,6 +443,9 @@ void WMain::RefreshTimer::Notify()
     long int compares = g_compare_count;
     wm.labelComparisonsValue->SetLabel(wxString::Format(_("%ld"), compares));
 
+    long int swaps = m_swaps;
+    wm.labelSwapsCount->SetLabel(wxString::Format(_("%ld"), swaps));
+
     long int inversions = wm.sortview->m_array.GetInversions();
     if (inversions >= 0)
         wm.labelInversionCount->SetLabel(wxString::Format(_("%ld"), inversions));
@@ -455,7 +476,7 @@ public:
 
         srand((int)wxGetLocalTime());
 
-        WMain* wmain = new WMain(NULL);
+        WMain* wmain = new WMain(nullptr);
         SetTopWindow(wmain);
         wmain->Show();
 

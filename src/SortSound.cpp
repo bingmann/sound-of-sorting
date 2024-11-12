@@ -232,7 +232,7 @@ void SoundReset()
 }
 
 /// sound generator callback run by SDL
-void SoundCallback(void* udata, Uint8 *stream, int len)
+void SoundCallback(void* udata, unsigned char* stream, int len)
 {
     if (!g_sound_on) {
         memset(stream, 0, len);

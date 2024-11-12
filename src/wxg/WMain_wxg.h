@@ -79,6 +79,7 @@ protected:
     wxClickText* labelAccessCount;
     wxClickText* labelInversionCount;
     wxClickText* labelRunsCount;
+    wxClickText* labelSwapsCount;
     wxChoice* inputTypeChoice;
     wxSlider* arraySizeSlider;
     wxStaticText* labelArraySizeValue;

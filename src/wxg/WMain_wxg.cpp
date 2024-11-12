@@ -42,9 +42,10 @@ WMain_wxg::WMain_wxg(wxWindow* parent, int id, const wxString& title, const wxPo
     labelAccessCount = new wxClickText(splitter_0_pane_2, wxID_ANY, wxEmptyString);
     labelInversionCount = new wxClickText(splitter_0_pane_2, ID_INVERSION_LABEL, wxEmptyString);
     labelRunsCount = new wxClickText(splitter_0_pane_2, wxID_ANY, wxEmptyString);
+    labelSwapsCount = new wxClickText(splitter_0_pane_2, wxID_ANY, wxEmptyString);
     const wxString *inputTypeChoice_choices = NULL;
     inputTypeChoice = new wxChoice(splitter_0_pane_2, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, inputTypeChoice_choices, 0);
-    arraySizeSlider = new wxSlider(splitter_0_pane_2, ID_ARRAY_SIZE_SLIDER, 0, 1, 2048);
+    arraySizeSlider = new wxSlider(splitter_0_pane_2, ID_ARRAY_SIZE_SLIDER, 0, 1, 16384);
     labelArraySizeValue = new wxStaticText(splitter_0_pane_2, wxID_ANY, _("1024"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE|wxST_NO_AUTORESIZE);
     const wxString *algoList_choices = NULL;
     algoList = new wxListBox(splitter_0_pane_2, ID_ALGO_LIST, wxDefaultPosition, wxDefaultSize, 0, algoList_choices, wxLB_SINGLE);
@@ -65,9 +66,11 @@ void WMain_wxg::set_properties()
     SetTitle(_("The Sound of Sorting - http://panthema.net/2013/sound-of-sorting"));
     sortview->SetMinSize(wxSize(640, 480));
     speedSlider->SetToolTip(_("Changes the animation speed by setting the delay for each array access."));
+    arraySizeSlider->SetToolTip(_("Resize the options panel if the visualized array doesn't seem to update."));
     soundSustainSlider->SetToolTip(_("Changes the duration of each access sound as a multiple of the delay."));
     labelInversionCount->SetToolTip(_("Current number of inversions. Click to enable or disable."));
     labelRunsCount->SetToolTip(_("Current number of runs."));
+    labelSwapsCount->SetToolTip(_("Current number of swaps."));
     panelQuickSortPivot->Hide();
     splitter_0->SetSashGravity(1.0);
     // end wxGlade
@@ -87,7 +90,7 @@ void WMain_wxg::do_layout()
     sizer_3_staticbox->Lower();
     wxStaticBoxSizer* sizer_3 = new wxStaticBoxSizer(sizer_3_staticbox, wxVERTICAL);
     wxBoxSizer* sizerAnimationControls = new wxBoxSizer(wxVERTICAL);
-    wxFlexGridSizer* grid_sizer_3 = new wxFlexGridSizer(7, 2, 0, 0);
+    wxFlexGridSizer* grid_sizer_3 = new wxFlexGridSizer(8, 2, 0, 0);
     wxBoxSizer* sizerSoundSustain = new wxBoxSizer(wxHORIZONTAL);
     wxGridSizer* grid_sizer_2 = new wxGridSizer(3, 2, 0, 0);
     wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
@@ -124,6 +127,11 @@ void WMain_wxg::do_layout()
     wxStaticText* labelRuns = new wxStaticText(splitter_0_pane_2, wxID_ANY, _("Runs: "));
     grid_sizer_3->Add(labelRuns, 0, wxTOP|wxBOTTOM|wxALIGN_CENTER_VERTICAL, 4);
     grid_sizer_3->Add(labelRunsCount, 0, wxTOP|wxBOTTOM|wxEXPAND|wxALIGN_CENTER_VERTICAL, 4);
+
+    wxStaticText* labelSwaps = new wxStaticText(splitter_0_pane_2, wxID_ANY, _("Swaps: "));
+    grid_sizer_3->Add(labelSwaps, 0, wxTOP | wxBOTTOM | wxALIGN_CENTER_VERTICAL, 4);
+    grid_sizer_3->Add(labelSwapsCount, 0, wxTOP | wxBOTTOM | wxEXPAND | wxALIGN_CENTER_VERTICAL, 4);
+
     grid_sizer_3->AddGrowableCol(1);
     sizerAnimationControls->Add(grid_sizer_3, 1, wxEXPAND, 0);
     sizer_3->Add(sizerAnimationControls, 1, wxEXPAND, 0);
@@ -135,6 +143,7 @@ void WMain_wxg::do_layout()
     grid_sizer_1->Add(labelArraySize, 0, wxTOP|wxBOTTOM|wxALIGN_CENTER_VERTICAL, 4);
     sizer_6->Add(arraySizeSlider, 1, wxTOP|wxBOTTOM|wxALIGN_CENTER_VERTICAL, 4);
     sizer_6->Add(labelArraySizeValue, 0, wxLEFT|wxTOP|wxBOTTOM|wxALIGN_CENTER_VERTICAL|wxFIXED_MINSIZE, 4);
+    labelArraySizeValue->SetMinSize(wxSize(39, -1));
     grid_sizer_1->Add(sizer_6, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL, 0);
     grid_sizer_1->AddGrowableCol(1);
     sizerInputAlgorithm->Add(grid_sizer_1, 0, wxEXPAND, 0);

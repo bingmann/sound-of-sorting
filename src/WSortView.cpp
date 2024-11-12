@@ -74,6 +74,8 @@ void mswMicroSleep(int microseconds)
 
 #endif // MSW_PERFORMANCECOUNTER
 
+static double returnFrac(double n) { return n - static_cast<int>(n); }
+
 void WSortView::DoDelay(double delay)
 {
     // must be called by the algorithm thread
@@ -81,7 +83,10 @@ void WSortView::DoDelay(double delay)
     ASSERT(wxThread::GetCurrentId() == wmain->m_thread->GetId());
 
     if (wmain->m_thread_terminate)
+    {
         wmain->m_thread->Exit();
+        return;
+    }
 
     // idle until main thread signals a condition
     while (m_stepwise)
@@ -90,20 +95,71 @@ void WSortView::DoDelay(double delay)
         if (se == wxSEMA_NO_ERROR)
             break;
         // else timeout, recheck m_stepwise and loop
-        wmain->m_thread->TestDestroy();
-        wmain->m_thread->Yield();
+        wxMilliSleep(1);
     }
-
-    wmain->m_thread->TestDestroy();
-
-#if __WXGTK__
-    wxMicroSleep(delay * 1000.0);
-#elif MSW_PERFORMANCECOUNTER
-    mswMicroSleep(delay * 1000.0);
-#else
-    // wxMSW does not have a high resolution timer, maybe others do?
-    wxMilliSleep(delay);
-#endif
+    double secs = 0.0, microDelay = returnFrac(delay) * 1000.0;
+    delay = std::trunc(delay);
+    #if __WXGTK__
+        // wxMicroSleep(delay * 1000.0);
+        while (secs < delay)
+        {
+            wxMilliSleep(1);
+            secs += 1.0;
+            if (wmain->m_thread_terminate)
+            {
+                wmain->m_thread->Exit();
+                return;
+            }
+        }
+        secs = 0.0;
+        while (secs < microDelay)
+        {
+            wxMicroSleep(1);
+            secs += 1.0;
+            if (wmain->m_thread_terminate)
+            {
+                wmain->m_thread->Exit();
+                return;
+            }
+        }
+    #elif MSW_PERFORMANCECOUNTER
+        // mswMicroSleep(delay * 1000.0);
+        while (secs < delay)
+        {
+            mswMicroSleep(1000);
+            secs += 1.0;
+            if (wmain->m_thread_terminate)
+            {
+                wmain->m_thread->Exit();
+                return;
+            }
+        }
+        secs = 0.0;
+        while (secs < microDelay)
+        {
+            mswMicroSleep(1);
+            secs += 1.0;
+            if (wmain->m_thread_terminate)
+            {
+                wmain->m_thread->Exit();
+                return;
+            }
+        }
+    #else
+        // wxMSW does not have a high resolution timer, maybe others do?
+        // wxMilliSleep(delay);
+        if (delay < 1.0) { delay = 1.0; }
+        while (secs < delay)
+        {
+            wxMilliSleep(1);
+            secs += 1.0;
+            if (wmain->m_thread_terminate)
+            {
+                wmain->m_thread->Exit();
+                return;
+            }
+        }
+    #endif
 }
 
 void WSortView::OnAccess()
@@ -158,7 +214,7 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
     size_t width = fwidth - 20;
     size_t height = fheight - 20;
 
-    dc.SetDeviceOrigin(10,10);
+    dc.SetDeviceOrigin(10, 10);
 
     // *** draw array element bars
 
@@ -170,14 +226,18 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
     //double bstep = 1.5 * wbar;
 
     // 2nd variant: one pixel between bars
-    double wbar = (width - (size-1)) / (double)size;
-    if (width <= (size-1)) wbar = 0.0;
-
+    size_t step = 1;
+    double wbar = (width - (size - 1)) / (double)size;
     double bstep = wbar + 1.0;
+    if (size > width) {
+        step = size / width;
+        wbar = wxMax(0.03, width / (double)size);  // Scale down further if too many elements
+        bstep = wbar;
+    }
 
     // special case for bstep = 2 pixel -> draw 2 pixel bars instead of 1px
     // bar/1px gaps.
-    if ( fabs(wbar - 1.0) < 0.1 && fabs(bstep - 2.0) < 0.1 ) wbar = 2, bstep = 2;
+    if (fabs(wbar - 1.0) < 0.1 && fabs(bstep - 2.0) < 0.1) wbar = 2, bstep = 2;
 
     static const wxPen pens[] = {
         *wxWHITE_PEN,
@@ -197,6 +257,16 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
         wxPen(wxColour(128,192,192)), // 14 dark cyan
         wxPen(wxColour(192,192,128)), // 15 dark yellow
         wxPen(wxColour(0,128,255)),   // 16 blue/cyan mix
+        wxPen(wxColour(255,64,64)),   // 17 bright red
+        wxPen(wxColour(64,255,64)),   // 18 bright green
+        wxPen(wxColour(64,64,255)),   // 19 bright blue
+        wxPen(wxColour(255,128,64)),  // 20 coral
+        wxPen(wxColour(128,255,64)),  // 21 lime green
+        wxPen(wxColour(64,255,255)),  // 22 aqua
+        wxPen(wxColour(255,215,0)),   // 23 gold
+        wxPen(wxColour(128,0,128)),   // 24 purple
+        wxPen(wxColour(0,255,127)),   // 25 spring green
+        wxPen(wxColour(255,69,0)),    // 26 orange red
     };
 
     static const wxBrush brushes[] = {
@@ -217,39 +287,72 @@ void WSortView::paint(wxDC& dc, const wxSize& dcsize)
         wxBrush(wxColour(128,192,192)), // 14 dark cyan
         wxBrush(wxColour(192,192,128)), // 15 dark yellow
         wxBrush(wxColour(0,128,255)),   // 16 blue/cyan mix
+        wxBrush(wxColour(255,64,64)),   // 17 bright red
+        wxBrush(wxColour(64,255,64)),   // 18 bright green
+        wxBrush(wxColour(64,64,255)),   // 19 bright blue
+        wxBrush(wxColour(255,128,64)),  // 20 coral
+        wxBrush(wxColour(128,255,64)),  // 21 lime green
+        wxBrush(wxColour(64,255,255)),  // 22 aqua
+        wxBrush(wxColour(255,215,0)),   // 23 bright yellow
+        wxBrush(wxColour(128,0,128)),   // 24 purple
+        wxBrush(wxColour(0,255,127)),   // 25 spring green
+        wxBrush(wxColour(255,69,0)),    // 26 orange red
     };
 
     wxMutexLocker lock(m_array.m_mutex);
     ASSERT(lock.IsOk());
-
-    for (size_t i = 0; i < size; ++i)
+    const int numBrushes = sizeof(brushes) / sizeof(brushes[0]);
+    if (step > 1)
     {
-        int clr = m_array.GetIndexColor(i);
-
-        ASSERT(clr < (int)(sizeof(brushes) / sizeof(brushes[0])));
-        dc.SetPen( pens[clr] );
-        dc.SetBrush( brushes[clr] );
-
-        dc.DrawRectangle(i*bstep, height,
-                         wxMax(1, // draw at least 1 pixel
-                               (wxCoord((i+1)*bstep) - wxCoord(i*bstep)) // integral gap to next bar
-                               - (bstep - wbar)    // space between bars
-                             ),
-                         -(double)height * m_array.direct(i).get_direct() / m_array.array_max());
+        size_t i_step = 0;
+        const size_t last = size - 1;
+        for (size_t i = 0; i < size; ++i)
+        {
+            int clr = m_array.GetIndexColor(i);
+            if (i == i_step || i == last)
+            {
+                clr = clr % numBrushes;
+                dc.SetPen(pens[clr]);
+                dc.SetBrush(brushes[clr]);
+                dc.DrawRectangle(i * bstep, height,
+                    wxMax(1, // draw at least 1 pixel
+                        (wxCoord((i + 1) * bstep) - wxCoord(i * bstep)) // integral gap to next bar
+                        - (bstep - wbar)    // space between bars
+                    ),
+                    -(double)height * m_array.direct(i).get_direct() / m_array.array_max());
+                i_step += step;
+            }
+        }
     }
-}
+    else
+    {
+        for (size_t i = 0; i < size; ++i)
+        {
+            int clr = m_array.GetIndexColor(i);
+            ASSERT(clr < numBrushes);
+            dc.SetPen(pens[clr]);
+            dc.SetBrush(brushes[clr]);
+            dc.DrawRectangle(i * bstep, height,
+                wxMax(1, // draw at least 1 pixel
+                    (wxCoord((i + 1) * bstep) - wxCoord(i * bstep)) // integral gap to next bar
+                    - (bstep - wbar)    // space between bars
+                ),
+                -(double)height * m_array.direct(i).get_direct() / m_array.array_max());
+        }
+    }
+};
 
 BEGIN_EVENT_TABLE(WSortView, wxWindow)
 
-    EVT_PAINT		(WSortView::OnPaint)
-    EVT_SIZE            (WSortView::OnSize)
+    EVT_PAINT(WSortView::OnPaint)
+    EVT_SIZE(WSortView::OnSize)
 
-END_EVENT_TABLE()
+END_EVENT_TABLE();
 
 // ****************************************************************************
 // *** Threading
 
-SortAlgoThread::SortAlgoThread(WMain* wmain, class WSortView& sortview, size_t algo)
+SortAlgoThread::SortAlgoThread(WMain* wmain, WSortView& sortview, size_t algo)
     : wxThread(wxTHREAD_JOINABLE),
       m_wmain(wmain),
       m_sortview(sortview),
@@ -271,7 +374,7 @@ void* SortAlgoThread::Entry()
     wxCommandEvent evt(wxEVT_COMMAND_BUTTON_CLICKED, WMain::ID_RUN_FINISHED);
     m_wmain->GetEventHandler()->AddPendingEvent(evt);
 
-    return NULL;
+    return nullptr;
 }
 
 void SortAlgoThread::Exit()
