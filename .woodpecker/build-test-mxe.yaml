@@ -1,0 +1,29 @@
+when:
+  - event: pull_request
+  - event: manual
+  - event: push
+    repo: bingmann/sound-of-sorting
+    branch: master
+
+matrix:
+  include:
+    - IMAGE:        mxe-24.04-1
+      BUILD_TYPE:   Release
+      C_COMPILER:   gcc
+      CXX_COMPILER: g++
+      CXX_FLAGS:
+      CMAKE_FLAGS:
+
+steps:
+  - name: build
+    image: docker.io/bingmann/dev:${IMAGE}
+    commands:
+      - /opt/mxe/usr/bin/i686-w64-mingw32.static-cmake --version
+      - mkdir build && cd build
+      - /opt/mxe/usr/bin/i686-w64-mingw32.static-cmake ${CMAKE_FLAGS}
+          -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
+          -DCMAKE_CXX_COMPILER="${CXX_COMPILER}"
+          -DCMAKE_CXX_FLAGS="${CXX_FLAGS}"
+          -DCMAKE_C_COMPILER="${C_COMPILER}"
+          ..
+      - make VERBOSE=1 -j4

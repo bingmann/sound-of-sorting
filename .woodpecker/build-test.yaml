@@ -1,0 +1,38 @@
+when:
+  - event: pull_request
+  - event: manual
+  - event: push
+    repo: bingmann/sound-of-sorting
+    branch: master
+
+matrix:
+  include:
+    - IMAGE:        ubuntu-24.04
+      BUILD_TYPE:   Debug
+      C_COMPILER:   gcc
+      CXX_COMPILER: g++
+      CXX_FLAGS:
+      CMAKE_FLAGS:
+
+    - IMAGE:        ubuntu-24.04
+      BUILD_TYPE:   Release
+      C_COMPILER:   gcc
+      CXX_COMPILER: g++
+      CXX_FLAGS:
+      CMAKE_FLAGS:
+
+steps:
+  - name: build
+    image: docker.io/bingmann/dev:${IMAGE}
+    commands:
+      - cmake --version
+      - mkdir build && cd build
+      - cmake ${CMAKE_FLAGS}
+          -G Ninja
+          -DCMAKE_BUILD_TYPE="${BUILD_TYPE}"
+          -DCMAKE_CXX_COMPILER="${CXX_COMPILER}"
+          -DCMAKE_CXX_FLAGS="${CXX_FLAGS}"
+          -DCMAKE_C_COMPILER="${C_COMPILER}"
+          ..
+      - ninja
+      - ninja test
