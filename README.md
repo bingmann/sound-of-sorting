@@ -33,6 +33,14 @@ different licenses.
 
 ## Usage
 
+```
+sudo apt update
+sudo apt install build-essential autoconf automake libtool pkg-config libwxgtk3.2-dev
+./configure
+make
+sudo make install
+sound-of-sorting
+```
 The Sound of Sorting demo program is very intuitive to use. It contains many
 sorting algorithms, which are selectable via the list box on the right. For the
 quick sort variants the pivot rule can be selected separately.
